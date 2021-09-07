@@ -10,6 +10,7 @@
 #include "EnumNetBios.h"
 #include "ToolsHTTP.h"
 #include "DetectWAF.h"
+#include "EnumSMTP.h"
 
 #pragma warning(disable:4996)
 
@@ -68,7 +69,8 @@ BOOL PortFingerPrint(NetworkPcInfo* networkPcInfo, int nbDetected, BOOL isBrutef
 			int portNb = networkPcInfo[i].port[j].portNumber;
 			switch (portNb) {
 			case PORT_NETBIOS_SSN:
-				EnumNetBios(networkPcInfo[i]);
+				EnumNetBios(&(networkPcInfo[i]));
+				// update mac if not 00-00-00-00-00-00
 				break;
 			case PORT_SSH:
 				GrabBanner("SSH",ipAddress, portNb, networkPcInfo[i].port[j].banner, BANNER_BUFFER_SIZE, NO_OFFSET,pFile);
@@ -100,6 +102,11 @@ BOOL PortFingerPrint(NetworkPcInfo* networkPcInfo, int nbDetected, BOOL isBrutef
 			case PORT_SMB:
 				SmbEnum(ipAddress, isBruteforce,pFile);
 				break;
+			
+			case PORT_SMTP:
+				EnumSMTP(&(networkPcInfo[i]), PORT_SMTP, pFile);
+				break;
+
 			default:
 				break;
 			}

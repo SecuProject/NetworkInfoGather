@@ -1,6 +1,7 @@
 #define PORT_FTP			21
 #define PORT_SSH			22
 #define PORT_TELNET			23
+#define PORT_SMTP			25
 #define PORT_DNS			53
 #define PORT_HTTP			80
 #define PORT_KERBEROS		88
@@ -22,4 +23,4 @@
 #define PORT_UDP_NETBIOS	137			// netbios-ns
 
 
-#define NB_TAB_PORT			19
+#define NB_TAB_PORT			20

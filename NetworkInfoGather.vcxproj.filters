@@ -73,6 +73,9 @@
     <Filter Include="Source Files\2. NetDiscovery\GetMacVendor">
       <UniqueIdentifier>{04d1b65c-8b9e-4627-a752-2b06763138b6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\4. FingerPrintInfo\EnumSMTP">
+      <UniqueIdentifier>{08cb817c-02fa-4c03-9db8-266031bef1b1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -137,6 +140,9 @@
     </ClCompile>
     <ClCompile Include="GetHTTPSserver.c">
       <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\GetHTTPserver</Filter>
+    </ClCompile>
+    <ClCompile Include="EnumSMTP.c">
+      <Filter>Source Files\4. FingerPrintInfo\EnumSMTP</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -211,6 +217,9 @@
     </ClInclude>
     <ClInclude Include="macDB.h">
       <Filter>Source Files\2. NetDiscovery\GetMacVendor</Filter>
+    </ClInclude>
+    <ClInclude Include="EnumSMTP.h">
+      <Filter>Source Files\4. FingerPrintInfo\EnumSMTP</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

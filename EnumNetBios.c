@@ -72,7 +72,7 @@ typedef struct {
     char macAddress[40];
 }NETBIOS_Info;
 */
-BOOL EnumNetBios(NetworkPcInfo networkPcInfo) {
+BOOL EnumNetBios(NetworkPcInfo* networkPcInfo) {
 //BOOL EnumNetBios(char* ipAddress) {
     SOCKET pSocket;
     SOCKADDR_IN ssin;
@@ -82,7 +82,7 @@ BOOL EnumNetBios(NetworkPcInfo networkPcInfo) {
     memset(&ssin, 0, sizeof(SOCKADDR_IN));
     ssin.sin_family = AF_INET;
     ssin.sin_port = htons(PORT_UDP_NETBIOS); /* netbios-ns */
-    ssin.sin_addr.s_addr = inet_addr(networkPcInfo.ipAddress);
+    ssin.sin_addr.s_addr = inet_addr(networkPcInfo->ipAddress);
 
     printf("\t[NETBIOS] Enumeration:\n");
 
@@ -119,16 +119,16 @@ BOOL EnumNetBios(NetworkPcInfo networkPcInfo) {
             return FALSE;
         }
 
-        networkPcInfo.NetbiosInfo = (NETBIOS_Info*)calloc(1, sizeof(NETBIOS_Info));
-        if (networkPcInfo.NetbiosInfo == NULL) {
+        networkPcInfo->NetbiosInfo = (NETBIOS_Info*)calloc(1, sizeof(NETBIOS_Info));
+        if (networkPcInfo->NetbiosInfo == NULL) {
             printf("\t\t[-] Memory error !\n");
             free(recv);
             closesocket(pSocket);
             return FALSE;
         }
-        networkPcInfo.isNetbiosInfo = TRUE;
-        networkPcInfo.NetbiosInfo->macAddress[0] = 0x00;
-        networkPcInfo.NetbiosInfo->nbNetBIOSRemoteMachineNameTab = 0;
+        networkPcInfo->isNetbiosInfo = TRUE;
+        networkPcInfo->NetbiosInfo->macAddress[0] = 0x00;
+        networkPcInfo->NetbiosInfo->nbNetBIOSRemoteMachineNameTab = 0;
         
         ptr = recv + 57;
         total = *(ptr - 1); /* max names */
@@ -147,28 +147,28 @@ BOOL EnumNetBios(NetworkPcInfo networkPcInfo) {
 
             if (i == total) {    /* max names reached */
                 ptr -= 19;   /* sets the pointer to the mac_addres field */
-                sprintf_s(networkPcInfo.NetbiosInfo->macAddress,40,"%02x-%02x-%02x-%02x-%02x-%02x",
+                sprintf_s(networkPcInfo->NetbiosInfo->macAddress,40,"%02x-%02x-%02x-%02x-%02x-%02x",
                     *(ptr + 1), *(ptr + 2), *(ptr + 3),
                     *(ptr + 4), *(ptr + 5), *(ptr + 6));
                 break;
             }
             if(temp && temp[0] != 0x00)
-                display(temp, nb_num, nb_type, networkPcInfo.NetbiosInfo);
+                display(temp, nb_num, nb_type, networkPcInfo->NetbiosInfo);
         }
     }
     free(recv);
     closesocket(pSocket);
 
 
-    for (int i = 0; i < networkPcInfo.NetbiosInfo->nbNetBIOSRemoteMachineNameTab; i++) {
+    for (int i = 0; i < networkPcInfo->NetbiosInfo->nbNetBIOSRemoteMachineNameTab; i++) {
         printf("\t\t[i] %s%s\n", 
-            networkPcInfo.NetbiosInfo->netBIOSRemoteMachineNameTab[i].isGroup?
+            networkPcInfo->NetbiosInfo->netBIOSRemoteMachineNameTab[i].isGroup?
             "Domain Name: ": 
             "Hostname:    ", 
-            networkPcInfo.NetbiosInfo->netBIOSRemoteMachineNameTab[i].Name);
+            networkPcInfo->NetbiosInfo->netBIOSRemoteMachineNameTab[i].Name);
     }
-    if(networkPcInfo.NetbiosInfo->macAddress[0] != 0x00)
-        printf("\t\t[i] Mac Address: %s\n", networkPcInfo.NetbiosInfo->macAddress);
+    if(networkPcInfo->NetbiosInfo->macAddress[0] != 0x00)
+        printf("\t\t[i] Mac Address: %s\n", networkPcInfo->NetbiosInfo->macAddress);
 
  	return TRUE;
 }

@@ -169,7 +169,8 @@ BOOL initSniffer(char* interfaceIp, SOCKET* sniffer, FILE* pFile) {
 	}
 
 	memset(&dest, 0, sizeof(SOCKADDR_IN));
-	memcpy(&dest.sin_addr.s_addr, local->h_addr_list[i], sizeof(dest.sin_addr.s_addr));
+	memcpy(&dest.sin_addr.s_addr, local->h_addr_list[i], sizeof(ULONG));
+	//memcpy(&dest.sin_addr.s_addr, local->h_addr_list[i], sizeof(dest.sin_addr.s_addr));
 	dest.sin_family = AF_INET;
 	dest.sin_port = 0;
 

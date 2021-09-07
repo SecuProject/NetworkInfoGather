@@ -1,5 +1,7 @@
 # NetDiscovery
 
+
+
 ## BUG
 
 ## To Add
@@ -38,19 +40,6 @@ e.g.
   - [x] ping 
   - [X] ARP
  - [x] AddIPRangeMultiThread
+ - [ ] FingerPrinting
 
 ### Check if admin ! 
-
-## Mac address DB
-
-- [X] python update Mac address db list 
-- [X] python txt -> h 
-- [ ] Add in code
-
-## Bug
-
-### Mac address database file
-
-- Check if exist
-
-### arg -sD without -t ???

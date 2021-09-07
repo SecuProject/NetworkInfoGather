@@ -155,6 +155,7 @@
     <ClCompile Include="EnumFTP.c" />
     <ClCompile Include="EnumNetBios.c" />
     <ClCompile Include="EnumSMB.c" />
+    <ClCompile Include="EnumSMTP.c" />
     <ClCompile Include="GetHTTPserver.c" />
     <ClCompile Include="GetHTTPSserver.c" />
     <ClCompile Include="GetMacVendor.c" />
@@ -178,6 +179,7 @@
     <ClInclude Include="EnumFTP.h" />
     <ClInclude Include="EnumNetBios.h" />
     <ClInclude Include="EnumSMB.h" />
+    <ClInclude Include="EnumSMTP.h" />
     <ClInclude Include="GetHTTPserver.h" />
     <ClInclude Include="GetHTTPSserver.h" />
     <ClInclude Include="GetMacVendor.h" />

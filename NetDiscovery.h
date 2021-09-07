@@ -7,7 +7,7 @@
 #include "MgArguments.h"
 
 #define BANNER_BUFFER_SIZE	50
-
+#define BUFFER_SIZE			1024
 
 typedef enum {
 	OsUnknown = 0,
@@ -24,6 +24,18 @@ typedef enum {
 	TrueNAS
 }DeviceType;
 
+// 3. PortScan
+typedef struct {
+	int portNumber;
+	char banner[BANNER_BUFFER_SIZE];
+	DeviceType deviceType;
+	int version;
+}PORT_INFO;
+
+
+
+
+
 typedef struct {
 	char Name[33];
 	BOOL isGroup;
@@ -36,12 +48,27 @@ typedef struct {
 	char macAddress[40];				// SIZE WTF !!!
 }NETBIOS_Info;
 
+
+// 4. FingerPrintInfo
+typedef struct {
+	char banner[BUFFER_SIZE];
+	char** listUser;
+	UINT numUser;
+	char* ntlmData;
+} SMTP_DATA;
+
+/*
 typedef struct {
 	int portNumber;
 	char banner[BANNER_BUFFER_SIZE];
+	union {
+		SMTP_DATA* smtpData;
+		NETBIOS_Info* smtpData;
+	};
 	DeviceType deviceType;
 	int version;
 }PORT_INFO;
+*/
 
 typedef struct {
 	// 2. NetDiscovery
@@ -58,6 +85,7 @@ typedef struct {
 	EnumOS osName;
 
 	NETBIOS_Info* NetbiosInfo;
+	SMTP_DATA* smtpData;
 	// SMTP
 	// DNS
 	// SMB

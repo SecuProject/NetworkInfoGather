@@ -61,6 +61,7 @@ const int port[] = {
 	PORT_FTP,
 	PORT_SSH,
 	PORT_TELNET,
+	PORT_SMTP,
 	PORT_DNS,
 	PORT_HTTP,
 	PORT_KERBEROS,

@@ -88,6 +88,9 @@ int main(int argc, char* argv[]) {
 					PortFingerPrint(networkPcInfo, nbDetected, listAgrument.bruteforce, listAgrument.ouputFile); // BOOL
 				}
 			}
+
+			// free(networkPcInfo.ipAdress);
+			// free(networkPcInfo);
 		}
 	}
 
