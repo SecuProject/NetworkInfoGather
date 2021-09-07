@@ -55,7 +55,7 @@ void scanPort(NetworkPcInfo* networkPcInfo, int nbDetected, Arguments arguments)
 		printOut(arguments.ouputFile,"[%s] PORT SCAN\n", networkPcInfo[iPC].ipAddress);
 		networkPcInfo[iPC].nbOpenPort = 0;
 		if (arguments.nbPort > 0) {
-			for (int iPort = 0; iPort < arguments.nbPort; iPort++) {
+			for (UINT iPort = 0; iPort < arguments.nbPort; iPort++) {
 				if (scanPortOpenTCP(networkPcInfo[iPC].ipAddress, arguments.portList[iPort], arguments.ouputFile)) {
 					printOut(arguments.ouputFile, "\t[%s] OPEN PORT %i\n", networkPcInfo[iPC].ipAddress, arguments.portList[iPort]);
 					networkPcInfo[iPC].port[networkPcInfo[iPC].nbOpenPort].portNumber = arguments.portList[iPort];
@@ -64,7 +64,7 @@ void scanPort(NetworkPcInfo* networkPcInfo, int nbDetected, Arguments arguments)
 					printOut(pFile,"\t[%s] CLOSE PORT %i\n", networkPcInfo[iPC].ipAddress, port[iPort]);*/
 			}
 		} else {
-			for (int iPort = 0; iPort < NB_TAB_PORT; iPort++) {
+			for (UINT iPort = 0; iPort < NB_TAB_PORT; iPort++) {
 				if (scanPortOpenTCP(networkPcInfo[iPC].ipAddress, port[iPort], arguments.ouputFile)) {
 					printOut(arguments.ouputFile, "\t[%s] OPEN PORT %i\n", networkPcInfo[iPC].ipAddress, port[iPort]);
 					networkPcInfo[iPC].port[networkPcInfo[iPC].nbOpenPort].portNumber = port[iPort];
@@ -119,7 +119,6 @@ DWORD WINAPI ThreadNetworkPortScan(LPVOID lpParam) {
 
 	int nbPort = NB_TAB_PORT;
 	int* portList = (int*)port;
-
 	// If user set custom port
 	if (pArguments->nbPort > 0) {
 		nbPort = pArguments->nbPort;
@@ -135,7 +134,6 @@ DWORD WINAPI ThreadNetworkPortScan(LPVOID lpParam) {
 		free(dwThreadIdArray);
 		return FALSE;
 	}
-
 	PTHREAD_STRUCT_PORT_SCAN pThreadDataPort = (PTHREAD_STRUCT_PORT_SCAN)calloc(nbPort, sizeof(THREAD_STRUCT_PORT_SCAN));
 	if (pThreadDataPort == NULL) {
 		free(hThreadArray);
@@ -201,6 +199,7 @@ BOOL MultiScanPort(NetworkPcInfo* networkPcInfo, int nbDetected, Arguments argum
 		
 		pThreadData[iPC].arguments = &(arguments);
 		pThreadData[iPC].networkPcInfo = &(networkPcInfo[iPC]);
+
 
 		hThreadArray[iPC] = CreateThread(NULL, 0, ThreadNetworkPortScan, &pThreadData[iPC], 0, &dwThreadIdArray[iPC]);
 		if (hThreadArray[iPC] == NULL) {

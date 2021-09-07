@@ -57,21 +57,7 @@ int display(char* name, unsigned int number, unsigned int type, NETBIOS_Info* ne
     return FALSE;
 
 }
-/*
-typedef struct {
-    char Name[33];
-    BOOL isGroup;
-}NETBIOS_R_M_N_TAB;
 
-
-typedef struct {
-    NETBIOS_R_M_N_TAB* netBIOSRemoteMachineNameTab;
-    int nbNetBIOSRemoteMachineNameTab;
-
-    //unsigned char macAddress[6];
-    char macAddress[40];
-}NETBIOS_Info;
-*/
 BOOL EnumNetBios(NetworkPcInfo* networkPcInfo) {
 //BOOL EnumNetBios(char* ipAddress) {
     SOCKET pSocket;

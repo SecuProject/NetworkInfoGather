@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
 	ADAPTER_INFO *adapterInfo=(ADAPTER_INFO *)calloc(sizeof(ADAPTER_INFO), MAX_NB_ADAPTER);
 	if(adapterInfo == NULL)
 		return FALSE;
-	int nbAdapter = getAdapterkInfo(adapterInfo, listAgrument.ouputFile);
+	UINT nbAdapter = getAdapterkInfo(adapterInfo, listAgrument.ouputFile);
 	if (nbAdapter == 0) {
 		printOut(listAgrument.ouputFile,"[x] No network interface detected !\n");
 		free(adapterInfo);
@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
 			printf("[x] Invalid number for the adapter !\n\n");
 		else if (listAgrument.interfaceNb == 0 && !listAgrument.isListInterface)
 			printf("[x] Adapter not set (-i [Adapter Number]) !\n\n");
-		for (int i = 0; i < nbAdapter; i++) {
+		for (UINT i = 0; i < nbAdapter; i++) {
 			int maskSizeInt = 0;
 
 			ipCalucation(adapterInfo[i].localIP, adapterInfo[i].networkMask, &maskSizeInt);

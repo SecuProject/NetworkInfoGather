@@ -14,15 +14,15 @@ typedef enum {
 
 typedef struct Argument {
     BOOL isListInterface;
-    int interfaceNb;
+    UINT interfaceNb;
 	TypeOfScan typeOfScan;
     BOOL advancedScan;
     BOOL portScan;
     BOOL bruteforce;
     FILE* ouputFile;
     char* ipAddress;
-    int* portList;
-    int nbPort;
+    UINT* portList;
+    UINT nbPort;
 }Arguments, * pArguments;
 
 BOOL GetArguments(int argc, char* argv[], pArguments listAgrument);

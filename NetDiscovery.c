@@ -34,7 +34,7 @@ break;
 		printOut(pFile, " - [Cisco base]");
 		break;
 	default:
-		printf(" - [Unknown OS]");
+		//printf(" - [Unknown OS]");
 		break;
 	}
 }
@@ -135,7 +135,7 @@ VOID PrintDiscoveredHost(Arguments listAgrument, NetworkPcInfo** networkPcInfo, 
 			printOut(listAgrument.ouputFile, "\t[%i] - [%s:%s]", i + 1, (*networkPcInfo)[i].ipAddress, (*networkPcInfo)[i].macAddress);
 		
 		if((*networkPcInfo)[i].vendorName != NULL)
-			printOut(listAgrument.ouputFile, "- [%s]",(*networkPcInfo)[i].vendorName);
+			printOut(listAgrument.ouputFile, " - [%s]",(*networkPcInfo)[i].vendorName);
 
 		PrintHostOS((*networkPcInfo)[i].osName, pFile);
 

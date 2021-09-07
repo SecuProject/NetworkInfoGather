@@ -86,8 +86,8 @@ typedef struct {
 
 	NETBIOS_Info* NetbiosInfo;
 	SMTP_DATA* smtpData;
-	// SMTP
 	// DNS
+	// LDAP
 	// SMB
 	// FTP
 	// HTTP/HTTPS

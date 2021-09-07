@@ -4,7 +4,21 @@
 
 ## BUG
 
+Release mode -> crash after NetDiscovery !!!!
+	-> ThreadPcPortScan ???
+
 ## To Add
+
+### Main structure 
+
+- [ ] Add element about fingerprinting 
+  - [ ] FTP -> {char* {username, password}}
+  - [ ] SMB -> {char* {username, password}}
+  - [ ] DNS -> {char** DOMAIN_NAME}
+  - [ ] LDAP -> {username,isadmin,ker,PRE-AUTH,...}
+  - [ ] HTTP -> {servername,powerby}
+  - [ ] HTTPS -> {servername,powerby,domain}
+
 
 ### Port 
 

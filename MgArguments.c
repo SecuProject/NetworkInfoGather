@@ -85,6 +85,7 @@ BOOL GetArguments(int argc, char* argv[], pArguments listAgrument) {
     listAgrument->bruteforce = FALSE;
     listAgrument->ouputFile = NULL;
     listAgrument->ipAddress = NULL;
+    listAgrument->nbPort = 0;
 
     if (argc == 1) {
         PrintMenu();
