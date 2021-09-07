@@ -4,7 +4,6 @@
 #include <icmpapi.h>
 
 #include "Network.h"
-#include "Tools.h"
 #include "NetDiscovery.h"
 
 
@@ -154,7 +153,6 @@ BOOL ICMPdiscoveryMultiThread(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo,
 		}
 		Sleep(20);
 	}
-	//WaitForMultipleObjects(maskSizeInt, hThreadArray, TRUE, INFINITE);
 	SyncWaitForMultipleObjs(hThreadArray, maskSizeInt);
 
 	int nbHostUp = 0;
@@ -169,9 +167,7 @@ BOOL ICMPdiscoveryMultiThread(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo,
 					return FALSE;
 
 				networkPcInfo[nbHostUp].osName = DetectOSBaseTTL(pDataArray[i]->computerTTL);
-
-				printf("\t[%i] [%s]\t", nbHostUp +1, pDataArray[i]->ipAddress);
-				PrintHostOS(networkPcInfo[nbHostUp].osName, pFile);
+				//printf("\t[%i] [%s]\t", nbHostUp +1, pDataArray[i]->ipAddress);
 
 				strcpy_s(networkPcInfo[nbHostUp].ipAddress, IP_ADDRESS_LEN, pDataArray[i]->ipAddress);
 				nbHostUp++;

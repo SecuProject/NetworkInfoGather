@@ -3,7 +3,7 @@
 #include <winhttp.h>
 
 #include "ToolsHTTP.h"
-#include "Tools.h"
+#include "Network.h"
 
 #define USER_AGENT_SIZE     100
 #define IP_ADDRESS_SIZE     16          // TO REMOVE !!!

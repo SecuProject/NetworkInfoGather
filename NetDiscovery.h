@@ -20,7 +20,8 @@ typedef enum {
 
 typedef enum {
 	UnknownType,
-	FRITZBox
+	FRITZBox,
+	TrueNAS
 }DeviceType;
 
 typedef struct {

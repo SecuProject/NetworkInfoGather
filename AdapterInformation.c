@@ -6,8 +6,6 @@
 
 #include "AdapterInformation.h"
 #include "Network.h"
-#include "Tools.h"
-
 
 #pragma warning(disable:4996)
 

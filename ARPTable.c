@@ -9,7 +9,6 @@
 
 #include "Network.h"
 #include "AdapterInformation.h"
-#include "Tools.h"
 
 #define CHECK_IP_STATE(value)	(value == NlnsReachable || value == NlnsStale)
 

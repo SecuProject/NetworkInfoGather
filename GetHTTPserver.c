@@ -5,7 +5,7 @@
 #include <ws2tcpip.h>
 
 #include "ToolsHTTP.h"
-#include "Tools.h"
+#include "Network.h"
 
 
 BOOL SendRequest(SOCKET Socket, char* ipAddress, char* requestType, char* resourcePath, char* userAgent, FILE* pFile) {

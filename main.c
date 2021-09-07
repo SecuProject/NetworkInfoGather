@@ -7,7 +7,7 @@
 #include "PortScan.h"
 #include "PortFingerPrint.h"
 #include "MgArguments.h"
-#include "Tools.h"
+#include "Network.h"
 
 #pragma comment(lib, "Advapi32.lib")
 #pragma comment(lib, "iphlpapi.lib")
@@ -15,7 +15,7 @@
 #pragma comment(lib, "Netapi32.lib")
 #pragma comment(lib, "Winhttp.lib")
 #pragma comment(lib, "Ws2_32.lib")
-
+#pragma comment(lib, "wininet.lib")
 
 #define MAX_NB_ADAPTER	50
 

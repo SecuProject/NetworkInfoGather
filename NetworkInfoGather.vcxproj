@@ -87,6 +87,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -99,6 +100,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -115,6 +117,7 @@
       <ConformanceMode>true</ConformanceMode>
       <DebugInformationFormat>None</DebugInformationFormat>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -134,6 +137,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <Optimization>MinSpace</Optimization>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -162,7 +166,6 @@
     <ClCompile Include="PassifPacketSniffing.c" />
     <ClCompile Include="PortFingerPrint.c" />
     <ClCompile Include="PortScan.c" />
-    <ClCompile Include="Tools.c" />
     <ClCompile Include="ToolsHTTP.c" />
     <ClCompile Include="wordlist.c" />
   </ItemGroup>
@@ -180,6 +183,7 @@
     <ClInclude Include="GetMacVendor.h" />
     <ClInclude Include="HttpWordlist.h" />
     <ClInclude Include="ICMP.h" />
+    <ClInclude Include="macDB.h" />
     <ClInclude Include="MgArguments.h" />
     <ClInclude Include="NetDiscovery.h" />
     <ClInclude Include="Network.h" />
@@ -188,12 +192,8 @@
     <ClInclude Include="portList.h" />
     <ClInclude Include="PortScan.h" />
     <ClInclude Include="tcpIpModuel.h" />
-    <ClInclude Include="Tools.h" />
     <ClInclude Include="ToolsHTTP.h" />
     <ClInclude Include="wordlist.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="mac.db" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="TODO.md" />

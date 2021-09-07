@@ -8,7 +8,6 @@
 #include "EnumHTTP.h"
 #include "EnumSMB.h"
 #include "EnumNetBios.h"
-#include "Tools.h"
 #include "ToolsHTTP.h"
 #include "DetectWAF.h"
 

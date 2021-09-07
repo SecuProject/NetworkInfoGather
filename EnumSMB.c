@@ -4,9 +4,9 @@
 #include <windows.h>
 #include <stdio.h>
 #include <lm.h>
-#include "wordlist.h"
-#include "Tools.h"
 
+#include "wordlist.h"
+#include "Network.h"
 
 BOOL PrintfSmbShareInfo(LPTSTR lpszServer, PSHARE_INFO_502 BufPtr, DWORD* er, FILE* pFile) {
     PSHARE_INFO_502 p = BufPtr;

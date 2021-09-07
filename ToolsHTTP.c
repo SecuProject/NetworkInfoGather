@@ -1,13 +1,15 @@
 #include <windows.h>
 #include <stdio.h>
 
+#include "NetDiscovery.h"
 #include "ToolsHTTP.h"
-#include "Tools.h"
+#include "Network.h"
 #include "GetHTTPserver.h"
 #include "GetHTTPSserver.h"
 #include "EnumFRITZBox.h"
 
 #include "HttpWordlist.h"
+#include "ToolsHTTP.h"
 //#include "wordListCommon.h"
 
 const char* userAgentList[] = {
@@ -21,6 +23,13 @@ const char* invalideUrlPath[] = {
     "/frjguoijefezhof.php",              // Add rand Str
     "/{fezfez-fee-feeeee-vfdfd}.php",    // Add rand Str
     "/testaaaFkefezf.html",              // Add rand Str
+};
+
+const StrucStrDev structStrDev[] = {
+    //{"\"bluBarTitle\":\"FRITZ!Box "," Cable",FRITZBox} ,
+    {"\"bluBarTitle\":\"FRITZ!Box ","\"",FRITZBox} ,
+    {"product.trim() === 'TrueNAS'",NULL,TrueNAS} ,
+    {"test","Cable",UnknownType} ,
 };
 
 UINT GetHttpReturnCode(char* serverResponce) {
@@ -433,11 +442,11 @@ BOOL GetHTTPFingerprint(char* serverResponce, PORT_INFO* portInfo) {
 
     for (int i = 0; i < 3; i++) {
         //for (int i = 0; sizeof(deviceType) / sizeof(StrucStrDev) > i; i++) {
-        if (strstr(serverResponce, deviceType[i].pStart) != NULL) {
-            portInfo->deviceType = deviceType[i].deviceType;
-            switch (deviceType[i].deviceType) {
+        if (strstr(serverResponce, structStrDev[i].pStart) != NULL) {
+            portInfo->deviceType = structStrDev[i].deviceType;
+            switch (structStrDev[i].deviceType) {
             case FRITZBox:
-                if (FRITZBoxVersionDetection(deviceType[i], portInfo, serverResponce)) {
+                if (FRITZBoxVersionDetection(structStrDev[i], portInfo, serverResponce)) {
                     printf("\t\t[SOFTWARE] FRITZBox %i\n", portInfo->version);
                     return FRITZBoxUserEnum(serverResponce);
                 }

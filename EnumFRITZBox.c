@@ -2,14 +2,10 @@
 #include <stdio.h>
 
 #include "EnumFRITZBox.h"
+#include "NetDiscovery.h"
+#include "ToolsHTTP.h"
 
 
-const StrucStrDev deviceType[] = {
-      //{"\"bluBarTitle\":\"FRITZ!Box "," Cable",FRITZBox} ,
-      {"\"bluBarTitle\":\"FRITZ!Box ","\"",FRITZBox} ,
-      {"product.trim() === 'TrueNAS'",NULL,TrueNAS} ,
-      {"test","Cable",UnknownType} ,
-};
 BOOL FRITZBoxVersionDetection(StrucStrDev deviceType, PORT_INFO* portInfo, char* serverResponce) {
     char* pStart = strstr(serverResponce, deviceType.pStart);
     if (pStart != NULL) {

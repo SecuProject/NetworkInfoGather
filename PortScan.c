@@ -1,13 +1,14 @@
 #include <winsock2.h>
 #include <windows.h>
 #include <stdio.h>
+#include <time.h>
+#include <iphlpapi.h>	// IPAddr
+#include <ws2tcpip.h>	// inet_pton()
 
 #include "Network.h"
 #include "portList.h"
 #include "EnumHTTP.h"
-#include "Tools.h"
 
-#pragma warning(disable:4996)  // for inet_addr
 
 int set_options(SOCKET fd) {
 	struct timeval timeout;
@@ -26,11 +27,14 @@ BOOL scanPortOpenTCP(char* dest_ip, int port,FILE* pFile) {
 		return FALSE;
 	} else {
 		SOCKADDR_IN ssin;
+		IPAddr DestIp;
+
+		inet_pton(AF_INET, dest_ip, &DestIp);
 
 		memset(&ssin, 0, sizeof(SOCKADDR_IN));
 		ssin.sin_family = AF_INET;
 		ssin.sin_port = htons(port);
-		ssin.sin_addr.s_addr = inet_addr(dest_ip);
+		ssin.sin_addr.s_addr = DestIp;
 
 		if (!set_options(tcp_sock)) {
 			printOut(pFile,"\t[X] Error setting socket options\n");

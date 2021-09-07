@@ -5,7 +5,6 @@
 
 #include "tcpIpModuel.h"
 #include "NetDiscovery.h"
-#include "Tools.h"
 #include "Network.h"
 
 #pragma warning(disable:4996)
@@ -56,7 +55,7 @@ BOOL ProcessPacket(char* Buffer, int Size, NetworkPcInfo** ppNetworkPcInfo, int*
 			
 			pNetworkPcInfo[*nbPcInfo].macAddress = NULL;
 			//printOut(pFile,"\tSource IP:\t %s\t", ipAddressSrc);
-			printOut(pFile,"\t[%i] - [%s]\t", (*nbPcInfo) +1, ipAddressSrc);
+			//printOut(pFile,"\t[%i] - [%s]\t", (*nbPcInfo) +1, ipAddressSrc);
 			pNetworkPcInfo[*nbPcInfo].osName = DetectOSBaseTTL(iphdr->ip_ttl);
 			(*nbPcInfo)++;
 			pNetworkPcInfo = (NetworkPcInfo*)realloc(pNetworkPcInfo, ((*nbPcInfo) + 1) * sizeof(NetworkPcInfo));
@@ -76,7 +75,8 @@ BOOL ProcessPacket(char* Buffer, int Size, NetworkPcInfo** ppNetworkPcInfo, int*
 			pNetworkPcInfo[*nbPcInfo].osName = OsUnknown;
 			pNetworkPcInfo[*nbPcInfo].macAddress = NULL;
 			//printOut(pFile,"\tDestination IP:\t %s\n", ipAddressDst);
-			printOut(pFile, "\t[%i] - [%s]\t", (*nbPcInfo) + 1, ipAddressDst);
+			//printOut(pFile, "\t[%i] - [%s]\n", (*nbPcInfo) + 1, ipAddressDst);
+			pNetworkPcInfo[*nbPcInfo].osName = DetectOSBaseTTL(iphdr->ip_ttl);
 			(*nbPcInfo)++;
 			pNetworkPcInfo = (NetworkPcInfo*)realloc(pNetworkPcInfo, ((*nbPcInfo) + 1) * sizeof(NetworkPcInfo));
 			if (pNetworkPcInfo == NULL)

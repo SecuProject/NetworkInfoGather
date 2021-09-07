@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <wininet.h>
 #include "wordlist.h"
-#include "Tools.h"
+#include "Network.h"
 
-#pragma comment(lib, "wininet.lib")
+
 
 
 

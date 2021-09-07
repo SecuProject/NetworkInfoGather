@@ -49,9 +49,6 @@
     <Filter Include="Source Files\4. FingerPrintInfo">
       <UniqueIdentifier>{05ad2e7e-9416-461f-b422-26453839f8a1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\4. FingerPrintInfo\GetMacVendor">
-      <UniqueIdentifier>{04d1b65c-8b9e-4627-a752-2b06763138b6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\4. FingerPrintInfo\EnumSMB">
       <UniqueIdentifier>{df85d002-0fb8-4d96-92a7-c638609149da}</UniqueIdentifier>
     </Filter>
@@ -72,6 +69,9 @@
     </Filter>
     <Filter Include="Source Files\4. FingerPrintInfo\EnumNetBios">
       <UniqueIdentifier>{8f2683ba-b9b8-44bb-a285-51d4ad068eaa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\2. NetDiscovery\GetMacVendor">
+      <UniqueIdentifier>{04d1b65c-8b9e-4627-a752-2b06763138b6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -97,7 +97,7 @@
       <Filter>Source Files\2. NetDiscovery\ARPQuery</Filter>
     </ClCompile>
     <ClCompile Include="GetMacVendor.c">
-      <Filter>Source Files\4. FingerPrintInfo\GetMacVendor</Filter>
+      <Filter>Source Files\2. NetDiscovery\GetMacVendor</Filter>
     </ClCompile>
     <ClCompile Include="PassifPacketSniffing.c">
       <Filter>Source Files\2. NetDiscovery\PassifPacketSniffing</Filter>
@@ -110,9 +110,6 @@
     </ClCompile>
     <ClCompile Include="EnumSMB.c">
       <Filter>Source Files\4. FingerPrintInfo\EnumSMB</Filter>
-    </ClCompile>
-    <ClCompile Include="Tools.c">
-      <Filter>Source Files\Tools</Filter>
     </ClCompile>
     <ClCompile Include="PortFingerPrint.c">
       <Filter>Source Files\4. FingerPrintInfo</Filter>
@@ -165,7 +162,7 @@
       <Filter>Source Files\2. NetDiscovery\ARPQuery</Filter>
     </ClInclude>
     <ClInclude Include="GetMacVendor.h">
-      <Filter>Source Files\4. FingerPrintInfo\GetMacVendor</Filter>
+      <Filter>Source Files\2. NetDiscovery\GetMacVendor</Filter>
     </ClInclude>
     <ClInclude Include="PassifPacketSniffing.h">
       <Filter>Source Files\2. NetDiscovery\PassifPacketSniffing</Filter>
@@ -181,9 +178,6 @@
     </ClInclude>
     <ClInclude Include="EnumSMB.h">
       <Filter>Source Files\4. FingerPrintInfo\EnumSMB</Filter>
-    </ClInclude>
-    <ClInclude Include="Tools.h">
-      <Filter>Source Files\Tools</Filter>
     </ClInclude>
     <ClInclude Include="PortFingerPrint.h">
       <Filter>Source Files\4. FingerPrintInfo</Filter>
@@ -215,11 +209,9 @@
     <ClInclude Include="GetHTTPSserver.h">
       <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\GetHTTPserver</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="mac.db">
-      <Filter>Source Files\4. FingerPrintInfo\GetMacVendor</Filter>
-    </None>
+    <ClInclude Include="macDB.h">
+      <Filter>Source Files\2. NetDiscovery\GetMacVendor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="TODO.md" />

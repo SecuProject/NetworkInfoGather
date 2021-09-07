@@ -3,8 +3,9 @@
 #ifndef ENUM_FRITZBOX_H
 #define ENUM_FRITZBOX_H
 
-/* #include "NetDiscovery.h"*/
+#include "ToolsHTTP.h"
 
+/*
 // --------------------------- NetDiscovery ---------------------------
 #define BANNER_BUFFER_SIZE	50
 typedef enum {
@@ -20,16 +21,7 @@ typedef struct {
     int version;
 }PORT_INFO;
 // --------------------------- NetDiscovery ---------------------------
-
-
-
-typedef struct {
-    const char* pStart;
-    const char* pStop;
-    DeviceType deviceType;
-}StrucStrDev;
-
-extern const StrucStrDev deviceType[];
+*/
 
 BOOL FRITZBoxVersionDetection(StrucStrDev deviceType, PORT_INFO* portInfo, char* serverResponce);
 BOOL FRITZBoxUserEnum(char* serverResponce);

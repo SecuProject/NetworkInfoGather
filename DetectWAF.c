@@ -1,9 +1,9 @@
 #include <Windows.h>
 #include <stdio.h>
-#include "Tools.h"
 #include "ToolsHTTP.h"
 #include "GetHTTPserver.h"
 #include "GetHTTPSserver.h"
+#include "Network.h"
 
 char* userAgentWaf[] = {
 	"Mozilla/5.00 (Nikto/2.1.6) (Evasions:None) (Test:007012)",

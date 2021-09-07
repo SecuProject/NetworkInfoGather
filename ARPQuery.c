@@ -6,7 +6,6 @@
 #include <ws2tcpip.h>
 
 #include "Network.h"
-#include "Tools.h"
 
 BOOL ArpScan(char* ipAddress, char* macAddress) {
 	IPAddr DestIp;
@@ -78,7 +77,6 @@ BOOL ARPdiscoveryThread(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo, INT32
 						CloseHandle(hThreadArray[i]);
 
 						if (arpStructData[i].isHostUp) {
-							printOut(pFile, "\t[%i] - [%s:%s]\n", nbDetected + 1, arpStructData[i].ipAddress, arpStructData[i].macAddress);
 
 							///// Copy To main struct -> networkPcInfo
 							//
