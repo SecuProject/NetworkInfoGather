@@ -34,6 +34,9 @@ void freeStrcutFP(NetworkPcInfo* networkPcInfo, int nbDetected) {
 
 int main(int argc, char* argv[]) {
 	Arguments listAgrument;
+	ADAPTER_INFO* adapterInfo;
+	UINT nbAdapter;
+
 
 	if (!GetArguments(argc, argv, &listAgrument))
 		return FALSE;
@@ -41,10 +44,11 @@ int main(int argc, char* argv[]) {
 	// Disable SMB brute-force for the test !!! 
 	listAgrument.bruteforce = FALSE;
 
-	ADAPTER_INFO *adapterInfo=(ADAPTER_INFO *)calloc(sizeof(ADAPTER_INFO), MAX_NB_ADAPTER);
+
+	adapterInfo = (ADAPTER_INFO *)calloc(sizeof(ADAPTER_INFO), MAX_NB_ADAPTER);
 	if(adapterInfo == NULL)
 		return FALSE;
-	UINT nbAdapter = getAdapterkInfo(adapterInfo, listAgrument.ouputFile);
+	nbAdapter = getAdapterkInfo(adapterInfo, listAgrument.ouputFile);
 	if (nbAdapter == 0) {
 		printOut(listAgrument.ouputFile,"[x] No network interface detected !\n");
 		free(adapterInfo);
@@ -52,6 +56,8 @@ int main(int argc, char* argv[]) {
 	}
 	if (!initWSA(listAgrument.ouputFile))
 		return FALSE;
+
+	srand((UINT)time(0));
 
 	if (listAgrument.isListInterface || listAgrument.interfaceNb == 0 || listAgrument.interfaceNb > nbAdapter) {
 		if (listAgrument.interfaceNb > nbAdapter)
@@ -89,6 +95,7 @@ int main(int argc, char* argv[]) {
 				}
 			}
 
+			// free(networkPcInfo. ...);
 			// free(networkPcInfo.ipAdress);
 			// free(networkPcInfo);
 		}

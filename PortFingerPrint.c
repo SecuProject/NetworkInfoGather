@@ -56,8 +56,6 @@ BOOL GrabBanner(char* protocalName, char* ipAddress, unsigned int port, char* bu
 
 BOOL PortFingerPrint(NetworkPcInfo* networkPcInfo, int nbDetected, BOOL isBruteforce, FILE* pFile) {
 	BOOL isWAfDetection = FALSE;
-
-	srand((UINT)time(0));
 	
 	for (int i = 0; i < nbDetected; i++) {
 		char* ipAddress = networkPcInfo[i].ipAddress;

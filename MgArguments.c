@@ -7,7 +7,7 @@
 
 
 BOOL GetPortList(char* portListRaw, pArguments listAgrument) {
-    char* next_token;
+    char* next_token = NULL;
     size_t maxNbPort = strlen(portListRaw) / 2;
     char* portList = strtok_s(portListRaw, ",", &next_token);
     listAgrument->nbPort = 0;
@@ -71,10 +71,10 @@ VOID PrintMenu() {
 
     printf("Select host scan:\n");
     printf("\t-sD\tDisable host scan (Must be used with -t).\n");
-    printf("\t-sI\tSelect icmp scan.\n");
-    printf("\t-sA\tSelect arp scan [DEFAULT].\n");
+    printf("\t-sI\tSelect ICMP scan.\n");
+    printf("\t-sA\tSelect ARP scan [DEFAULT].\n");
     printf("\t-sP\tSelect passif mode (Require Administrator privilege).\n");
-    printf("\t-sT\tSelect passif mode (Will grab the list of host from the arp table of the system).\n\n");
+    printf("\t-sT\tSelect passif mode (Will grab the list of host from the ARP table of the system).\n\n");
 }
 BOOL GetArguments(int argc, char* argv[], pArguments listAgrument) {
     listAgrument->isListInterface = FALSE;
@@ -85,6 +85,7 @@ BOOL GetArguments(int argc, char* argv[], pArguments listAgrument) {
     listAgrument->bruteforce = FALSE;
     listAgrument->ouputFile = NULL;
     listAgrument->ipAddress = NULL;
+    listAgrument->portList = NULL;
     listAgrument->nbPort = 0;
 
     if (argc == 1) {

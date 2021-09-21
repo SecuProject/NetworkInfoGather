@@ -62,7 +62,7 @@ BOOL ARPdiscoveryThread(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo, INT32
 
 						hThreadArray[i] = CreateThread(NULL, 0, ThreadArpHost, &(arpStructData[i]), 0, &dwThreadIdArray[i]);
 						if (hThreadArray[i] == NULL) {
-							printf("\t[x] Unable to Create Thread\n");
+							printOut(pFile, "\t[x] Unable to Create Thread\n");
 							free(hThreadArray);
 							free(dwThreadIdArray);
 							free(arpStructData);

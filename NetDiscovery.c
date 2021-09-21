@@ -152,27 +152,20 @@ BOOL NetDiscovery(Arguments listAgrument, INT32 ipRangeInt32, int maskSizeInt,ch
 	switch (listAgrument.typeOfScan) {
 // ------------------------ Passive Attack  ------------------------
 	case Passif_Scan:
-		if (GetARPTable(networkPcInfo, nbDetected, ipRangeInt32,pFile)) {
+		if (GetARPTable(networkPcInfo, nbDetected, ipRangeInt32,pFile))
 			getMacVendor(*networkPcInfo, *nbDetected);
-			PrintDiscoveredHost(listAgrument, networkPcInfo, nbDetected, pFile);
-		}
 		break;
 	case Passif_Packet_Sniffing:
-		if (PassifPacketSniffing(localIP, 5, networkPcInfo, nbDetected, listAgrument.ouputFile)) { // 30
-			//getMacVendor(*networkPcInfo, *nbDetected);
-			PrintDiscoveredHost(listAgrument, networkPcInfo, nbDetected, pFile);
-		}
+		PassifPacketSniffing(localIP, 5, networkPcInfo, nbDetected, listAgrument.ouputFile); // 30
+		//getMacVendor(*networkPcInfo, *nbDetected);
 		break;
 // ------------------------ Active Attack ------------------------
 	case ICMP_Scan:
-		if(ICMPdiscoveryMultiThread(maskSizeInt, networkPcInfo, ipRangeInt32, nbDetected, pFile))
-			PrintDiscoveredHost(listAgrument, networkPcInfo, nbDetected, pFile);
+		ICMPdiscoveryMultiThread(maskSizeInt, networkPcInfo, ipRangeInt32, nbDetected, pFile);
 		break;
 	case ARP_Scan:
-		if (ARPdiscoveryThread(maskSizeInt, networkPcInfo, ipRangeInt32, nbDetected, pFile)) {
+		if (ARPdiscoveryThread(maskSizeInt, networkPcInfo, ipRangeInt32, nbDetected, pFile))
 			getMacVendor(*networkPcInfo, *nbDetected);
-			PrintDiscoveredHost(listAgrument, networkPcInfo, nbDetected, pFile);
-		}
 		break;
 	case Disable_Scan:
 		if(AddHostNotScan(maskSizeInt, networkPcInfo, ipRangeInt32, nbDetected, pFile))
@@ -181,5 +174,8 @@ BOOL NetDiscovery(Arguments listAgrument, INT32 ipRangeInt32, int maskSizeInt,ch
 	default:
 		break;
 	}
+	if(*nbDetected > 0)
+		PrintDiscoveredHost(listAgrument, networkPcInfo, nbDetected, pFile);
+
 	return *nbDetected > 0;
 }
