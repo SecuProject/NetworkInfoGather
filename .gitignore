@@ -13,6 +13,7 @@ MacUpdate/
 *.o
 *.ko
 *.obj
+*.obj.enc
 *.elf
 
 # Linker output
@@ -58,3 +59,6 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Hide files or directories
+.*

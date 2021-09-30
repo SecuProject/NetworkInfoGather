@@ -341,6 +341,7 @@ BOOL EnumSMTP(NetworkPcInfo* networkPcInfo, int port, FILE* pFile) {
 		for (UINT i = 0; i < networkPcInfo->smtpData->numUser; i++)
 			printf("\t\t- %s\n", networkPcInfo->smtpData->listUser[i]);
 	}
+	
 	//FreeSmtpData(smtpData);
 
 	return TRUE;

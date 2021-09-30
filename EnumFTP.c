@@ -100,24 +100,25 @@ BOOL ListCurrentDirectory(char* IpAddress, char* username, char* password) {
 }
 
 BOOL FtpEnum(char* serverIp, BOOL isBurtForce, FILE* pFile) {
-    char* usernameAnomym = "anonymous";
-    char* passwordAnomym = "anonymous";
+    const char* usernameAnomym = "anonymous";
+    const char* passwordAnomym = "anonymous";
     BOOL isFtpCreadValid = FALSE;
     printf("\t[FTP] Test Password\n");
 
-    if (TestPasswordFTP(serverIp, usernameAnomym, passwordAnomym)) {
-        ListCurrentDirectory(serverIp, usernameAnomym, passwordAnomym);
-        isFtpCreadValid = TRUE;
-    } else if(isBurtForce){
+    if (isBurtForce) {
         printOut(pFile, "\t[FTP] Brute Forcing FTP server:\n");
         for (int i = 0; i < ARRAY_SIZE_CHAR(usernameList) && !isFtpCreadValid; i++) {
             for (int j = 0; j < ARRAY_SIZE_CHAR(passwordList) && !isFtpCreadValid; j++) {
                 printOut(pFile, "\t%i/%i\r", i * ARRAY_SIZE_CHAR(usernameList) + j, ARRAY_SIZE_CHAR(passwordList) * ARRAY_SIZE_CHAR(usernameList));
                 isFtpCreadValid = TestPasswordFTP(serverIp, usernameList[i], passwordList[j]);
-                if (isFtpCreadValid)
-                    printOut(pFile, "\t\t[FTP] VALID: %s:%s\n\n", usernameList[i], passwordList[j]);
+                if (isFtpCreadValid) {
+                    ListCurrentDirectory(serverIp, (char*)usernameList[i], (char*)passwordList[j]);
+                }
             }
         }
-    }
+    }else if (TestPasswordFTP(serverIp, usernameAnomym, passwordAnomym)) {
+        ListCurrentDirectory(serverIp, (char*)usernameAnomym, (char*)passwordAnomym);
+        isFtpCreadValid = TRUE;
+    } 
     return isFtpCreadValid;
 }

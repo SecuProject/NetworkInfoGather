@@ -4,14 +4,14 @@
 #include "ToolsHTTP.h"
 #include "GetHTTPserver.h"
 #include "GetHTTPSserver.h"
-#include "Tools.h"
+//#include "Tools.h"
 #include "NetDiscovery.h"
 
-typedef struct {
+/*typedef struct {
     const char* pStart;
     const char* pStop;
     DeviceType deviceType;
-}StrucStrDev;
+}StrucStrDev;*/
 
 
 const StrucStrDev deviceType[] = {

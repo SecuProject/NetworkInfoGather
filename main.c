@@ -1,5 +1,6 @@
 #include <Windows.h>
 #include <stdio.h>
+#include <time.h>
 
 #include "AdapterInformation.h"
 #include "NetDiscovery.h"
@@ -19,11 +20,13 @@
 
 #define MAX_NB_ADAPTER	50
 
-void freeStrcutFP(NetworkPcInfo* networkPcInfo, int nbDetected) {
+void FreeStrcutNetPcInfo(NetworkPcInfo* networkPcInfo, int nbDetected) {
 	if (networkPcInfo == NULL)
 		return;
 
 	for (int i = nbDetected - 1; i ; i--) {
+		if (networkPcInfo[i].smtpData != NULL)
+			free(networkPcInfo[i].smtpData);
 		if (networkPcInfo[i].ipAddress != NULL)
 			free(networkPcInfo[i].ipAddress);
 		if (networkPcInfo[i].vendorName != NULL)
@@ -95,12 +98,9 @@ int main(int argc, char* argv[]) {
 				}
 			}
 
-			// free(networkPcInfo. ...);
-			// free(networkPcInfo.ipAdress);
-			// free(networkPcInfo);
+			// FreeStrcutNetPcInfo(networkPcInfo, nbDetected);
 		}
 	}
-
 
 	WSACleanup();
 	free(adapterInfo);

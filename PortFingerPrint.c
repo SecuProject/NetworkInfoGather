@@ -66,19 +66,21 @@ BOOL PortFingerPrint(NetworkPcInfo* networkPcInfo, int nbDetected, BOOL isBrutef
 		for (int j = 0; j < nbFPInfo; j++) {
 			int portNb = networkPcInfo[i].port[j].portNumber;
 			switch (portNb) {
-			case PORT_NETBIOS_SSN:
-				EnumNetBios(&(networkPcInfo[i]));
-				// update mac if not 00-00-00-00-00-00
+			case PORT_FTP:
+				GrabBanner("FTP", ipAddress, portNb, networkPcInfo[i].port[j].banner, BANNER_BUFFER_SIZE, NO_OFFSET, pFile);
+				FtpEnum(ipAddress, isBruteforce, pFile);
 				break;
 			case PORT_SSH:
 				GrabBanner("SSH",ipAddress, portNb, networkPcInfo[i].port[j].banner, BANNER_BUFFER_SIZE, NO_OFFSET,pFile);
 				break;
-			case PORT_FTP:
-				GrabBanner("FTP", ipAddress, portNb, networkPcInfo[i].port[j].banner, BANNER_BUFFER_SIZE, NO_OFFSET,pFile);
-				FtpEnum(ipAddress, isBruteforce, pFile);
+			case PORT_TELNET:
+				//TODO
 				break;
-			case PORT_MYSQL:
-				GrabBanner("MYSQL", ipAddress, portNb, networkPcInfo[i].port[j].banner, BANNER_BUFFER_SIZE, MYSQL_OFFSET,pFile);
+			case PORT_SMTP:
+				EnumSMTP(&(networkPcInfo[i]), PORT_SMTP, pFile);
+				break;
+			case PORT_DNS:
+				// TODO
 				break;
 			case PORT_HTTP:
 			case PORT_HTTP_TOMCAT:
@@ -97,12 +99,30 @@ BOOL PortFingerPrint(NetworkPcInfo* networkPcInfo, int nbDetected, BOOL isBrutef
 				}
 				HttpDirEnum(ipAddress, portNb, pFile, TRUE);
 				break;
+			case PORT_NETBIOS_SSN:
+				EnumNetBios(&(networkPcInfo[i]));
+				// update mac if not 00-00-00-00-00-00
+				break;
+			case PORT_LDAP:
+				// TODO
+				break;
 			case PORT_SMB:
 				SmbEnum(ipAddress, isBruteforce,pFile);
 				break;
-			
-			case PORT_SMTP:
-				EnumSMTP(&(networkPcInfo[i]), PORT_SMTP, pFile);
+			case PORT_MSSQL:
+				// TODO
+				break;
+			case PORT_ORACLEDB:
+				// TODO
+				break;
+			case PORT_MYSQL:
+				GrabBanner("MYSQL", ipAddress, portNb, networkPcInfo[i].port[j].banner, BANNER_BUFFER_SIZE, MYSQL_OFFSET, pFile);
+				break;
+			case PORT_RDP:
+				// TODO
+				break;
+			case PORT_POSTGRESQL:
+				// TODO
 				break;
 
 			default:

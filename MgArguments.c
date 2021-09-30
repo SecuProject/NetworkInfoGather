@@ -50,31 +50,35 @@ BOOL GetPortList(char* portListRaw, pArguments listAgrument) {
 }
 
 VOID PrintMenu() {
-    printf("\nNetwork scanner.\n\n");
+    printf("\n\nNetworkInfoGather.exe -l\n");
+    printf("NetworkInfoGather.exe -i INTERFACE_NB [-sD/-sI/-sA/-sP/-sT]|[-t IP_ADDRESS] [-A/-sV/-b] [-p PORTS/-ps] [-o FILEPATH] \n\n");
 
-    printf("NetworkInfoGather.exe -l\n");
-    printf("NetworkInfoGather.exe [-i INTERFACE_NB] [-s icmp|arp|passif|passifT]|[-t IP_ADDRESS] [-A] [-ps] [-o FILEPATH] \n\n");
+    printf("Select interface:\n");
+    printf("\t-l\t\tList interfaces\n");
+    printf("\t-i INTERFACE_NB Select the interface\n\n");
+
+    printf("Select host scan:\n");
+    printf("\t-sD\t\tDisable host scan (Must be used with -t).\n");
+    printf("\t-sI\t\tSelect ICMP scan.\n");
+    printf("\t-sA\t\tSelect ARP scan [DEFAULT].\n");
+    printf("\t-sP\t\tSelect passif mode (Require Administrator privilege).\n");
+    printf("\t-sT\t\tSelect passif mode (Will grab the list of host from the ARP table of the system).\n\n");
 
     printf("Select option:\n");
     printf("\t-h\t\tPrint help menu\n");
-    printf("\t-l\t\tList interfaces\n");
-    printf("\t-i INTERFACE_NB Select the interface\n");
+    printf("\t-t IP_ADDRESS\tTarget IP Address or range. Allowed formats:\n");
+    printf("\t\t\t\te.g. '192.168.1.1' or '192.168.1.1-5'\n");
     printf("\t-ps\t\tEnable port scan\n");
     printf("\t-p [PORT_NB]\tUse custom port list port scan (If not set will use default list)\n");
     printf("\t\t\t\te.g. -p 80,443,8080\n");
     printf("\t-b\t\tEnable brute force enable\n");
     printf("\t-A\t\tAggressive scan (grab banner and brute force enable)\n");
+    printf("\t-sV\t\tScan for service version\n");
     printf("\t-o FILEPATH\tOutput into a file\n");
-    printf("\t-t IP_ADDRESS\tTarget IP Address or range. Allowed formats:\n");
-    printf("\t\t\t\te.g. '192.168.1.1' or '192.168.1.1-5'\n");
+    
 
 
-    printf("Select host scan:\n");
-    printf("\t-sD\tDisable host scan (Must be used with -t).\n");
-    printf("\t-sI\tSelect ICMP scan.\n");
-    printf("\t-sA\tSelect ARP scan [DEFAULT].\n");
-    printf("\t-sP\tSelect passif mode (Require Administrator privilege).\n");
-    printf("\t-sT\tSelect passif mode (Will grab the list of host from the ARP table of the system).\n\n");
+    
 }
 BOOL GetArguments(int argc, char* argv[], pArguments listAgrument) {
     listAgrument->isListInterface = FALSE;
@@ -143,6 +147,11 @@ BOOL GetArguments(int argc, char* argv[], pArguments listAgrument) {
                             listAgrument->typeOfScan = Passif_Packet_Sniffing;
                         else if (argv[count][2] == 'T')
                             listAgrument->typeOfScan = Passif_Scan;
+                        
+                        else if (argv[count][2] == 'V') {
+                            listAgrument->portScan = TRUE;
+                            listAgrument->advancedScan = TRUE;
+                        }
                     } else if (argv[count][1] == 'p' && argv[count][2] == 's') {
                         listAgrument->portScan = TRUE;
                     } else
