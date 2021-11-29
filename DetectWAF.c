@@ -18,26 +18,25 @@ char* userAgentWaf[] = {
 
 };
 
-BOOL IsHttpWaf(char* ipAddress, int port, FILE* pFile, BOOL isSSL) {
-	printf("[*] %s:%i - Detect HTTP%s WAF\n", ipAddress, port, isSSL ? "S" : "");
+BOOL TestUserAgent(char* ipAddress, int port, FILE* pFile, BOOL isSSL) {
 	char* path = "/";
 	char* serverResponce = (char*)malloc(GET_REQUEST_SIZE);
 
 	if (serverResponce == NULL) {
-		printf("\t[x] Alloc fail !\n");
+		printOut(pFile, "\t[x] Alloc fail !\n");
 		return FALSE;
 	}
 
 	// Default test
 	if (isSSL) {
 		if (!GetHttpsServer(ipAddress, port, "HEAD", path, (char*)userAgentList[rand() % 5], &serverResponce, pFile)) {
-			printf("\t[-] Page not available !\n");
+			printOut(pFile, "\t[-] Page not available !\n");
 			free(serverResponce);
 			return FALSE;
 		}
 	} else {
 		if (!GetHttpServer(ipAddress, port, "HEAD", path, NULL, &serverResponce, pFile)) {
-			printf("\t[-] Page not available !\n");
+			printOut(pFile, "\t[-] Page not available !\n");
 			free(serverResponce);
 			return FALSE;
 		}
@@ -46,21 +45,46 @@ BOOL IsHttpWaf(char* ipAddress, int port, FILE* pFile, BOOL isSSL) {
 	for (int i = 0; i < ARRAY_SIZE_CHAR(userAgentWaf); i++) {
 		if (isSSL) {
 			if (!GetHttpsServer(ipAddress, port, "HEAD", path, userAgentWaf[i], &serverResponce, pFile)) {
-				printf("\t[-] WAF Detected (Blocked user agent: %s) !\n", userAgentWaf[i]);
+				printOut(pFile, "\t[-] WAF Detected (Blocked user agent: %s) !\n", userAgentWaf[i]);
 				free(serverResponce);
 				return FALSE;
 			}
 		} else {
 			if (!GetHttpServer(ipAddress, port, "HEAD", path, userAgentWaf[i], &serverResponce, pFile)) {
-				printf("\t[-] WAF Detected (Blocked user agent: %s) !\n", userAgentWaf[i]);
+				printOut(pFile, "\t[-] WAF Detected (Blocked user agent: %s) !\n", userAgentWaf[i]);
 				free(serverResponce);
 				return FALSE;
 			}
 		}
-		Sleep(10);
+		Sleep(100);
 	}
 	free(serverResponce);
-	printf("\t[i] Not WAF detected !\n");
+	return TRUE;
+}
+BOOL TestAttacks(char* ipAddress, int port, FILE* pFile, BOOL isSSL) {
+	/*
+	* 
+	* Source: https://github.com/EnableSecurity/wafw00f/blob/master/wafw00f/main.py
+	* 
+	xsstring = '<script>alert("XSS");</script>'
+	sqlistring = "UNION SELECT ALL FROM information_schema AND ' or SLEEP(5) or '"
+	lfistring = '../../../../etc/passwd'
+	rcestring = '/bin/cat /etc/passwd; ping 127.0.0.1; curl google.com'
+	xxestring = '<!ENTITY xxe SYSTEM "file:///etc/shadow">]><pwn>&hack;</pwn>'
+	*/
+	//const char* payload[] = "";
+
+	return TRUE;
+}
+
+
+BOOL IsHttpWaf(char* ipAddress, int port, FILE* pFile, BOOL isSSL) {
+	printOut(pFile, "[*] %s:%i - Detect HTTP%s WAF\n", ipAddress, port, isSSL ? "S" : "");
+	if (TestUserAgent( ipAddress, port, pFile, isSSL))
+		return FALSE;
+	if (TestAttacks(ipAddress, port, pFile, isSSL))
+		return FALSE;
+	printOut(pFile,"\t[i] Not WAF detected !\n");
 	return TRUE;
 }
 

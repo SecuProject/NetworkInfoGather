@@ -30,6 +30,7 @@ typedef struct {
 	char banner[BANNER_BUFFER_SIZE];
 	DeviceType deviceType;
 	int version;
+	BOOL isTcp;
 }PORT_INFO;
 
 
@@ -75,10 +76,11 @@ typedef struct {
 	char* ipAddress;
 	char* macAddress;
 	char* vendorName;
+	char* hostname;
 
 	// 3. PortScan
 	int version;
-	PORT_INFO port[NB_TAB_PORT];
+	PORT_INFO port[NB_TAB_PORT_TCP + NB_TAB_PORT_UDP];
 	int nbOpenPort;
 
 	// 4. FingerPrintInfo
@@ -98,9 +100,9 @@ typedef struct {
 
 EnumOS DetectOSBaseTTL(UINT computerTTL);
 
-BOOL NetDiscovery(Arguments listAgrument, INT32 ipRangeInt32, int maskSizeInt, char* localIP, NetworkPcInfo** networkPcInfo, int* nbDetected, FILE* pFile);
+BOOL NetDiscovery(ScanStruct listAgrument, INT32 ipRangeInt32, int maskSizeInt, char* localIP, NetworkPcInfo** networkPcInfo, int* nbDetected, FILE* pFile);
 
-INT32 AddIPRange(Arguments listAgrument, int* maskSizeInt);
+INT32 AddIPRange(ScanStruct listAgrument, int* maskSizeInt);
 
 VOID PrintHostOS(EnumOS hostOs, FILE* pFile);
 

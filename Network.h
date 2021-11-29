@@ -28,9 +28,12 @@
 #define MAC_ADDRESS_LEN			MAC_ADDRESS_LEN_BYTE * 2 + 5
 //#define MAC_ADDRESS_LEN	    MAC_ADDRESS_LEN_BYTE * 2 + 5 + 50   // test
 
+#define IS_PRIVATE_IP(IP_ADDRESS)		(strncmp(IP_ADDRESS, "192.168.", 8) == 0 \
+										||strncmp(IP_ADDRESS, "172.16.", 7) == 0 \
+										|| strncmp(IP_ADDRESS, "10.", 3) == 0)
 
-
-const int port[NB_TAB_PORT];
+const int portTcp[NB_TAB_PORT_TCP];
+const int portUdp[NB_TAB_PORT_UDP];
 
 
 typedef struct {

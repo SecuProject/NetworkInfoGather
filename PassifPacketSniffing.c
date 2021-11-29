@@ -10,10 +10,6 @@
 #pragma warning(disable:4996)
 
 
-#define IS_PRIVATE_IP(IP_ADDRESS)		(strncmp(IP_ADDRESS, "192.168.", 8) == 0 \
-										||strncmp(IP_ADDRESS, "172.16.", 7) == 0 \
-										|| strncmp(IP_ADDRESS, "10.", 3) == 0)
-
 /*typedef struct {
 	char ipAddress[IP_ADDRESS_LEN];
 	int ttlInfo[100];
@@ -32,7 +28,7 @@ BOOL ProcessPacket(char* Buffer, int Size, NetworkPcInfo** ppNetworkPcInfo, int*
 	IPV4_HDR* iphdr = (IPV4_HDR*)Buffer;
 	iphdrlen = iphdr->ip_header_len * 4;
 
-	TCP_HDR* tcpHdr = (TCP_HDR*)(Buffer + sizeof(IPV4_HDR));
+	//TCP_HDR* tcpHdr = (TCP_HDR*)(Buffer + sizeof(IPV4_HDR));
 
 	memset(&source, 0, sizeof(source));
 	source.sin_addr.s_addr = iphdr->ip_srcaddr;

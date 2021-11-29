@@ -15,9 +15,48 @@ int set_options(SOCKET fd) {
 
 	timeout.tv_sec = 2;
 	timeout.tv_usec = 0;
-	return setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(timeout)) != SOCKET_ERROR; // if setsockopt == fail => return 0;
+	return setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(timeout)) != SOCKET_ERROR;
 }
 
+BOOL scanPortOpenUDP(char* dest_ip, int port, FILE* pFile) {
+	SOCKET udp_sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	if (udp_sock == INVALID_SOCKET) {
+		printOut(pFile, "\t[X] socket open failed %ld\n", GetLastError());
+		closesocket(udp_sock);
+		return FALSE;
+	} else {
+		SOCKADDR_IN server_addr;
+
+		IPAddr AddrIp;
+		inet_pton(AF_INET, dest_ip, &AddrIp);
+		memset(&server_addr, 0, sizeof(SOCKADDR_IN));
+		server_addr.sin_family = AF_INET;
+		server_addr.sin_port = htons(port);
+		server_addr.sin_addr.s_addr = AddrIp;
+
+		char msg[] = "Just a text\n";
+
+		int send_size = sendto(udp_sock, msg, (int)strlen(msg), 0, (struct sockaddr*)&server_addr, sizeof(SOCKADDR_IN));
+		if (send_size != SOCKET_ERROR) {
+			int servAddSize = sizeof(server_addr);
+			char buffer[OCTE_MAX];
+
+			if (!set_options(udp_sock)) {
+				printOut(pFile, "\t[X] Error setting socket options\n");
+				closesocket(udp_sock);
+				return FALSE;
+			}
+
+			int recv_size = recvfrom(udp_sock, buffer, OCTE_MAX, 0, (struct sockaddr*)&server_addr, &servAddSize);
+			if (recv_size != SOCKET_ERROR) {
+				closesocket(udp_sock);
+				return TRUE;
+			}
+		}
+		closesocket(udp_sock);
+	}
+	return FALSE;
+}
 BOOL scanPortOpenTCP(char* dest_ip, int port,FILE* pFile) {
 	SOCKET tcp_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
@@ -50,27 +89,35 @@ BOOL scanPortOpenTCP(char* dest_ip, int port,FILE* pFile) {
 	return FALSE;
 }
 
-void scanPort(NetworkPcInfo* networkPcInfo, int nbDetected, Arguments arguments) {
+void scanPort(NetworkPcInfo* networkPcInfo, int nbDetected, ScanStruct scanStruct) {
 	for (int iPC = 0; iPC < nbDetected; iPC++) {
-		printOut(arguments.ouputFile,"[%s] PORT SCAN\n", networkPcInfo[iPC].ipAddress);
+		printOut(scanStruct.ouputFile,"[%s] PORT SCAN\n", networkPcInfo[iPC].ipAddress);
 		networkPcInfo[iPC].nbOpenPort = 0;
-		if (arguments.nbPort > 0) {
-			for (UINT iPort = 0; iPort < arguments.nbPort; iPort++) {
-				if (scanPortOpenTCP(networkPcInfo[iPC].ipAddress, arguments.portList[iPort], arguments.ouputFile)) {
-					printOut(arguments.ouputFile, "\t[%s] OPEN PORT %i\n", networkPcInfo[iPC].ipAddress, arguments.portList[iPort]);
-					networkPcInfo[iPC].port[networkPcInfo[iPC].nbOpenPort].portNumber = arguments.portList[iPort];
+		if (scanStruct.nbPort > 0) {
+			for (UINT iPort = 0; iPort < scanStruct.nbPort; iPort++) {
+				if (scanPortOpenTCP(networkPcInfo[iPC].ipAddress, scanStruct.portList[iPort], scanStruct.ouputFile)) {
+					printOut(scanStruct.ouputFile, "\t[%s] OPEN PORT %i\n", networkPcInfo[iPC].ipAddress, scanStruct.portList[iPort]);
+					networkPcInfo[iPC].port[networkPcInfo[iPC].nbOpenPort].portNumber = scanStruct.portList[iPort];
 					networkPcInfo[iPC].nbOpenPort++;
 				}/*else
 					printOut(pFile,"\t[%s] CLOSE PORT %i\n", networkPcInfo[iPC].ipAddress, port[iPort]);*/
 			}
 		} else {
-			for (UINT iPort = 0; iPort < NB_TAB_PORT; iPort++) {
-				if (scanPortOpenTCP(networkPcInfo[iPC].ipAddress, port[iPort], arguments.ouputFile)) {
-					printOut(arguments.ouputFile, "\t[%s] OPEN PORT %i\n", networkPcInfo[iPC].ipAddress, port[iPort]);
-					networkPcInfo[iPC].port[networkPcInfo[iPC].nbOpenPort].portNumber = port[iPort];
+			// Scan TCP
+			for (UINT iPort = 0; iPort < NB_TAB_PORT_TCP; iPort++) {
+				if (scanPortOpenTCP(networkPcInfo[iPC].ipAddress, portTcp[iPort], scanStruct.ouputFile)) {
+					printOut(scanStruct.ouputFile, "\t[%s] TCP - OPEN PORT %i\n", networkPcInfo[iPC].ipAddress, portTcp[iPort]);
+					networkPcInfo[iPC].port[networkPcInfo[iPC].nbOpenPort].portNumber = portTcp[iPort];
 					networkPcInfo[iPC].nbOpenPort++;
-				}/*else
-					printOut(pFile,"\t[%s] CLOSE PORT %i\n", networkPcInfo[iPC].ipAddress, port[iPort]);*/
+				}
+			}
+			// Scan UDP
+			for (UINT iPort = 0; iPort < NB_TAB_PORT_UDP; iPort++) {
+				if (scanPortOpenUDP(networkPcInfo[iPC].ipAddress, portUdp[iPort], scanStruct.ouputFile)) {
+					printOut(scanStruct.ouputFile, "\t[%s] UDP - OPEN PORT %i\n", networkPcInfo[iPC].ipAddress, portUdp[iPort]);
+					networkPcInfo[iPC].port[networkPcInfo[iPC].nbOpenPort].portNumber = portUdp[iPort];
+					networkPcInfo[iPC].nbOpenPort++;
+				}
 			}
 		}
 	}
@@ -81,30 +128,32 @@ void scanPort(NetworkPcInfo* networkPcInfo, int nbDetected, Arguments arguments)
 
 
 typedef struct {
-	Arguments *arguments;
+	ScanStruct *scanStruct;
 	NetworkPcInfo *networkPcInfo;
 	int nbPort;
 	int portList;
 } THREAD_STRUCT_PORT_SCAN, * PTHREAD_STRUCT_PORT_SCAN;
 
 typedef struct {
-	Arguments *arguments;
+	ScanStruct *scanStruct;
 	NetworkPcInfo *networkPcInfo;
+	BOOL isTcp;
 } THREAD_STRUCT_PC_PORT_SCAN, * PTHREAD_STRUCT_PC_PORT_SCAN;
 
 CRITICAL_SECTION CriticalSection;
 
-DWORD WINAPI ThreadPcPortScan(LPVOID lpParam) {
+DWORD WINAPI ThreadPcPortScanTcp(LPVOID lpParam) {
 	PTHREAD_STRUCT_PORT_SCAN pThreadData = (PTHREAD_STRUCT_PORT_SCAN)lpParam;
 	NetworkPcInfo* pNetworkPcInfo = pThreadData->networkPcInfo;
-	Arguments* pArguments = pThreadData->arguments;
+	ScanStruct* pscanStruct = pThreadData->scanStruct;
 
 	
-	if (scanPortOpenTCP(pNetworkPcInfo->ipAddress, pThreadData->portList, pArguments->ouputFile)) {
+	if (scanPortOpenTCP(pNetworkPcInfo->ipAddress, pThreadData->portList, pscanStruct->ouputFile)) {
 		
 		EnterCriticalSection(&CriticalSection);
 		// Access the shared resource.
 		pNetworkPcInfo->port[pNetworkPcInfo->nbOpenPort].portNumber = pThreadData->portList;
+		pNetworkPcInfo->port[pNetworkPcInfo->nbOpenPort].isTcp = TRUE;
 		pNetworkPcInfo->nbOpenPort++;
 
 		LeaveCriticalSection(&CriticalSection);
@@ -112,17 +161,47 @@ DWORD WINAPI ThreadPcPortScan(LPVOID lpParam) {
 	}
 	return TRUE;
 }
+DWORD WINAPI ThreadPcPortScanUdp(LPVOID lpParam) {
+	PTHREAD_STRUCT_PORT_SCAN pThreadData = (PTHREAD_STRUCT_PORT_SCAN)lpParam;
+	NetworkPcInfo* pNetworkPcInfo = pThreadData->networkPcInfo;
+	ScanStruct* pscanStruct = pThreadData->scanStruct;
+
+	
+	if (scanPortOpenUDP(pNetworkPcInfo->ipAddress, pThreadData->portList, pscanStruct->ouputFile)) {
+		
+		EnterCriticalSection(&CriticalSection);
+		// Access the shared resource.
+		pNetworkPcInfo->port[pNetworkPcInfo->nbOpenPort].portNumber = pThreadData->portList;
+		pNetworkPcInfo->port[pNetworkPcInfo->nbOpenPort].isTcp = FALSE;
+		pNetworkPcInfo->nbOpenPort++;
+
+		LeaveCriticalSection(&CriticalSection);
+		
+	}
+	return TRUE;
+}
+
+// portTcp ???
 DWORD WINAPI ThreadNetworkPortScan(LPVOID lpParam) {
 	PTHREAD_STRUCT_PC_PORT_SCAN pThreadData = (PTHREAD_STRUCT_PC_PORT_SCAN)lpParam;
 	NetworkPcInfo* pNetworkPcInfo = pThreadData->networkPcInfo;
-	Arguments* pArguments = pThreadData->arguments;
+	ScanStruct* pscanStruct = pThreadData->scanStruct;
 
-	int nbPort = NB_TAB_PORT;
-	int* portList = (int*)port;
+	int nbPort;
+	int* portList;
+	if (pThreadData->isTcp) {
+		portList = (int*)portTcp;
+		nbPort = NB_TAB_PORT_TCP;
+	} else {
+		portList = (int*)portUdp;
+		nbPort = NB_TAB_PORT_UDP;
+	}
+	
+
 	// If user set custom port
-	if (pArguments->nbPort > 0) {
-		nbPort = pArguments->nbPort;
-		portList = pArguments->portList;
+	if (pscanStruct->nbPort > 0) {
+		nbPort = pscanStruct->nbPort;
+		portList = pscanStruct->portList;
 	}
 
 	DWORD* dwThreadIdArray = (DWORD*)calloc(nbPort, sizeof(DWORD));
@@ -141,14 +220,18 @@ DWORD WINAPI ThreadNetworkPortScan(LPVOID lpParam) {
 		return FALSE;
 	}
 
-	pNetworkPcInfo->nbOpenPort = 0;
+	//pNetworkPcInfo->nbOpenPort = 0;
 	for (int iPort= 0; iPort < nbPort; iPort++) {
-		pThreadDataPort[iPort].arguments = pArguments;
+		pThreadDataPort[iPort].scanStruct = pscanStruct;
 		pThreadDataPort[iPort].networkPcInfo = pNetworkPcInfo;
 		pThreadDataPort[iPort].nbPort = nbPort;
 		pThreadDataPort[iPort].portList = portList[iPort];
 
-		hThreadArray[iPort] = CreateThread(NULL, 0, ThreadPcPortScan, &pThreadDataPort[iPort], 0, &dwThreadIdArray[iPort]);
+
+		if(pThreadData->isTcp)
+			hThreadArray[iPort] = CreateThread(NULL, 0, ThreadPcPortScanTcp, &pThreadDataPort[iPort], 0, &dwThreadIdArray[iPort]);
+		else
+			hThreadArray[iPort] = CreateThread(NULL, 0, ThreadPcPortScanUdp, &pThreadDataPort[iPort], 0, &dwThreadIdArray[iPort]);
 		if (hThreadArray[iPort] == NULL) {
 			printf("\t[x] Unable to Create Thread\n");
 			free(pThreadDataPort);
@@ -162,7 +245,8 @@ DWORD WINAPI ThreadNetworkPortScan(LPVOID lpParam) {
 	SyncWaitForMultipleObjs(hThreadArray, nbPort);
 
 	for (int iPort = 0; iPort < nbPort; iPort++) {
-		CloseHandle(hThreadArray[iPort]);
+		if(hThreadArray[iPort] != NULL)
+			CloseHandle(hThreadArray[iPort]);
 	}
 	free(pThreadDataPort);
 	free(hThreadArray);
@@ -174,7 +258,7 @@ DWORD WINAPI ThreadNetworkPortScan(LPVOID lpParam) {
 
 
 
-BOOL MultiScanPort(NetworkPcInfo* networkPcInfo, int nbDetected, Arguments arguments) {
+BOOL MultiScanPort(NetworkPcInfo* networkPcInfo, int nbDetected, ScanStruct scanStruct, BOOL isTcp) {
 	DWORD* dwThreadIdArray = (DWORD*)calloc(nbDetected, sizeof(DWORD));
 	if (dwThreadIdArray == NULL) {
 		return FALSE;
@@ -196,9 +280,9 @@ BOOL MultiScanPort(NetworkPcInfo* networkPcInfo, int nbDetected, Arguments argum
 		return FALSE;
 
 	for (int iPC = 0; iPC < nbDetected; iPC++) {
-		
-		pThreadData[iPC].arguments = &(arguments);
+		pThreadData[iPC].scanStruct = &(scanStruct);
 		pThreadData[iPC].networkPcInfo = &(networkPcInfo[iPC]);
+		pThreadData[iPC].isTcp = isTcp;
 
 
 		hThreadArray[iPC] = CreateThread(NULL, 0, ThreadNetworkPortScan, &pThreadData[iPC], 0, &dwThreadIdArray[iPC]);
@@ -222,9 +306,10 @@ BOOL MultiScanPort(NetworkPcInfo* networkPcInfo, int nbDetected, Arguments argum
 
 	for (int iPC = 0; iPC < nbDetected; iPC++) {
 		CloseHandle(hThreadArray[iPC]);
-		printOut(arguments.ouputFile, "[%s] PORT SCAN\n", networkPcInfo[iPC].ipAddress);
+		printOut(scanStruct.ouputFile, "[%s] PORT SCAN - %s\n", networkPcInfo[iPC].ipAddress, isTcp ? "TCP" : "UDP");
 		for (int iPort = 0; iPort < networkPcInfo[iPC].nbOpenPort; iPort++) {
-			printOut(arguments.ouputFile, "\t[%s] OPEN PORT %i\n", networkPcInfo[iPC].ipAddress, networkPcInfo[iPC].port[iPort].portNumber);
+			if(isTcp == networkPcInfo[iPC].port[iPort].isTcp)
+				printOut(scanStruct.ouputFile, "\t[%s] %s - OPEN PORT %i\n", networkPcInfo[iPC].ipAddress, isTcp ? "TCP" : "UDP", networkPcInfo[iPC].port[iPort].portNumber);
 		}
 	}
 	free(hThreadArray);

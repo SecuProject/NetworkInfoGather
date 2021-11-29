@@ -57,7 +57,7 @@ DWORD SyncWaitForMultipleObjs(HANDLE* handles, DWORD count) {
 5357/tcp open  wsdapi
 */
 
-const int port[] = {
+const int portTcp[] = {
 	PORT_FTP,
 	PORT_SSH,
 	PORT_TELNET,
@@ -79,7 +79,25 @@ const int port[] = {
 	PORT_HTTP_PROXY,
 	PORT_HTTP_OTHER
 };
+/*
 
+#define PORT_UDP_DNS	53
+#define PORT_UDP_DHCP	67
+#define PORT_UDP_DHCP	68
+#define PORT_UDP_NTP	123
+#define PORT_UDP_SNMP	161
+#define PORT_UDP_SNMP	162
+
+67, 68	Dynamic Host Configuration Protocol (DHCP)
+*/
+const int portUdp[] = {
+	PORT_UDP_NETBIOS,
+	PORT_UDP_DHCP,
+	PORT_UDP_DHCP2,
+	PORT_UDP_NTP,
+	PORT_UDP_SNMP,
+	PORT_UDP_SNMP2,
+};
 
 
 

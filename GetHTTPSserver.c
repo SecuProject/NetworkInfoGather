@@ -149,9 +149,26 @@ BOOL RequestBody(HINTERNET hRequest, char** serverResponce, FILE* pFile) {
     return FALSE;
 }
 
+VOID PrintCertInfo(char* title, LPWSTR lpszSubjectInfo, FILE* pFile) {
+    LPWSTR pwc = wcschr(lpszSubjectInfo, L'\n');
+    if (pwc) {
+        INT64 sizeSize = pwc - lpszSubjectInfo;
+        printOut(pFile, "\t\t[i] %s:\t%.*ws\n", title, (int)sizeSize, lpszSubjectInfo);
+        while (pwc != NULL) {
+            pwc++;
+            LPWSTR pwcTemp = pwc;
+            pwc = wcschr(pwc, L'\n');
+            if (pwc != NULL) {
+                sizeSize = pwc - pwcTemp;
+                printOut(pFile, "\t\t\t\t%.*ws\n", (int)sizeSize, pwcTemp);
+            } else
+                printOut(pFile, "\t\t\t\t%ws\n", pwcTemp);
+        }
+    }
+}
 
 typedef WINHTTP_CERTIFICATE_INFO* PWINHTTP_CERTIFICATE_INFO;
-BOOL GetServerCertInfo(HINTERNET hSession) {
+BOOL GetServerCertInfo(HINTERNET hSession, FILE* pFile) {
 
     BOOL bResult = FALSE;
     DWORD dwSize = 0;
@@ -163,19 +180,19 @@ BOOL GetServerCertInfo(HINTERNET hSession) {
         pCertInfo = (PWINHTTP_CERTIFICATE_INFO)malloc(dwSize);
         if (pCertInfo != NULL) {
             if (WinHttpQueryOption(hSession, WINHTTP_OPTION_SECURITY_CERTIFICATE_STRUCT, pCertInfo, &dwSize)) {
-                printf("\t[+] Certificate Chain Information:\n");
+                printf("\t[HTTPS] Certificate Chain Information:\n");
 
                 if (pCertInfo->lpszSubjectInfo)
-                    printf("\t\t[i] Subject: %ws\n", pCertInfo->lpszSubjectInfo);
+                    PrintCertInfo("Subject",pCertInfo->lpszSubjectInfo,pFile);
                 if (pCertInfo->lpszIssuerInfo)
-                    printf("\t\t[i] Issuer: %ws\n", pCertInfo->lpszIssuerInfo);
+                    PrintCertInfo("Issuer", pCertInfo->lpszIssuerInfo,pFile);
                 if (pCertInfo->lpszProtocolName)
-                    printf("\t\t[i] Protocol: %ws\n", pCertInfo->lpszProtocolName);
+                    printOut(pFile, "\t\t[i] Protocol:\t%ws\n", pCertInfo->lpszProtocolName);
                 if (pCertInfo->lpszSignatureAlgName)
-                    printf("\t\t[i] Signature Algorithm: %ws\n", pCertInfo->lpszSignatureAlgName);
+                    printOut(pFile, "\t\t[i] Signature Algorithm: %ws\n", pCertInfo->lpszSignatureAlgName);
                 if (pCertInfo->lpszEncryptionAlgName)
-                    printf("\t\t[i] Encryption Algorithm: %ws\n", pCertInfo->lpszEncryptionAlgName);
-                printf("\t\t[i] Key Size: %d\n", pCertInfo->dwKeySize);
+                    printOut(pFile, "\t\t[i] Encryption Algorithm: %ws\n", pCertInfo->lpszEncryptionAlgName);
+                printOut(pFile, "\t\t[i] Key Size:\t%d\n", pCertInfo->dwKeySize);
                 LocalFree(pCertInfo->lpszSubjectInfo);
                 LocalFree(pCertInfo->lpszIssuerInfo);
                 bResult = TRUE;
@@ -196,13 +213,12 @@ UINT GetHttpsServer(char* ipAddress, int port, char* requestType, char* resource
                 if (WinHttpSetOptionF(hRequest)) {
 
                     
-
                     if (WinHttpSendRequest(hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
                         if (WinHttpReceiveResponse(hRequest, NULL)) {
 
                             DWORD srvResponseSize = RequestHeader(hRequest, serverResponce, pFile);
                             if (srvResponseSize > 0 && strcmp(requestType, "HEAD") != 0) {
-                                GetServerCertInfo(hRequest);
+                                GetServerCertInfo(hRequest, pFile);
                                 srvResponseSize = RequestBody(hRequest, serverResponce, pFile);
                             }
                                 
@@ -212,11 +228,10 @@ UINT GetHttpsServer(char* ipAddress, int port, char* requestType, char* resource
                             return srvResponseSize;
                         } else
                             printOut(pFile, "\t[X] WinHttpReceiveResponse:Error %d has occurred.\n", GetLastError());
-                    } else
+                    } else {
                         printOut(pFile, "\t[X] WinHttpSendRequest:Error %d has occurred.\n", GetLastError());
-
-
-
+                    }
+                        
                 }else
                     printOut(pFile, "\t[X] WinHttpSetOption:Error %d has occurred.\n", GetLastError());
                 WinHttpCloseHandle(hRequest);
@@ -230,3 +245,7 @@ UINT GetHttpsServer(char* ipAddress, int port, char* requestType, char* resource
         printOut(pFile, "\t[X] WinHttpOpen:Error %d has occurred.\n", GetLastError());
     return FALSE;
 }
+
+/*
+ERROR_WINHTTP_SECURE_FAILURE
+*/

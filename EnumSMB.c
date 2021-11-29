@@ -80,15 +80,15 @@ BOOL BrutForceSMB(char* sharePath, FILE* pFile) {
 
 
 BOOL SmbEnum(char* serverIp, BOOL isBurtForce, FILE* pFile) {
-    int serverIpSize = (int)strlen(serverIp);
+    int serverIpSize = (int)strlen(serverIp) + 1;
 
-    LPWSTR lpszServer = (LPWSTR)calloc(serverIpSize + 1, sizeof(LPWSTR));
+    LPWSTR lpszServer = (LPWSTR)calloc(serverIpSize, sizeof(LPWSTR));
     if (lpszServer == NULL)
         return FALSE;
 
     printOut(pFile, "\t[SMB] Try to enumerate file share\n");
 
-    swprintf_s(lpszServer, serverIpSize + 1, L"%hs", serverIp);
+    swprintf_s(lpszServer, serverIpSize, L"%hs", serverIp);
 
     
 
@@ -96,11 +96,11 @@ BOOL SmbEnum(char* serverIp, BOOL isBurtForce, FILE* pFile) {
         free(lpszServer);
         return TRUE;
     } else {
-        char* sharePath = (char*)calloc(serverIpSize + 4 + 1, sizeof(char*));
+        char* sharePath = (char*)calloc(serverIpSize + 4, sizeof(char*));
         if (sharePath == NULL)
             return FALSE;
 
-        sprintf_s(sharePath, serverIpSize + 4 + 1, "\\\\%s", serverIp);
+        sprintf_s(sharePath, serverIpSize + 4 , "\\\\%s", serverIp);
 
         if (LoginSMB("", "", sharePath) || LoginSMB("guest", "guest", sharePath) || (isBurtForce && BrutForceSMB(sharePath, pFile))) {
             if (SmbPublic(lpszServer,pFile))
@@ -114,7 +114,6 @@ BOOL SmbEnum(char* serverIp, BOOL isBurtForce, FILE* pFile) {
     free(lpszServer);
     return FALSE;
 }
-
 
 /*
 BOOL SmbEnum(char* serverIp, BOOL isBurtForce, FILE* pFile) {

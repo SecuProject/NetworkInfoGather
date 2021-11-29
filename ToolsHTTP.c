@@ -20,9 +20,9 @@ const char* userAgentList[] = {
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:66.0) Gecko/20100101 Firefox/66.0"
 };
 const char* invalideUrlPath[] = {
-    "/frjguoijefezhof.php",              // Add rand Str
-    "/{fezfez-fee-feeeee-vfdfd}.php",    // Add rand Str
-    "/testaaaFkefezf.html",              // Add rand Str
+    "/frjguoijefezhof.php",             // Add rand Str
+    "/fezfez-fee-feeeee-vfdfd.txt",     // Add rand Str
+    "/testaaaFkefezf.html",             // Add rand Str
 };
 
 const StrucStrDev structStrDev[] = {
@@ -287,7 +287,32 @@ PHTTP_STRUC GetHttpRequest(char* ipAddress, int port, char* path, char* requestT
     }
     return httpStruct;
 }*/
+BOOL TestAllHttpsRedirect(PHTTP_STRUC* pHttpStructInvalide,char* ipAddress, int port,FILE* pFile) {
+    // ipAddress, port, (char*)invalideUrlPath[i]
+    int match = 0;
+    char* tmpPath = (char*)malloc(MAX_PATH);
+    if (tmpPath == NULL)
+        return TRUE;
 
+    for (int i = 0; i < ARRAY_SIZE_CHAR(invalideUrlPath); i++) {
+        sprintf_s(tmpPath, MAX_PATH, "https://%s%s", ipAddress, invalideUrlPath[i]);
+        if (strcmp(tmpPath, pHttpStructInvalide[i]->redirectionPath) == 0)
+            match++;
+        else {
+            sprintf_s(tmpPath, MAX_PATH, "https://%s:443%s", ipAddress, invalideUrlPath[i]);
+            if (strcmp(tmpPath, pHttpStructInvalide[i]->redirectionPath) == 0)
+                match++;
+        }
+    }
+
+    free(tmpPath);
+    if (match == 3)
+        printOut(pFile, "\t\tAll requests return https://%s/[PAGE_NAME]\n", ipAddress);
+    return match == 3;
+
+
+    // http://192.168.59.45/.bash_history       301 -  0     -> https://192.168.59.45/.bash_history
+}
 
 
 /*
@@ -297,6 +322,9 @@ PHTTP_STRUC GetHttpRequest(char* ipAddress, int port, char* path, char* requestT
 2. If returnCode >= 400 && returnCode < 599
     * Use returnCode
 3. if returnCode >= 300 && returnCode < 400
+    if redirectionPath of all 3 to same but HTTPS
+        BASE_NOT_FOUND
+
     if redirectionPath the same for all 3
         * returnCode >= 300 && returnCode < 400 && default->redirectionPath = new->redirectionPath
 4. Request size the same for all 3
@@ -336,6 +364,9 @@ ENUM_PAGE_NOT_FOUND SetPageNotFound(PHTTP_STRUC pHttpStruct, char* ipAddress, in
         isReturnCodeSame = FALSE;
 
     if (IS_HTTP_REDIRECTS(pHttpStructInvalide[0]->returnCode)) {
+        if (TestAllHttpsRedirect(pHttpStructInvalide, ipAddress, port, pFile))
+            return BASE_NOT_FOUND;
+
         if (pHttpStructInvalide[0]->redirectionPath != NULL)
             strcpy_s(pHttpStruct->redirectionPath, 100, pHttpStructInvalide[0]->redirectionPath);
         else
@@ -383,7 +414,7 @@ VOID PrintDirFind(PHTTP_STRUC pHttpStructPage, char* ipAddress, FILE* pFile, BOO
 
 BOOL HttpDirEnum(char* ipAddress, int port, FILE* pFile, BOOL isSSL) {
 
-    printf("\t[HTTP] %s:%i - HTTP%s Directory Enum  \n", ipAddress, port, isSSL ? "S" : "");
+    printf("\t[HTTP%s] %s:%i - HTTP%s Directory Enum  \n", isSSL ? "S" : "", ipAddress, port, isSSL ? "S" : "");
 
     ENUM_PAGE_NOT_FOUND enulPageNotFound;
     PHTTP_STRUC pHttpStructInvalide = InitPHTTP_STRUC(1);
@@ -462,7 +493,7 @@ BOOL GetHTTPFingerprint(char* serverResponce, PORT_INFO* portInfo) {
 
 
 BOOL GetHttpServerInfo(char* ipAddress, int port, FILE* pFile, BOOL isSSL) {
-    printf("\t[HTTP] %s:%i - HTTP%s information\n", ipAddress, port, isSSL ? "S" : "");
+    printf("\t[HTTP%s] %s:%i - HTTP%s information\n", isSSL ? "S" : "", ipAddress, port, isSSL ? "S" : "");
 
     PHTTP_STRUC pHttpStructPage = GetHttpRequest(ipAddress, port, "/", "GET", isSSL, pFile);
     //PHTTP_STRUC pHttpStructPage = GetHttpRequest(ipAddress, port, "/ui/", "GET", isSSL, pFile);
@@ -484,7 +515,7 @@ BOOL GetHttpServerInfo(char* ipAddress, int port, FILE* pFile, BOOL isSSL) {
             portInfo.banner[0] = 0x00;
 
             if (GetHTTPFingerprint(pHttpStructPage->pContent, &portInfo))
-                printOut(pFile, "\t\t[HTTP%s] Port %i Fingerprint %i - %i\n", isSSL ? "S" : "", portInfo.portNumber, portInfo.deviceType, portInfo.version); // portInfo.deviceType todo
+                printOut(pFile, "\t[HTTP%s] Port %i Fingerprint %i - %i\n", isSSL ? "S" : "", portInfo.portNumber, portInfo.deviceType, portInfo.version); // portInfo.deviceType todo
         }
     }
 

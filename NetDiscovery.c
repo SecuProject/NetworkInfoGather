@@ -7,6 +7,7 @@
 #include "ARPTable.h"
 #include "GetMacVendor.h"
 #include "PassifPacketSniffing.h"
+#include "DNSscan.h"
 #include "MgArguments.h"
 #include "Network.h"
 #include "AdapterInformation.h"
@@ -53,6 +54,9 @@ VOID ScanBanner(TypeOfScan typeOfScan, FILE* pFile) {
 	case ARP_Scan:
 		printOut(pFile, "[i] ARP Table discovery:\n");
 		break;
+	case DNS_Scan:
+		printOut(pFile, "[i] DNS request discovery:\n");
+		break;
 	case Disable_Scan:
 		printOut(pFile, "[i] Host(s) to scan:\n");
 	default:
@@ -60,18 +64,18 @@ VOID ScanBanner(TypeOfScan typeOfScan, FILE* pFile) {
 	}
 }
 
-INT32 AddIPRange(Arguments listAgrument, int* maskSizeInt) {
+INT32 AddIPRange(ScanStruct scanStruct, int* maskSizeInt) {
 	int nbDetected = 0;
 	NetworkPcInfo* pNetworkPcInfo = NULL;
 	int nbHostTest = 0;
 	int a, b, c, d, ipRange;
 
-	if (listAgrument.typeOfScan == Passif_Packet_Sniffing) {
+	if (scanStruct.typeOfScan == Passif_Packet_Sniffing) {
 		printf("\t[!] Passif Packet Sniffing with arg '-t' is not supported !\n");
 		printf("\t[!] All the ip address will be seen has up !\n");
 	}
 
-	int nbData = sscanf_s(listAgrument.ipAddress, "%i.%i.%i.%i-%i", &a, &b, &c, &d, &ipRange);
+	int nbData = sscanf_s(scanStruct.ipAddress, "%i.%i.%i.%i-%i", &a, &b, &c, &d, &ipRange);
 	switch (nbData) {
 	case 4:
 		// Single host
@@ -127,36 +131,38 @@ BOOL AddHostNotScan(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo, INT32 ipA
 	return TRUE;
 }
 
-VOID PrintDiscoveredHost(Arguments listAgrument, NetworkPcInfo** networkPcInfo, int* nbDetected, FILE* pFile) {
+VOID PrintDiscoveredHost(ScanStruct scanStruct, NetworkPcInfo** networkPcInfo, int* nbDetected, FILE* pFile) {
 	for (int i = 0; i < *nbDetected; i++) {
 		if ((*networkPcInfo)[i].macAddress == NULL)
-			printOut(listAgrument.ouputFile, "\t[%i] - [%s]", i + 1, (*networkPcInfo)[i].ipAddress);
+			printOut(scanStruct.ouputFile, "\t%3i - %15s", i + 1, (*networkPcInfo)[i].ipAddress);
 		else
-			printOut(listAgrument.ouputFile, "\t[%i] - [%s:%s]", i + 1, (*networkPcInfo)[i].ipAddress, (*networkPcInfo)[i].macAddress);
+			printOut(scanStruct.ouputFile, "\t%3i - %15s:%s", i + 1, (*networkPcInfo)[i].ipAddress, (*networkPcInfo)[i].macAddress);
 		
 		if((*networkPcInfo)[i].vendorName != NULL)
-			printOut(listAgrument.ouputFile, " - [%s]",(*networkPcInfo)[i].vendorName);
+			printOut(scanStruct.ouputFile, " - [%s]",(*networkPcInfo)[i].vendorName);
+		if((*networkPcInfo)[i].hostname != NULL)
+			printOut(scanStruct.ouputFile, " - [%s]",(*networkPcInfo)[i].hostname);
 
 		PrintHostOS((*networkPcInfo)[i].osName, pFile);
 
-		printOut(listAgrument.ouputFile, "\n");
+		printOut(scanStruct.ouputFile, "\n");
 	}
 	return;
 }
 
-BOOL NetDiscovery(Arguments listAgrument, INT32 ipRangeInt32, int maskSizeInt,char* localIP, NetworkPcInfo** networkPcInfo, int* nbDetected, FILE* pFile) {
+BOOL NetDiscovery(ScanStruct scanStruct, INT32 ipRangeInt32, int maskSizeInt,char* localIP, NetworkPcInfo** networkPcInfo, int* nbDetected, FILE* pFile) {
 	*nbDetected = 0;
 	
-	ScanBanner(listAgrument.typeOfScan, listAgrument.ouputFile);
+	ScanBanner(scanStruct.typeOfScan, scanStruct.ouputFile);
 
-	switch (listAgrument.typeOfScan) {
+	switch (scanStruct.typeOfScan) {
 // ------------------------ Passive Attack  ------------------------
 	case Passif_Scan:
 		if (GetARPTable(networkPcInfo, nbDetected, ipRangeInt32,pFile))
 			getMacVendor(*networkPcInfo, *nbDetected);
 		break;
 	case Passif_Packet_Sniffing:
-		PassifPacketSniffing(localIP, 5, networkPcInfo, nbDetected, listAgrument.ouputFile); // 30
+		PassifPacketSniffing(localIP, scanStruct.psTimeout, networkPcInfo, nbDetected, scanStruct.ouputFile); // 30
 		//getMacVendor(*networkPcInfo, *nbDetected);
 		break;
 // ------------------------ Active Attack ------------------------
@@ -167,6 +173,10 @@ BOOL NetDiscovery(Arguments listAgrument, INT32 ipRangeInt32, int maskSizeInt,ch
 		if (ARPdiscoveryThread(maskSizeInt, networkPcInfo, ipRangeInt32, nbDetected, pFile))
 			getMacVendor(*networkPcInfo, *nbDetected);
 		break;
+	case DNS_Scan:
+		if (DNSdiscoveryMultiThread(maskSizeInt, networkPcInfo, ipRangeInt32, nbDetected, pFile))
+			getMacVendor(*networkPcInfo, *nbDetected);
+		break;
 	case Disable_Scan:
 		if(AddHostNotScan(maskSizeInt, networkPcInfo, ipRangeInt32, nbDetected, pFile))
 			getMacVendor(*networkPcInfo, *nbDetected);
@@ -175,7 +185,7 @@ BOOL NetDiscovery(Arguments listAgrument, INT32 ipRangeInt32, int maskSizeInt,ch
 		break;
 	}
 	if(*nbDetected > 0)
-		PrintDiscoveredHost(listAgrument, networkPcInfo, nbDetected, pFile);
+		PrintDiscoveredHost(scanStruct, networkPcInfo, nbDetected, pFile);
 
 	return *nbDetected > 0;
 }

@@ -76,6 +76,9 @@
     <Filter Include="Source Files\4. FingerPrintInfo\EnumSMTP">
       <UniqueIdentifier>{08cb817c-02fa-4c03-9db8-266031bef1b1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\2. NetDiscovery\DNSscan">
+      <UniqueIdentifier>{42ae1d73-9297-4ae0-b836-96bf0f999f6d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -143,6 +146,9 @@
     </ClCompile>
     <ClCompile Include="EnumSMTP.c">
       <Filter>Source Files\4. FingerPrintInfo\EnumSMTP</Filter>
+    </ClCompile>
+    <ClCompile Include="DNSscan.c">
+      <Filter>Source Files\2. NetDiscovery\DNSscan</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -220,6 +226,9 @@
     </ClInclude>
     <ClInclude Include="EnumSMTP.h">
       <Filter>Source Files\4. FingerPrintInfo\EnumSMTP</Filter>
+    </ClInclude>
+    <ClInclude Include="DNSscan.h">
+      <Filter>Source Files\2. NetDiscovery\DNSscan</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -21,7 +21,7 @@ typedef struct ip_hdr
 	unsigned int ip_srcaddr; // Source address
 	unsigned int ip_destaddr; // Source address
 } IPV4_HDR;
-
+/*
 typedef struct udp_hdr
 {
 	unsigned short source_port; // Source port no.
@@ -40,10 +40,10 @@ typedef struct tcp_header
 
 	unsigned char ns : 1; //Nonce Sum Flag Added in RFC 3540.
 	unsigned char reserved_part1 : 3; //according to rfc
-	unsigned char data_offset : 4; /*The number of 32-bit words in the TCP header.
-								   This indicates where the data begins.
-								   The length of the TCP header is always a multiple
-								   of 32 bits.*/
+	unsigned char data_offset : 4; //The number of 32-bit words in the TCP header.
+								   //This indicates where the data begins.
+								   //The length of the TCP header is always a multiple
+								   //of 32 bits.
 
 	unsigned char fin : 1; //Finish Flag
 	unsigned char syn : 1; //Synchronise Flag
@@ -72,7 +72,7 @@ typedef struct icmp_hdr
 } ICMP_HDR;
 
 #define TCP_IP_PROTOCOL 6
-#define UDP_IP_PROTOCOL 17
+#define UDP_IP_PROTOCOL 17*/
 
 
 #define PACKET_BUFFER_SIZE 65536
