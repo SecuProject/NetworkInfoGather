@@ -7,10 +7,6 @@
 #include "FaviconDatabase.h"
 #include "Network.h"
 
-#define MAX_FAVION_BUFFER	100000
-
-
-
 
 char* GetHttpBody2(char* httpData) {
 	const char delim1[] = "\r\n\r\n";
@@ -41,7 +37,7 @@ UINT GetFavicon(char* ipAddress, int port, char* requestPath, char** ppDataFavio
 		return FALSE;
 	}
 
-	faviconSize -= dataFavionBody - dataFavion;
+	faviconSize -= (UINT)(dataFavionBody - dataFavion);
 
 	*ppDataFavionBody = dataFavionBody;
 	*ppDataFavion = dataFavion;
@@ -67,12 +63,11 @@ BOOL FaviconIdentification(char* ipAddress, int port, FILE* pFile, BOOL isSSL) {
 		//"/phpMyAdmin/favicon.ico",
 	};
 
-
 	UINT faviconSize = GetFavicon(ipAddress, port, (char*)tabRequestPath[0], &dataFavion, &dataFavionBody, isSSL);
 	if (faviconSize > 0) {
 		char* faviconHash = NULL;
 		if (MD5Hash(dataFavionBody, faviconSize, &faviconHash)) {
-			//printf("\t\t[D] MD5 Hash: %s\n", faviconHash);
+			//printOut(NULL,"\t\t[D] MD5 Hash: %s\n", faviconHash);
 			int iFavion = DatabaseSearch(faviconHash);
 			if (iFavion >= 0) {
 				printOut(NULL,"\t\t[Favicon id] %s\n", favionStruct[iFavion].cmsName);

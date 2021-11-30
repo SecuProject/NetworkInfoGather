@@ -6,7 +6,6 @@
 #include "Network.h"
 
 #define USER_AGENT_SIZE     100
-#define IP_ADDRESS_SIZE     16          // TO REMOVE !!!
 #define RESOURCE_PATH_SIZE  100
 #define REQUEST_TYPE_SIZE   100
 
@@ -28,11 +27,11 @@ HINTERNET WinHttpOpenF(char* userAgent) {
     return NULL;
 }
 HINTERNET WinHttpConnectF(HINTERNET hSession,char* ipAddress, int port) {
-    WCHAR* ipAddressW = (WCHAR*)calloc(IP_ADDRESS_SIZE, sizeof(WCHAR));
+    WCHAR* ipAddressW = (WCHAR*)calloc(IP_ADDRESS_LEN, sizeof(WCHAR));
     if (ipAddressW != NULL) {
         HINTERNET hConnect;
 
-        swprintf(ipAddressW, IP_ADDRESS_SIZE, L"%hs", ipAddress);
+        swprintf(ipAddressW, IP_ADDRESS_LEN, L"%hs", ipAddress);
         hConnect = WinHttpConnect(hSession, ipAddressW, port, 0);
         free(ipAddressW);
         return hConnect;

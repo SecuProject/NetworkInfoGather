@@ -49,26 +49,25 @@ BOOL SendRequest(SOCKET Socket, char* ipAddress, char* requestType, char* resour
 UINT RecvResponce(SOCKET Socket, char** pServerResponce, FILE* pFile) {
     int nDataLength;
     int nDataLengthTmp;
-    char* serverResponce = (char*)malloc(GET_REQUEST_SIZE + 1);
+    char* serverResponce = (char*)malloc(GET_RESPONSE_SIZE + 1);
     if (serverResponce == NULL)
         return FALSE;
 
 
-    nDataLength = recv(Socket, serverResponce, GET_REQUEST_SIZE, 0);
+    nDataLength = recv(Socket, serverResponce, GET_RESPONSE_SIZE, 0);
     nDataLengthTmp = nDataLength;
 
     for (UINT i = 2; nDataLengthTmp > 0; i++) {
-        serverResponce = realloc(serverResponce, GET_REQUEST_SIZE * i);
+        serverResponce = realloc(serverResponce, (GET_RESPONSE_SIZE * i) +1);
         if (serverResponce == NULL) {
             printOut(pFile, "\t[X] Realloc failed.\n");
             closesocket(Socket);
             return FALSE;
         }
-
-        nDataLengthTmp = recv(Socket, serverResponce + nDataLengthTmp, GET_REQUEST_SIZE - 1, 0);
+        nDataLengthTmp = recv(Socket, serverResponce + nDataLength, GET_RESPONSE_SIZE, 0);
         nDataLength += nDataLengthTmp;
     }
-    if (nDataLengthTmp < 0) {
+    if (nDataLengthTmp == SOCKET_ERROR) {
         printOut(pFile, "\t[X] Error receiving data.\n");
         closesocket(Socket);
         return FALSE;
@@ -80,6 +79,7 @@ UINT RecvResponce(SOCKET Socket, char** pServerResponce, FILE* pFile) {
         return FALSE;
     }
     //*(serverResponce)[nDataLength] = 0x00; //1086
+
     *pServerResponce = serverResponce;
     return nDataLength;
 }
