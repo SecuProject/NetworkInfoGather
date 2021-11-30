@@ -4,7 +4,9 @@
 *.lastbuildstate
 *.recipe
 MacUpdate/
-
+x64/
+Debug/
+Release/
 
 # Prerequisites
 *.d

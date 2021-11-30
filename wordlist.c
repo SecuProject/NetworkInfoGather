@@ -10,6 +10,7 @@ const char* usernameList[] = {
     "Admin",
     "guest",
     "manager",
+    // ftpuser
 };
 const char* passwordList[] = {
     "root",
@@ -25,4 +26,5 @@ const char* passwordList[] = {
     "linux",
     "1111111",
     "manager",
+    // ftpuser
 };

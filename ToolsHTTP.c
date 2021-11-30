@@ -238,13 +238,13 @@ PHTTP_STRUC GetHttpRequest(char* ipAddress, int port, char* path, char* requestT
     else
         httpStruct->responseLen = GetHttpServer(ipAddress, port, requestType, path, NULL, &(httpStruct->rawData), pFile); // GET
     if (httpStruct->responseLen == 0) {
-        printOut(pFile, "\t[-] Page not available !\n");
+        printOut(pFile, "\t\t[-] Page not available !\n");
         free(httpStruct->rawData);
         free(httpStruct);
         return NULL;
     }
     if (httpStruct->rawData == NULL) {
-        printOut(pFile, "\t[-] Response data error !\n");
+        printOut(pFile, "\t\t[-] Response data error !\n");
         free(httpStruct);
         return NULL;
     }
@@ -252,7 +252,7 @@ PHTTP_STRUC GetHttpRequest(char* ipAddress, int port, char* path, char* requestT
 
 
     if (!GetHttpRequestInfo(httpStruct)) {
-        printOut(pFile, "\t[-] Fail to retrieve information form the request !\n");
+        printOut(pFile, "\t\t[-] Fail to retrieve information form the request !\n");
         free(httpStruct->rawData);
         free(httpStruct);
         return NULL;
@@ -428,10 +428,10 @@ BOOL HttpDirEnum(char* ipAddress, int port, FILE* pFile, BOOL isSSL) {
         return FALSE;
     }
     printf("\t\tURL\t\t\t\t       Code - Length\tRedirection\n");
-    for (int i = 0; i < ARRAY_SIZE_CHAR(wordListCommon); i++) {
+    for (UINT i = 0; i < ARRAY_SIZE_CHAR(wordListCommon); i++) {
         PHTTP_STRUC pHttpStructPage = GetHttpRequest(ipAddress, port, (char*)wordListCommon[i], "HEAD", isSSL, pFile);
         if (pHttpStructPage != NULL) {
-            printf("\t\t[i] %i/%u\r", i, (unsigned int)ARRAY_SIZE_CHAR(wordListCommon));
+            printf("\t\t[i] %i/%u\r", i+1, (UINT)ARRAY_SIZE_CHAR(wordListCommon));
             switch (enulPageNotFound) {
             case BASE_CODE_ERROR_CODE:
                 if (!IS_HTTP_ERROR(pHttpStructPage->returnCode)) {

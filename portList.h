@@ -30,9 +30,9 @@
 #define PORT_UDP_DHCP		67
 #define PORT_UDP_DHCP2		68
 #define PORT_UDP_NTP		123
+#define PORT_UDP_NETBIOS	137			// netbios-ns
 #define PORT_UDP_SNMP		161
 #define PORT_UDP_SNMP2		162
-#define PORT_UDP_NETBIOS	137			// netbios-ns
 //
 ////////////////// UDP //////////////////
 

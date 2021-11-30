@@ -141,7 +141,6 @@ DWORD WINAPI ThreadDnsQueryHost(LPVOID lpParam) {
 BOOL DNSdiscoveryMultiThread(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo, INT32 ipAddressBc, int* nbDetected, FILE* pFile) {
 	NetworkPcInfo* networkPcInfo = (NetworkPcInfo*)calloc(maskSizeInt, sizeof(NetworkPcInfo));
 
-	printf("[i] ARP Table discovery:\n");
 	if (networkPcInfo == NULL) {
 		printOut(pFile, "\t[x] Unable to allocate memory\n");
 		return FALSE;
