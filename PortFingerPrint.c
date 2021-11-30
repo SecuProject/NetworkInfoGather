@@ -8,8 +8,6 @@
 #include "EnumHTTP.h"
 #include "EnumSMB.h"
 #include "EnumNetBios.h"
-#include "ToolsHTTP.h"
-#include "DetectWAF.h"
 #include "EnumSMTP.h"
 
 #pragma warning(disable:4996)
@@ -88,18 +86,10 @@ BOOL PortFingerPrint(NetworkPcInfo* networkPcInfo, int nbDetected, BOOL isBrutef
 				case PORT_HTTP_TOMCAT:
 				case PORT_HTTP_PROXY:
 				case PORT_HTTP_OTHER:
-					if (GetHttpServerInfo(ipAddress, portNb, pFile, FALSE)) {
-						if (isWAfDetection)
-							IsHttpWaf(ipAddress, portNb, pFile, FALSE);
-					}
-					HttpDirEnum(ipAddress, portNb, pFile, FALSE);
+					EnumHTTP(ipAddress, portNb, isWAfDetection, pFile, FALSE);
 					break;
 				case PORT_HTTPS:
-					if (GetHttpServerInfo(ipAddress, portNb, pFile, TRUE)) {
-						if (isWAfDetection)
-							IsHttpWaf(ipAddress, portNb, pFile, TRUE);
-					}
-					HttpDirEnum(ipAddress, portNb, pFile, TRUE);
+					EnumHTTP(ipAddress, portNb, isWAfDetection, pFile, TRUE);
 					break;
 				case PORT_NETBIOS_SSN:
 					EnumNetBios(&(networkPcInfo[i]));

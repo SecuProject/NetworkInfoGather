@@ -79,6 +79,15 @@
     <Filter Include="Source Files\2. NetDiscovery\DNSscan">
       <UniqueIdentifier>{42ae1d73-9297-4ae0-b836-96bf0f999f6d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\4. FingerPrintInfo\EnumHTTP\FaviconDetection">
+      <UniqueIdentifier>{34850fa1-d6fd-443d-a5b5-edb74e0b82e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\4. FingerPrintInfo\EnumHTTP\FaviconDetection\MD5">
+      <UniqueIdentifier>{dc280b89-ad85-43c0-a1ce-4e8fc32a930c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\4. FingerPrintInfo\EnumHTTP\ToolsHTTP">
+      <UniqueIdentifier>{667100e0-55ba-4d33-ac45-159c92fef4ca}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -129,9 +138,6 @@
     <ClCompile Include="EnumNetBios.c">
       <Filter>Source Files\4. FingerPrintInfo\EnumNetBios</Filter>
     </ClCompile>
-    <ClCompile Include="ToolsHTTP.c">
-      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP</Filter>
-    </ClCompile>
     <ClCompile Include="DetectWAF.c">
       <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\DetectWAF</Filter>
     </ClCompile>
@@ -149,6 +155,18 @@
     </ClCompile>
     <ClCompile Include="DNSscan.c">
       <Filter>Source Files\2. NetDiscovery\DNSscan</Filter>
+    </ClCompile>
+    <ClCompile Include="FaviconDetection.c">
+      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\FaviconDetection</Filter>
+    </ClCompile>
+    <ClCompile Include="md5.c">
+      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\FaviconDetection\MD5</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolsHTTP.c">
+      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\ToolsHTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="EnumHTTP.c">
+      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -203,9 +221,6 @@
     <ClInclude Include="EnumNetBios.h">
       <Filter>Source Files\4. FingerPrintInfo\EnumNetBios</Filter>
     </ClInclude>
-    <ClInclude Include="ToolsHTTP.h">
-      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP</Filter>
-    </ClInclude>
     <ClInclude Include="HttpWordlist.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
@@ -229,6 +244,21 @@
     </ClInclude>
     <ClInclude Include="DNSscan.h">
       <Filter>Source Files\2. NetDiscovery\DNSscan</Filter>
+    </ClInclude>
+    <ClInclude Include="FaviconDetection.h">
+      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\FaviconDetection</Filter>
+    </ClInclude>
+    <ClInclude Include="md5.h">
+      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\FaviconDetection\MD5</Filter>
+    </ClInclude>
+    <ClInclude Include="FaviconDatabase.h">
+      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\FaviconDetection</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolsHTTP.h">
+      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\ToolsHTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="EnumHTTP.h">
+      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -11,7 +11,7 @@
 #define IS_HTTP_ERROR_CLIENT(StatusCode)           (StatusCode >= 400 && StatusCode < 500)
 #define IS_HTTP_ERROR_SERVER(StatusCode)           (StatusCode >= 500 && StatusCode < 600)
 
-#define GET_REQUEST_SIZE    10000
+#define GET_REQUEST_SIZE    100000
 #define SERVER_VERSION_SIZE 100
 
 extern const char* userAgentList[];
