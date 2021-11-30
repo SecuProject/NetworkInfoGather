@@ -10,8 +10,9 @@ BOOL EnumHTTP(char* ipAddress, int portNb,BOOL isWAfDetection, FILE* pFile, BOOL
 	if (GetHttpServerInfo(ipAddress, portNb, pFile, FALSE)) {
 		if (isWAfDetection)
 			IsHttpWaf(ipAddress, portNb, pFile, FALSE);
+		FaviconIdentification(ipAddress, portNb, pFile, FALSE);
+		HttpDirEnum(ipAddress, portNb, pFile, FALSE);
+		return TRUE;
 	}
-	FaviconIdentification(ipAddress, portNb, pFile, FALSE);
-	HttpDirEnum(ipAddress, portNb, pFile, FALSE);
-	return TRUE;
+	return FALSE;
 }
