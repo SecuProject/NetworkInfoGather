@@ -216,6 +216,9 @@ UINT GetHttpsServer(char* ipAddress, int port, char* requestType, char* resource
                         if (WinHttpReceiveResponse(hRequest, NULL)) {
 
                             DWORD srvResponseSize = RequestHeader(hRequest, serverResponce, pFile);
+
+
+                            // OK FOR DIR ENUM ??? 
                             if (srvResponseSize > 0 && strcmp(requestType, "HEAD") != 0) {
                                 GetServerCertInfo(hRequest, pFile);
                                 srvResponseSize = RequestBody(hRequest, serverResponce, pFile);

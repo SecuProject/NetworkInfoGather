@@ -83,12 +83,17 @@ BOOL PortFingerPrint(NetworkPcInfo* networkPcInfo, int nbDetected, BOOL isBrutef
 					// TODO
 					break;
 				case PORT_HTTP:
+				case PORT_HTTP_GRAFANA:
 				case PORT_HTTP_TOMCAT:
 				case PORT_HTTP_PROXY:
 				case PORT_HTTP_OTHER:
+				case PORT_HTTP_DELUGE:
+				case PORT_HTTP_PORTAINER:
+				case PORT_HTTP_PROMETHEUS:
 					EnumHTTP(ipAddress, portNb, isWAfDetection, pFile, FALSE);
 					break;
 				case PORT_HTTPS:
+				case PORT_HTTPS_PORTAINER:
 					EnumHTTP(ipAddress, portNb, isWAfDetection, pFile, TRUE);
 					break;
 				case PORT_NETBIOS_SSN:

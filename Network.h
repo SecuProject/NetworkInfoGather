@@ -32,8 +32,10 @@
 										||strncmp(IP_ADDRESS, "172.16.", 7) == 0 \
 										|| strncmp(IP_ADDRESS, "10.", 3) == 0)
 
-const int portTcp[NB_TAB_PORT_TCP];
-const int portUdp[NB_TAB_PORT_UDP];
+
+
+extern const int portTcp[NB_TAB_PORT_TCP];
+extern const int portUdp[NB_TAB_PORT_UDP];
 
 
 typedef struct {

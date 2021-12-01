@@ -1,11 +1,10 @@
 # NetDiscovery
 
-
-
 ## BUG
 
-Release mode -> crash after NetDiscovery !!!!
-	-> ThreadPcPortScan ???
+- [ ] GetHttpsServer -> GetServerCertInfo 
+  - [ ] OK for dirEnum ???
+  - [ ] Show 2 times !! 
 
 ## To Add
 

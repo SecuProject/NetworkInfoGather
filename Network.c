@@ -51,10 +51,19 @@ DWORD SyncWaitForMultipleObjs(HANDLE* handles, DWORD count) {
 }
 
 /*
-135/tcp  open  msrpc
-139/tcp  open  netbios-ssn
-445/tcp  open  microsoft-ds
-5357/tcp open  wsdapi
+# HTTP
+https://192.168.59.89:9090/             prometheus
+https://192.168.59.76/                  freenas
+https://192.168.59.89:9443/#!/home      portainer
+https://192.168.59.89:8112/             deluge
+https://192.168.59.89:3000/             Grafana
+
+
+#define PORT_HTTP_GRAFANA	3000
+#define PORT_HTTP_DELUGE		8112
+#define PORT_HTTPS_PORTAINER	9443
+#define PORT_HTTP_PROMETHEUS	9090
+
 */
 
 const int portTcp[] = {
@@ -71,13 +80,18 @@ const int portTcp[] = {
 	PORT_SMB,
 	PORT_MSSQL,
 	PORT_ORACLEDB,
+	PORT_HTTP_GRAFANA,
 	PORT_MYSQL,
 	PORT_RDP,
 	PORT_POSTGRESQL,
 	PORT_WINRM,
+	PORT_HTTP_PORTAINER,
 	PORT_HTTP_TOMCAT,
 	PORT_HTTP_PROXY,
-	PORT_HTTP_OTHER
+	PORT_HTTP_OTHER,
+	PORT_HTTP_DELUGE,
+	PORT_HTTPS_PORTAINER,
+	PORT_HTTP_PROMETHEUS,
 };
 /*
 

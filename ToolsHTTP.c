@@ -32,7 +32,7 @@ const StrucStrDev structStrDev[] = {
     {"test","Cable",UnknownType} ,
 };
 
-UINT GetHttpReturnCode(char* serverResponce) {
+UINT GetHttpReturnCode(char* serverResponce, UINT responceSize) {
     const char delim1[] = "HTTP/1.1 ";
     const char delim2[] = " ";
 
@@ -42,13 +42,13 @@ UINT GetHttpReturnCode(char* serverResponce) {
 
         ptr1 = ptr1 + sizeof(delim1) - 1;
         ptr2 = strstr(ptr1, delim2);
-        if (ptr2 != NULL && ptr2 - ptr1 < SERVER_VERSION_SIZE) {
-            char* buffer = (char*)malloc(SERVER_VERSION_SIZE);
+        if (ptr2 != NULL && ptr2 - ptr1 < responceSize) {
+            char* buffer = (char*)malloc(responceSize);
             if (buffer == NULL)
                 return FALSE;
 
             UINT responceCode;
-            strncpy_s(buffer, SERVER_VERSION_SIZE, ptr1, ptr2 - ptr1);
+            strncpy_s(buffer, responceSize, ptr1, ptr2 - ptr1);
             responceCode = atoi(buffer);
             free(buffer);
             return responceCode;
@@ -57,7 +57,7 @@ UINT GetHttpReturnCode(char* serverResponce) {
     return FALSE;
 }
 
-UINT GetHttpContentLen(char* serverResponce) {
+UINT GetHttpContentLen(char* serverResponce, UINT responceSize) {
     const char delim1[] = "Content-Length: ";
     const char delim2[] = "\r\n";
 
@@ -67,13 +67,13 @@ UINT GetHttpContentLen(char* serverResponce) {
 
         ptr1 = ptr1 + sizeof(delim1) - 1;
         ptr2 = strstr(ptr1, delim2);
-        if (ptr2 != NULL && ptr2 - ptr1 < SERVER_VERSION_SIZE && ptr2 - ptr1 > 0) {
-            char* buffer = (char*)malloc(SERVER_VERSION_SIZE);
+        if (ptr2 != NULL && ptr2 - ptr1 < responceSize && ptr2 - ptr1 > 0) {
+            char* buffer = (char*)malloc(responceSize);
             if (buffer == NULL)
                 return FALSE;
 
             UINT contentLen;
-            strncpy_s(buffer, SERVER_VERSION_SIZE, ptr1, ptr2 - ptr1);
+            strncpy_s(buffer, responceSize, ptr1, ptr2 - ptr1);
             contentLen = atoi(buffer);
             free(buffer);
             return contentLen;
@@ -99,9 +99,9 @@ BOOL GetHttpHeaderStr(const char* delim1, int sizeDelim1, char* serverResponce, 
     return FALSE;
 }
 
-BOOL GetHttpHeaderServerVersion(PHTTP_STRUC httpStruct) {
-    UINT serverVersionSize = SERVER_VERSION_SIZE;
-    httpStruct->ServerName = (char*)malloc(SERVER_VERSION_SIZE);
+BOOL GetHttpHeaderServerVersion(PHTTP_STRUC httpStruct, UINT responceSize) {
+    UINT serverVersionSize = responceSize;
+    httpStruct->ServerName = (char*)malloc(responceSize);
     if (httpStruct->ServerName != NULL) {
         const char delim1[] = "Server:";
         if (GetHttpHeaderStr(delim1, sizeof(delim1), httpStruct->rawData, httpStruct->ServerName, &serverVersionSize)) {
@@ -115,9 +115,9 @@ BOOL GetHttpHeaderServerVersion(PHTTP_STRUC httpStruct) {
     httpStruct->ServerName = NULL;
     return FALSE;
 }
-BOOL GetHttpHeaderPowerby(PHTTP_STRUC httpStruct) {
-    UINT serverVersionSize = SERVER_VERSION_SIZE;
-    httpStruct->poweredBy = (char*)malloc(SERVER_VERSION_SIZE);
+BOOL GetHttpHeaderPowerby(PHTTP_STRUC httpStruct, UINT responceSize) {
+    UINT serverVersionSize = responceSize;
+    httpStruct->poweredBy = (char*)malloc(responceSize);
     if (httpStruct->poweredBy != NULL) {
         const char delim1[] = "X-Powered-By:";
         if (GetHttpHeaderStr(delim1, sizeof(delim1), httpStruct->rawData, httpStruct->poweredBy, &serverVersionSize)) {
@@ -131,9 +131,9 @@ BOOL GetHttpHeaderPowerby(PHTTP_STRUC httpStruct) {
     httpStruct->poweredBy = NULL;
     return FALSE;
 }
-BOOL GetHttpHeaderContentType(PHTTP_STRUC httpStruct) {
-    UINT serverVersionSize = SERVER_VERSION_SIZE;
-    httpStruct->contentType = (char*)malloc(SERVER_VERSION_SIZE);
+BOOL GetHttpHeaderContentType(PHTTP_STRUC httpStruct, UINT responceSize) {
+    UINT serverVersionSize = responceSize;
+    httpStruct->contentType = (char*)malloc(responceSize);
     if (httpStruct->contentType != NULL) {
         const char delim1[] = "Content-Type:";
         if (GetHttpHeaderStr(delim1, sizeof(delim1), httpStruct->rawData, httpStruct->contentType, &serverVersionSize)) {
@@ -147,9 +147,9 @@ BOOL GetHttpHeaderContentType(PHTTP_STRUC httpStruct) {
     httpStruct->contentType = NULL;
     return FALSE;
 }
-BOOL GetHttpHeaderRedirection(PHTTP_STRUC httpStruct) {
-    UINT serverVersionSize = SERVER_VERSION_SIZE;
-    httpStruct->redirectionPath = (char*)malloc(SERVER_VERSION_SIZE);
+BOOL GetHttpHeaderRedirection(PHTTP_STRUC httpStruct, UINT responceSize) {
+    UINT serverVersionSize = responceSize;
+    httpStruct->redirectionPath = (char*)malloc(responceSize);
     if (httpStruct->redirectionPath != NULL) {
         const char delim1[] = "Location:";
         if (GetHttpHeaderStr(delim1, sizeof(delim1), httpStruct->rawData, httpStruct->redirectionPath, &serverVersionSize)) {
@@ -175,20 +175,34 @@ BOOL GetHttpBody(PHTTP_STRUC httpStruct) {
 }
 
 BOOL GetHttpRequestInfo(PHTTP_STRUC httpStruct) {
+    // httpStruct->responseLen -> OK ??? 
 
-    httpStruct->returnCode = GetHttpReturnCode(httpStruct->rawData);
-    httpStruct->contentLen = GetHttpContentLen(httpStruct->rawData);
+    if (httpStruct->responseLen == 0) {
+        printf("[d] Test respone size: %i !!!\n", httpStruct->contentLen);
+        system("pause");
+        return FALSE;
+    }
+        
 
-    GetHttpHeaderServerVersion(httpStruct);
-    GetHttpHeaderPowerby(httpStruct);
-    GetHttpHeaderContentType(httpStruct);
+    httpStruct->returnCode = GetHttpReturnCode(httpStruct->rawData, httpStruct->responseLen);
+    httpStruct->contentLen = GetHttpContentLen(httpStruct->rawData, httpStruct->responseLen);
 
+    GetHttpHeaderServerVersion(httpStruct, httpStruct->responseLen);
+    GetHttpHeaderPowerby(httpStruct, httpStruct->responseLen);
+    GetHttpHeaderContentType(httpStruct, httpStruct->responseLen);
+
+
+    if (httpStruct->contentLen > 0) {
+        printf("[d] Test body size: %i !\n", httpStruct->contentLen);
+        system("pause");
+    }
+        
     /*if(httpStruct->contentLen > 0)
         GetHttpBody(httpStruct);*/
     GetHttpBody(httpStruct);
 
     if (IS_HTTP_REDIRECTS(httpStruct->returnCode))
-        GetHttpHeaderRedirection(httpStruct);
+        GetHttpHeaderRedirection(httpStruct, httpStruct->responseLen);
     else
         httpStruct->redirectionPath = NULL;
 
@@ -334,6 +348,7 @@ typedef enum {
     BASE_CODE_ERROR_CODE,
     BASE_REDIRECT_CODE,
     BASE_DATA_SIZE_CODE,
+    BASE_CODE_AUTH,
     BASE_NOT_FOUND
 }ENUM_PAGE_NOT_FOUND;
 
@@ -360,8 +375,22 @@ ENUM_PAGE_NOT_FOUND SetPageNotFound(PHTTP_STRUC pHttpStruct, char* ipAddress, in
 
 
 
-    if (!IS_HTTP_ERROR(pHttpStruct->returnCode))
+    if (!IS_HTTP_ERROR(pHttpStruct->returnCode)) {
+        if (IS_HTTP_AUTH(pHttpStruct->returnCode)) {
+            UINT countCodeAuth = 1;
+            for (int i = 1; i < ARRAY_SIZE_CHAR(invalideUrlPath); i++) {
+                if(IS_HTTP_AUTH(pHttpStructInvalide[i]->returnCode))
+                    countCodeAuth++;
+            }
+            if (countCodeAuth == 3) {
+                for (int i = ARRAY_SIZE_CHAR(invalideUrlPath) - 1; i > 0; i--)
+                    free(pHttpStructInvalide[i]);
+                return BASE_CODE_AUTH;
+            }
+        }
         isReturnCodeSame = FALSE;
+    }
+        
 
     if (IS_HTTP_REDIRECTS(pHttpStructInvalide[0]->returnCode)) {
         if (TestAllHttpsRedirect(pHttpStructInvalide, ipAddress, port, pFile))
