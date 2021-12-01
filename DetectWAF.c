@@ -29,13 +29,13 @@ BOOL TestUserAgent(char* ipAddress, int port, FILE* pFile, BOOL isSSL) {
 
 	// Default test
 	if (isSSL) {
-		if (!GetHttpsServer(ipAddress, port, "HEAD", path, (char*)userAgentList[rand() % 5], &serverResponce, pFile)) {
+		if (!GetHttpsServer(ipAddress, port, "HEAD", path, (char*)userAgentList[rand() % 5], &serverResponce,NULL,FALSE, pFile)) {
 			printOut(pFile, "\t\t[-] Page not available !\n");
 			free(serverResponce);
 			return FALSE;
 		}
 	} else {
-		if (!GetHttpServer(ipAddress, port, "HEAD", path, NULL, &serverResponce, pFile)) {
+		if (!GetHttpServer(ipAddress, port, "HEAD", path, NULL, &serverResponce, NULL, pFile)) {
 			printOut(pFile, "\t\t[-] Page not available !\n");
 			free(serverResponce);
 			return FALSE;
@@ -44,13 +44,13 @@ BOOL TestUserAgent(char* ipAddress, int port, FILE* pFile, BOOL isSSL) {
 
 	for (int i = 0; i < ARRAY_SIZE_CHAR(userAgentWaf); i++) {
 		if (isSSL) {
-			if (!GetHttpsServer(ipAddress, port, "HEAD", path, userAgentWaf[i], &serverResponce, pFile)) {
+			if (!GetHttpsServer(ipAddress, port, "HEAD", path, userAgentWaf[i], &serverResponce, NULL, FALSE, pFile)) {
 				printOut(pFile, "\t\t[-] WAF Detected (Blocked user agent: %s) !\n", userAgentWaf[i]);
 				free(serverResponce);
 				return FALSE;
 			}
 		} else {
-			if (!GetHttpServer(ipAddress, port, "HEAD", path, userAgentWaf[i], &serverResponce, pFile)) {
+			if (!GetHttpServer(ipAddress, port, "HEAD", path, userAgentWaf[i], &serverResponce, NULL, pFile)) {
 				printOut(pFile, "\t\t[-] WAF Detected (Blocked user agent: %s) !\n", userAgentWaf[i]);
 				free(serverResponce);
 				return FALSE;

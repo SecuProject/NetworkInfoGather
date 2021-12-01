@@ -276,8 +276,11 @@ BOOL MultiScanPort(NetworkPcInfo* networkPcInfo, int nbDetected, ScanStruct scan
 		return FALSE;
 	}
 
-	if (!InitializeCriticalSectionAndSpinCount(&CriticalSection, 0x00000400))
+	if (!InitializeCriticalSectionAndSpinCount(&CriticalSection, 0x00000400)) {
+		free(hThreadArray);
+		free(dwThreadIdArray);
 		return FALSE;
+	}
 
 	for (int iPC = 0; iPC < nbDetected; iPC++) {
 		pThreadData[iPC].scanStruct = &(scanStruct);

@@ -25,9 +25,9 @@ UINT GetFavicon(char* ipAddress, int port, char* requestPath, char** ppDataFavio
 	UINT faviconSize = 0;
 
 	if (isSSL)
-		faviconSize = GetHttpsServer(ipAddress, port, "GET", requestPath, NULL, &dataFavion, NULL);
+		faviconSize = GetHttpsServer(ipAddress, port, "GET", requestPath, NULL, &dataFavion, NULL,TRUE, NULL);
 	else
-		faviconSize = GetHttpServer(ipAddress, port, "GET", requestPath, NULL, &dataFavion, NULL);
+		faviconSize = GetHttpServer(ipAddress, port, "GET", requestPath, NULL, &dataFavion, NULL,NULL);
 	if (faviconSize == 0)
 		return FALSE;
 
@@ -53,7 +53,7 @@ int DatabaseSearch(char* md5Hash) {
 	return -1;
 }
 
-
+// Call show SSL config ??
 BOOL FaviconIdentification(char* ipAddress, int port, FILE* pFile, BOOL isSSL) {
 	char* dataFavion = NULL;
 	char* dataFavionBody = NULL;

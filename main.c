@@ -46,7 +46,7 @@ BOOL Scan(ScanStruct scanStruct) {
 	UINT nbAdapter;
 
 	// Disable SMB brute-force for the test !!! 
-	scanStruct.bruteforce = FALSE;
+	//scanStruct.bruteforce = FALSE;
 
 	adapterInfo = (ADAPTER_INFO*)calloc(sizeof(ADAPTER_INFO), MAX_NB_ADAPTER);
 	if (adapterInfo == NULL)

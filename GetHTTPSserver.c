@@ -202,7 +202,26 @@ BOOL GetServerCertInfo(HINTERNET hSession, FILE* pFile) {
     return bResult;
 }
 
-UINT GetHttpsServer(char* ipAddress, int port, char* requestType, char* resourcePath, char* userAgent, char** serverResponce, FILE* pFile) {
+
+BOOL WinHttpSetCustomHeader(HINTERNET hRequest, char* customHeader, FILE* pFile) {
+    if (customHeader != NULL && customHeader[0] != 0x00) {
+        WCHAR* wCustomHeader = (WCHAR*)calloc(1042, sizeof(WCHAR));
+        if (wCustomHeader == NULL)
+            return FALSE;
+        int CustHeadSize = swprintf(wCustomHeader, 1042, L"%hs", customHeader);
+
+        if (!WinHttpAddRequestHeaders(hRequest, wCustomHeader, CustHeadSize, WINHTTP_ADDREQ_FLAG_ADD)) {
+            printf("\t[-] Fail to set custom header (%ld)!\n", GetLastError());
+            free(wCustomHeader);
+            return FALSE;
+        }
+        free(wCustomHeader);
+    }
+    return TRUE;
+}
+
+
+UINT GetHttpsServer(char* ipAddress, int port, char* requestType, char* resourcePath, char* userAgent, char** serverResponce, char* customHeader, BOOL showInfoCert, FILE* pFile) {
     HINTERNET hSession = WinHttpOpenF(userAgent);
     if (hSession) {
         HINTERNET hConnect = WinHttpConnectF(hSession, ipAddress, port);
@@ -210,7 +229,7 @@ UINT GetHttpsServer(char* ipAddress, int port, char* requestType, char* resource
             HINTERNET hRequest = WinHttpOpenRequestF(hConnect, requestType, resourcePath);
             if (hRequest) {
                 if (WinHttpSetOptionF(hRequest)) {
-
+                    WinHttpSetCustomHeader(hRequest, customHeader, pFile);
                     
                     if (WinHttpSendRequest(hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
                         if (WinHttpReceiveResponse(hRequest, NULL)) {
@@ -220,7 +239,8 @@ UINT GetHttpsServer(char* ipAddress, int port, char* requestType, char* resource
 
                             // OK FOR DIR ENUM ??? 
                             if (srvResponseSize > 0 && strcmp(requestType, "HEAD") != 0) {
-                                GetServerCertInfo(hRequest, pFile);
+                                if(showInfoCert)
+                                    GetServerCertInfo(hRequest, pFile);
                                 srvResponseSize = RequestBody(hRequest, serverResponce, pFile);
                             }
                                 

@@ -90,11 +90,11 @@ BOOL PortFingerPrint(NetworkPcInfo* networkPcInfo, int nbDetected, BOOL isBrutef
 				case PORT_HTTP_DELUGE:
 				case PORT_HTTP_PORTAINER:
 				case PORT_HTTP_PROMETHEUS:
-					EnumHTTP(ipAddress, portNb, isWAfDetection, pFile, FALSE);
+					EnumHTTP(ipAddress, portNb, isWAfDetection, pFile, FALSE, isBruteforce);
 					break;
 				case PORT_HTTPS:
 				case PORT_HTTPS_PORTAINER:
-					EnumHTTP(ipAddress, portNb, isWAfDetection, pFile, TRUE);
+					EnumHTTP(ipAddress, portNb, isWAfDetection, pFile, TRUE, isBruteforce);
 					break;
 				case PORT_NETBIOS_SSN:
 					EnumNetBios(&(networkPcInfo[i]));

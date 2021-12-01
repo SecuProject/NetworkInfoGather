@@ -6,13 +6,22 @@
 #include "FaviconDetection.h"
 
 
-BOOL EnumHTTP(char* ipAddress, int portNb,BOOL isWAfDetection, FILE* pFile, BOOL isSSL) {
-	if (GetHttpServerInfo(ipAddress, portNb, pFile, isSSL)) {
+BOOL EnumHTTP(char* ipAddress, int portNb,BOOL isWAfDetection, FILE* pFile, BOOL isSSL, BOOL isBruteForce) {
+	char* httpAuthHeader = (char*)malloc(1024);
+	if (httpAuthHeader == NULL)
+		return FALSE;
+	httpAuthHeader[0] = 0x00;
+
+	if (GetHttpServerInfo(ipAddress, portNb, httpAuthHeader, pFile, isSSL, isBruteForce)) {
 		if (isWAfDetection)
 			IsHttpWaf(ipAddress, portNb, pFile, isSSL);
 		FaviconIdentification(ipAddress, portNb, pFile, isSSL);
-		HttpDirEnum(ipAddress, portNb, pFile, isSSL);
+		HttpDirEnum(ipAddress, portNb, httpAuthHeader, pFile, isSSL);
+
+		free(httpAuthHeader);
 		return TRUE;
 	}
+
+	free(httpAuthHeader);
 	return FALSE;
 }

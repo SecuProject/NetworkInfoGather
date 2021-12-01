@@ -150,6 +150,8 @@
     <ClCompile Include="AdapterInformation.c" />
     <ClCompile Include="ARPQuery.c" />
     <ClCompile Include="ARPTable.c" />
+    <ClCompile Include="Base64.c" />
+    <ClCompile Include="DetectHttpBasicAuth.c" />
     <ClCompile Include="DetectWAF.c" />
     <ClCompile Include="DNSscan.c" />
     <ClCompile Include="EnumFRITZBox.c" />
@@ -178,6 +180,8 @@
     <ClInclude Include="AdapterInformation.h" />
     <ClInclude Include="ARPQuery.h" />
     <ClInclude Include="ARPTable.h" />
+    <ClInclude Include="Base64.h" />
+    <ClInclude Include="DetectHttpBasicAuth.h" />
     <ClInclude Include="DetectWAF.h" />
     <ClInclude Include="DNSscan.h" />
     <ClInclude Include="EnumFRITZBox.h" />
