@@ -21,7 +21,7 @@ int set_options(SOCKET fd) {
 BOOL scanPortOpenUDP(char* dest_ip, int port, FILE* pFile) {
 	SOCKET udp_sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if (udp_sock == INVALID_SOCKET) {
-		printOut(pFile, "\t[X] socket open failed %ld\n", GetLastError());
+		printOut(pFile, "\t[X] socket open failed %lu\n", GetLastError());
 		closesocket(udp_sock);
 		return FALSE;
 	} else {
@@ -61,7 +61,7 @@ BOOL scanPortOpenTCP(char* dest_ip, int port,FILE* pFile) {
 	SOCKET tcp_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
 	if (tcp_sock == INVALID_SOCKET) {
-		printOut(pFile,"\t[X] socket open failed %ld\n", GetLastError());
+		printOut(pFile,"\t[X] socket open failed %lu\n", GetLastError());
 		closesocket(tcp_sock);
 		return FALSE;
 	} else {
@@ -96,7 +96,8 @@ void scanPort(NetworkPcInfo* networkPcInfo, int nbDetected, ScanStruct scanStruc
 		if (scanStruct.nbPort > 0) {
 			for (UINT iPort = 0; iPort < scanStruct.nbPort; iPort++) {
 				if (scanPortOpenTCP(networkPcInfo[iPC].ipAddress, scanStruct.portList[iPort], scanStruct.ouputFile)) {
-					printOut(scanStruct.ouputFile, "\t[%s] OPEN PORT %i\n", networkPcInfo[iPC].ipAddress, scanStruct.portList[iPort]);
+					//printOut(scanStruct.ouputFile, "\t[%s] OPEN PORT %i\n", networkPcInfo[iPC].ipAddress, scanStruct.portList[iPort]);
+					printOut(scanStruct.ouputFile, "\tOPEN PORT %i\n", scanStruct.portList[iPort]);
 					networkPcInfo[iPC].port[networkPcInfo[iPC].nbOpenPort].portNumber = scanStruct.portList[iPort];
 					networkPcInfo[iPC].nbOpenPort++;
 				}/*else
@@ -106,7 +107,8 @@ void scanPort(NetworkPcInfo* networkPcInfo, int nbDetected, ScanStruct scanStruc
 			// Scan TCP
 			for (UINT iPort = 0; iPort < NB_TAB_PORT_TCP; iPort++) {
 				if (scanPortOpenTCP(networkPcInfo[iPC].ipAddress, portTcp[iPort], scanStruct.ouputFile)) {
-					printOut(scanStruct.ouputFile, "\t[%s] TCP - OPEN PORT %i\n", networkPcInfo[iPC].ipAddress, portTcp[iPort]);
+					//printOut(scanStruct.ouputFile, "\t[%s] TCP - OPEN PORT %i\n", networkPcInfo[iPC].ipAddress, portTcp[iPort]);
+					printOut(scanStruct.ouputFile, "\tOPEN PORT %i\n", portTcp[iPort]);
 					networkPcInfo[iPC].port[networkPcInfo[iPC].nbOpenPort].portNumber = portTcp[iPort];
 					networkPcInfo[iPC].nbOpenPort++;
 				}
@@ -114,7 +116,8 @@ void scanPort(NetworkPcInfo* networkPcInfo, int nbDetected, ScanStruct scanStruc
 			// Scan UDP
 			for (UINT iPort = 0; iPort < NB_TAB_PORT_UDP; iPort++) {
 				if (scanPortOpenUDP(networkPcInfo[iPC].ipAddress, portUdp[iPort], scanStruct.ouputFile)) {
-					printOut(scanStruct.ouputFile, "\t[%s] UDP - OPEN PORT %i\n", networkPcInfo[iPC].ipAddress, portUdp[iPort]);
+					//printOut(scanStruct.ouputFile, "\t[%s] UDP - OPEN PORT %i\n", networkPcInfo[iPC].ipAddress, portUdp[iPort]);
+					printOut(scanStruct.ouputFile, "\tOPEN PORT %i\n", portUdp[iPort]);
 					networkPcInfo[iPC].port[networkPcInfo[iPC].nbOpenPort].portNumber = portUdp[iPort];
 					networkPcInfo[iPC].nbOpenPort++;
 				}
@@ -313,7 +316,8 @@ BOOL MultiScanPort(NetworkPcInfo* networkPcInfo, int nbDetected, ScanStruct scan
 		printOut(scanStruct.ouputFile, "[%s] PORT SCAN - %s\n", networkPcInfo[iPC].ipAddress, isTcp ? "TCP" : "UDP");
 		for (int iPort = 0; iPort < networkPcInfo[iPC].nbOpenPort; iPort++) {
 			if(isTcp == networkPcInfo[iPC].port[iPort].isTcp)
-				printOut(scanStruct.ouputFile, "\t[%s] %s - OPEN PORT %i\n", networkPcInfo[iPC].ipAddress, isTcp ? "TCP" : "UDP", networkPcInfo[iPC].port[iPort].portNumber);
+				printOut(scanStruct.ouputFile, "\t%5i - PORT OPEN\n", networkPcInfo[iPC].port[iPort].portNumber);
+				//printOut(scanStruct.ouputFile, "\t[%s] %s - OPEN PORT %i\n", networkPcInfo[iPC].ipAddress, isTcp ? "TCP" : "UDP", networkPcInfo[iPC].port[iPort].portNumber);
 		}
 	}
 	free(hThreadArray);

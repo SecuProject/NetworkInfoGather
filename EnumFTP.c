@@ -19,7 +19,6 @@ BOOL TestPasswordFTP(char* IpAddress, const char* username, const char* password
         InternetCloseHandle(hInternet);
         return FALSE;
     }
-    printf("\t\t[FTP] VALID: '%s:%s'\n", username, password);
     InternetCloseHandle(hFtpSession);
     InternetCloseHandle(hInternet);
     return TRUE;
@@ -103,23 +102,25 @@ BOOL FtpEnum(char* serverIp, BOOL isBurtForce, FILE* pFile) {
     const char* usernameAnomym = "anonymous";
     const char* passwordAnomym = "anonymous";
     BOOL isFtpCreadValid = FALSE;
-    printf("\t[FTP] Test Password\n");
-
-    if (isBurtForce) {
+    
+    if (TestPasswordFTP(serverIp, usernameAnomym, passwordAnomym)) {
+        printf("\t[FTP] Test Password\n");
+        printf("\t\t[i] VALID: '%s:%s'\n", usernameAnomym, passwordAnomym);
+        ListCurrentDirectory(serverIp, (char*)usernameAnomym, (char*)passwordAnomym);
+        isFtpCreadValid = TRUE;
+    }else if (isBurtForce) {
         printOut(pFile, "\t[FTP] Brute Forcing FTP server:\n");
         for (int i = 0; i < ARRAY_SIZE_CHAR(usernameList) && !isFtpCreadValid; i++) {
             for (int j = 0; j < ARRAY_SIZE_CHAR(passwordList) && !isFtpCreadValid; j++) {
                 printOut(pFile, "\t%i/%i\r", i * ARRAY_SIZE_CHAR(usernameList) + j, ARRAY_SIZE_CHAR(passwordList) * ARRAY_SIZE_CHAR(usernameList));
                 isFtpCreadValid = TestPasswordFTP(serverIp, usernameList[i], passwordList[j]);
                 if (isFtpCreadValid) {
+                    printf("\t\t[i] VALID: '%s:%s'\n", usernameList[i], passwordList[j]);
                     ListCurrentDirectory(serverIp, (char*)usernameList[i], (char*)passwordList[j]);
                 }
             }
         }
-    }else if (TestPasswordFTP(serverIp, usernameAnomym, passwordAnomym)) {
-        ListCurrentDirectory(serverIp, (char*)usernameAnomym, (char*)passwordAnomym);
-        isFtpCreadValid = TRUE;
-    } 
+    }
     return isFtpCreadValid;
 }
 BOOL FtpBruteForce(char* serverIp,char** usernameList,UINT usernameListSize, char** passwordList, UINT passwordListSize, FILE* pFile) {

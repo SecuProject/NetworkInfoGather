@@ -26,11 +26,11 @@ BOOL SmbPublic(LPWSTR lpszServer, FILE* pFile) {
     DWORD er = 0, tr = 0, resume = 0;
 
     res = NetShareEnum(lpszServer, 502, (LPBYTE*)&BufPtr, MAX_PREFERRED_LENGTH, &er, &tr, &resume);
-    if (res != ACCESS_DENIED) {
+
+    //if (res != ACCESS_DENIED) {
+    if (res == NERR_Success) {
         printOut(pFile,"\t\tShare:           Local Path:                   Descriptor:\n");
         printOut(pFile,"\t\t----------------------------------------------------------\n");   
-        //printOut(pFile,"Share:           Local Path:                   Descriptor:\n");
-        //printOut(pFile,"----------------------------------------------------------\n");
 
         PrintfSmbShareInfo(lpszServer, BufPtr, er,pFile);
         NetApiBufferFree(BufPtr);
@@ -41,16 +41,19 @@ BOOL SmbPublic(LPWSTR lpszServer, FILE* pFile) {
                 PrintfSmbShareInfo(lpszServer, BufPtr, er,pFile);
                 NetApiBufferFree(BufPtr);
             } else {
-                printOut(pFile,"Error: %ld\n", res);
+                printOut(pFile,"\t[SMB] Error: %lu\n", res);
             }
         }
         return TRUE;
+    } else {
+        if(res != ERROR_BAD_NETPATH)
+            printOut(pFile, "\t[SMB] Error: %lu\n", res);
+        //53 -> ERROR_BAD_NETPATH
     }
     return FALSE;
 }
 
 BOOL LoginSMB(const char* username, const char* password, char* share) {
-    // brutforce
     NETRESOURCEA resource;
     resource.dwType = RESOURCETYPE_DISK;
     resource.lpLocalName = 0;
@@ -65,32 +68,34 @@ BOOL BrutForceSMB(char* sharePath, FILE* pFile) {
     BOOL isSmbCreadValid = FALSE;
 
     printOut(pFile,"\t[SMB] Brute Forcing SMB server:\n");
+
     for (int i = 0; i < ARRAY_SIZE_CHAR(usernameList) && !isSmbCreadValid; i++) {
         for (int j = 0; j < ARRAY_SIZE_CHAR(passwordList) && !isSmbCreadValid; j++) {
-            printOut(pFile,"%i/%i\r", i * ARRAY_SIZE_CHAR(usernameList) + j, ARRAY_SIZE_CHAR(passwordList) * ARRAY_SIZE_CHAR(usernameList));
+            printOut(pFile,"\t\t%i/%i\r", i * ARRAY_SIZE_CHAR(passwordList) + j +1,
+                ARRAY_SIZE_CHAR(passwordList) * ARRAY_SIZE_CHAR(usernameList));
             isSmbCreadValid = LoginSMB(usernameList[i], passwordList[j], sharePath);
             if (isSmbCreadValid)
-                printOut(pFile,"\t\t[SMB] VALID: %s:%s\n\n", usernameList[i], passwordList[j]);
+                printOut(pFile,"\t\t[i] VALID: %s:%s\n\n", usernameList[i], passwordList[j]);
             /*else
                 printOut(pFile,"[SMB] FAILED: %s:%s\n", usernameList[i], passwordList[j]);*/
         }
     }
+    if (isSmbCreadValid)
+        printf("\n");
     return isSmbCreadValid;
 }
 
 
 BOOL SmbEnum(char* serverIp, BOOL isBurtForce, FILE* pFile) {
-    int serverIpSize = (int)strlen(serverIp) + 1;
-
+    size_t serverIpSize = strlen(serverIp) + 1;
     LPWSTR lpszServer = (LPWSTR)calloc(serverIpSize, sizeof(LPWSTR));
+
     if (lpszServer == NULL)
         return FALSE;
 
     printOut(pFile, "\t[SMB] Try to enumerate file share\n");
 
     swprintf_s(lpszServer, serverIpSize, L"%hs", serverIp);
-
-    
 
     if (SmbPublic(lpszServer,pFile)) {
         free(lpszServer);
@@ -104,13 +109,14 @@ BOOL SmbEnum(char* serverIp, BOOL isBurtForce, FILE* pFile) {
 
         sprintf_s(sharePath, serverIpSize + 4 , "\\\\%s", serverIp);
 
-        if (LoginSMB("", "", sharePath) || LoginSMB("guest", "guest", sharePath) || (isBurtForce && BrutForceSMB(sharePath, pFile))) {
+        if (LoginSMB("", "", sharePath) || LoginSMB("guest", "guest", sharePath) || 
+            (isBurtForce && BrutForceSMB(sharePath, pFile))) {
             if (SmbPublic(lpszServer,pFile))
                 WNetCancelConnection2A(sharePath, 0, TRUE);
             else
-                printOut(pFile,"\t\t[SMB] Access denied !\n");
+                printOut(pFile,"\t\t[i] Access denied !\n");
         } else
-            printOut(pFile,"\t\t[SMB] Access denied !\n");
+            printOut(pFile,"\t\t[i] Access denied !\n"); //  remove \n
         free(sharePath);
     }
     free(lpszServer);

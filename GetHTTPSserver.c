@@ -107,11 +107,11 @@ DWORD RequestHeader(HINTERNET hRequest, char** pServerResponce, FILE* pFile) {
                 free(lpOutBuffer);
                 return dwSize;
             } else
-                printOut(pFile, "\t[X] WinHttpQueryHeaders: Error %d has occurred.\n", lastError);
+                printOut(pFile, "\t[X] WinHttpQueryHeaders: Error %lu has occurred.\n", lastError);
         } else
-            printOut(pFile, "\t[X] WinHttpOpen: Error %d has occurred.\n", lastError);
+            printOut(pFile, "\t[X] WinHttpOpen: Error %lu has occurred.\n", lastError);
     } else
-        printOut(pFile, "\t[X] WinHttpQueryHeaders: Error %u in WinHttpQueryDataAvailable.\n", GetLastError());
+        printOut(pFile, "\t[X] WinHttpQueryHeaders: Error %lu in WinHttpQueryDataAvailable.\n", GetLastError());
     return FALSE;
 }
 BOOL RequestBody(HINTERNET hRequest, char** serverResponce, FILE* pFile) {
@@ -131,12 +131,12 @@ BOOL RequestBody(HINTERNET hRequest, char** serverResponce, FILE* pFile) {
             if (*serverResponce == NULL)
                 return FALSE;
             if (!WinHttpReadData(hRequest, (LPVOID)((*serverResponce) + dwTmp), dwSize, &dwDownloaded)) {
-                printOut(pFile, "\t[X] Error %u in WinHttpReadData.\n", GetLastError());
+                printOut(pFile, "\t[X] Error %lu in WinHttpReadData.\n", GetLastError());
                 return FALSE;
             }
             dwTmp += dwSize;
             if (!WinHttpQueryDataAvailable(hRequest, &dwSize)) {
-                printOut(pFile, "\t[X] Error %u in WinHttpQueryDataAvailable.\n", GetLastError());
+                printOut(pFile, "\t[X] Error %lu in WinHttpQueryDataAvailable.\n", GetLastError());
                 return FALSE;
             }
         }
@@ -144,7 +144,7 @@ BOOL RequestBody(HINTERNET hRequest, char** serverResponce, FILE* pFile) {
         (*serverResponce)[srvResponseSize] = 0x00;
         return srvResponseSize;
     } else
-        printOut(pFile, "\t[X] Error %u in WinHttpQueryDataAvailable.\n", GetLastError());
+        printOut(pFile, "\t[X] Error %lu in WinHttpQueryDataAvailable.\n", GetLastError());
     return FALSE;
 }
 
@@ -249,22 +249,22 @@ UINT GetHttpsServer(char* ipAddress, int port, char* requestType, char* resource
                             WinHttpCloseHandle(hSession);
                             return srvResponseSize;
                         } else
-                            printOut(pFile, "\t[X] WinHttpReceiveResponse:Error %d has occurred.\n", GetLastError());
+                            printOut(pFile, "\t[X] WinHttpReceiveResponse:Error %lu has occurred.\n", GetLastError());
                     } else {
-                        printOut(pFile, "\t[X] WinHttpSendRequest:Error %d has occurred.\n", GetLastError());
+                        printOut(pFile, "\t[X] WinHttpSendRequest:Error %lu has occurred.\n", GetLastError());
                     }
                         
                 }else
-                    printOut(pFile, "\t[X] WinHttpSetOption:Error %d has occurred.\n", GetLastError());
+                    printOut(pFile, "\t[X] WinHttpSetOption:Error %lu has occurred.\n", GetLastError());
                 WinHttpCloseHandle(hRequest);
             } else
-                printOut(pFile, "\t[X] WinHttpOpenRequest:Error %d has occurred.\n", GetLastError());
+                printOut(pFile, "\t[X] WinHttpOpenRequest:Error %lu has occurred.\n", GetLastError());
             WinHttpCloseHandle(hConnect);
         } else
-            printOut(pFile, "\t[X] WinHttpConnect:Error %d has occurred.\n", GetLastError());
+            printOut(pFile, "\t[X] WinHttpConnect:Error %lu has occurred.\n", GetLastError());
         WinHttpCloseHandle(hSession);
     } else
-        printOut(pFile, "\t[X] WinHttpOpen:Error %d has occurred.\n", GetLastError());
+        printOut(pFile, "\t[X] WinHttpOpen:Error %lu has occurred.\n", GetLastError());
     return FALSE;
 }
 

@@ -38,18 +38,18 @@ BOOL SendRequest(SOCKET Socket, char* ipAddress, char* requestType, char* resour
         if (requestSize > 0) {
             int sendSize = send(Socket, getRequest, requestSize, 0);
             if (sendSize <= 0) {
-                printOut(pFile, "\t[X] Send request failed.\n");
+                printOut(pFile, "\t\t[X] Send request failed.\n");
                 free(getRequest);
                 return FALSE;
             }
             if (sendSize != requestSize)
-                printOut(pFile, "\t[!] Send request size not match !\n");
+                printOut(pFile, "\t\t[!] Send request size not match !\n");
 
             free(getRequest);
             return TRUE;
 
         } else
-            printOut(pFile, "\t[X] Generate Get request failed.\n");
+            printOut(pFile, "\t\t[X] Generate Get request failed.\n");
         free(getRequest);
         return TRUE;
     }
@@ -70,7 +70,7 @@ UINT RecvResponce(SOCKET Socket, char** pServerResponce, FILE* pFile) {
     for (UINT i = 2; nDataLengthTmp > 0; i++) {
         serverResponce = realloc(serverResponce, (GET_RESPONSE_SIZE * i) +1);
         if (serverResponce == NULL) {
-            printOut(pFile, "\t[X] Realloc failed.\n");
+            printOut(pFile, "\t\t[X] Realloc failed.\n");
             closesocket(Socket);
             return FALSE;
         }
@@ -78,13 +78,13 @@ UINT RecvResponce(SOCKET Socket, char** pServerResponce, FILE* pFile) {
         nDataLength += nDataLengthTmp;
     }
     if (nDataLengthTmp == SOCKET_ERROR) {
-        printOut(pFile, "\t[X] Error receiving data.\n");
+        printOut(pFile, "\t\t[X] Error receiving data.\n");
         closesocket(Socket);
         return FALSE;
     }
     serverResponce = (char*)realloc(serverResponce, nDataLength + 1);
     if (serverResponce == NULL) {
-        printOut(pFile, "\t[X] Realloc failed.\n");
+        printOut(pFile, "\t\t[X] Realloc failed.\n");
         closesocket(Socket);
         return FALSE;
     }
@@ -126,9 +126,9 @@ UINT GetHttpServer(char* ipAddress, int port, char* requestType, char* resourceP
                 return nDataLength;
             }
         } else 
-            printOut(pFile, "\t[X] Could not connect to the web server.\n");
+            printOut(pFile, "\t\t[X] Could not connect to the web server.\n");
         closesocket(Socket);
     }else
-        printOut(pFile, "\t[X] socket open failed %ld\n", GetLastError());
+        printOut(pFile, "\t\t[X] socket open failed %lu\n", GetLastError());
     return FALSE;
 }
