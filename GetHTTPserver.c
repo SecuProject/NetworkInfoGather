@@ -68,9 +68,8 @@ UINT RecvResponce(SOCKET Socket, char** pServerResponce, FILE* pFile) {
     nDataLengthTmp = nDataLength;
 
     for (UINT i = 2; nDataLengthTmp > 0; i++) {
-        serverResponce = realloc(serverResponce, (GET_RESPONSE_SIZE * i) +1);
+        serverResponce = xrealloc(serverResponce, (GET_RESPONSE_SIZE * i) +1);
         if (serverResponce == NULL) {
-            printOut(pFile, "\t\t[X] Realloc failed.\n");
             closesocket(Socket);
             return FALSE;
         }
@@ -82,9 +81,8 @@ UINT RecvResponce(SOCKET Socket, char** pServerResponce, FILE* pFile) {
         closesocket(Socket);
         return FALSE;
     }
-    serverResponce = (char*)realloc(serverResponce, nDataLength + 1);
+    serverResponce = (char*)xrealloc(serverResponce, nDataLength + 1);
     if (serverResponce == NULL) {
-        printOut(pFile, "\t\t[X] Realloc failed.\n");
         closesocket(Socket);
         return FALSE;
     }
@@ -94,13 +92,13 @@ UINT RecvResponce(SOCKET Socket, char** pServerResponce, FILE* pFile) {
     return nDataLength;
 }
 
-BOOL SetSocketTimout(SOCKET Socket) {
+/*BOOL SetSocketTimout(SOCKET Socket) {
     struct timeval timeout;
     timeout.tv_sec = 1000;
     timeout.tv_usec = 0;
 
     return (setsockopt(Socket, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(struct timeval)) < 0);
-}
+}*/
 
 
 UINT GetHttpServer(char* ipAddress, int port, char* requestType, char* resourcePath, char* userAgent, char** pServerResponce, char* customHeader, FILE* pFile) {

@@ -172,6 +172,7 @@
     <ClCompile Include="Network.c" />
     <ClCompile Include="PassifPacketSniffing.c" />
     <ClCompile Include="PortFingerPrint.c" />
+    <ClCompile Include="portList.c" />
     <ClCompile Include="PortScan.c" />
     <ClCompile Include="ToolsHTTP.c" />
     <ClCompile Include="wordlist.c" />

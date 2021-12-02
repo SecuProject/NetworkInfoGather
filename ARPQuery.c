@@ -40,8 +40,6 @@ DWORD WINAPI ThreadArpHost(LPVOID lpParam) {
 }
 
 BOOL ARPdiscoveryThread(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo, INT32 ipAddressBc, int* pNbDetected, FILE* pFile) {
-	int nbDetected = 0;
-
 	NetworkPcInfo* networkPcInfo = (NetworkPcInfo*)calloc(maskSizeInt, sizeof(NetworkPcInfo));
 	if (networkPcInfo != NULL) {
 		PTHREAD_STRUCT_DATA arpStructData = (PTHREAD_STRUCT_DATA)calloc(maskSizeInt, sizeof(THREAD_STRUCT_DATA));
@@ -50,6 +48,7 @@ BOOL ARPdiscoveryThread(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo, INT32
 			if (dwThreadIdArray != NULL) {
 				HANDLE* hThreadArray = (HANDLE*)calloc(maskSizeInt, sizeof(HANDLE));
 				if (hThreadArray != NULL) {
+					int nbDetected = 0;
 
 					for (int i = 0; i < maskSizeInt; i++) {
 						INT32 ipAddress = ipAddressBc + i;
@@ -101,7 +100,7 @@ BOOL ARPdiscoveryThread(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo, INT32
 					free(dwThreadIdArray);
 					free(arpStructData);
 
-					networkPcInfo = (NetworkPcInfo*)realloc(networkPcInfo, (nbDetected + 1) * sizeof(NetworkPcInfo));
+					networkPcInfo = (NetworkPcInfo*)xrealloc(networkPcInfo, (nbDetected + 1) * sizeof(NetworkPcInfo));
 					if (networkPcInfo == NULL)
 						return FALSE;
 

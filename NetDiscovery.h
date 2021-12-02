@@ -1,9 +1,11 @@
 #pragma once
-#include "portList.h"
+
 
 
 #ifndef NET_DISCOVERY_HEADER_H
 #define NET_DISCOVERY_HEADER_H
+
+#include "portList.h"
 #include "MgArguments.h"
 
 #define BANNER_BUFFER_SIZE	50

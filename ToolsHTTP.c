@@ -113,7 +113,7 @@ BOOL GetHttpHeaderServerVersion(PHTTP_STRUC httpStruct, UINT responceSize) {
     if (httpStruct->ServerName != NULL) {
         const char delim1[] = "Server:";
         if (GetHttpHeaderStr(delim1, sizeof(delim1), httpStruct->rawData, httpStruct->ServerName, &serverVersionSize)) {
-            httpStruct->ServerName = (char*)realloc(httpStruct->ServerName, serverVersionSize + 1);
+            httpStruct->ServerName = (char*)xrealloc(httpStruct->ServerName, serverVersionSize + 1);
             if (httpStruct->ServerName == NULL)
                 return FALSE;
             return TRUE;
@@ -129,7 +129,7 @@ BOOL GetHttpHeaderPowerby(PHTTP_STRUC httpStruct, UINT responceSize) {
     if (httpStruct->poweredBy != NULL) {
         const char delim1[] = "X-Powered-By:";
         if (GetHttpHeaderStr(delim1, sizeof(delim1), httpStruct->rawData, httpStruct->poweredBy, &serverVersionSize)) {
-            httpStruct->poweredBy = (char*)realloc(httpStruct->poweredBy, serverVersionSize + 1);
+            httpStruct->poweredBy = (char*)xrealloc(httpStruct->poweredBy, serverVersionSize + 1);
             if (httpStruct->poweredBy == NULL)
                 return FALSE;
             return TRUE;
@@ -145,7 +145,7 @@ BOOL GetHttpHeaderContentType(PHTTP_STRUC httpStruct, UINT responceSize) {
     if (httpStruct->contentType != NULL) {
         const char delim1[] = "Content-Type:";
         if (GetHttpHeaderStr(delim1, sizeof(delim1), httpStruct->rawData, httpStruct->contentType, &serverVersionSize)) {
-            httpStruct->contentType = (char*)realloc(httpStruct->contentType, serverVersionSize +1);
+            httpStruct->contentType = (char*)xrealloc(httpStruct->contentType, serverVersionSize +1);
             if (httpStruct->contentType == NULL)
                 return FALSE;
             return TRUE;
@@ -161,7 +161,7 @@ BOOL GetHttpHeaderRedirection(PHTTP_STRUC httpStruct, UINT responceSize) {
     if (httpStruct->redirectionPath != NULL) {
         const char delim1[] = "Location:";
         if (GetHttpHeaderStr(delim1, sizeof(delim1), httpStruct->rawData, httpStruct->redirectionPath, &serverVersionSize)) {
-            httpStruct->redirectionPath = (char*)realloc(httpStruct->redirectionPath, serverVersionSize + 1);
+            httpStruct->redirectionPath = (char*)xrealloc(httpStruct->redirectionPath, serverVersionSize + 1);
             if (httpStruct->redirectionPath == NULL)
                 return FALSE;
             return TRUE;
@@ -295,7 +295,7 @@ PHTTP_STRUC GetHttpRequest(char* ipAddress, int port, char* path, char* requestT
         free(httpStruct);
         return NULL;
     }
-    httpStruct->rawData = (char*)realloc(httpStruct->rawData, GET_REQUEST_SIZE);
+    httpStruct->rawData = (char*)xrealloc(httpStruct->rawData, GET_REQUEST_SIZE);
     if (httpStruct->rawData == NULL) {
         free(httpStruct);
         return NULL;

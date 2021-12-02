@@ -1,3 +1,8 @@
+#pragma once
+
+#ifndef PORT_LIST_HEADER_H
+#define PORT_LIST_HEADER_H
+
 ////////////////// TCP //////////////////
 //
 #define PORT_FTP				21
@@ -44,3 +49,10 @@
 
 #define NB_TAB_PORT_TCP		25
 #define NB_TAB_PORT_UDP		6
+
+
+
+extern const int portTcp[NB_TAB_PORT_TCP];
+extern const int portUdp[NB_TAB_PORT_UDP];
+
+#endif

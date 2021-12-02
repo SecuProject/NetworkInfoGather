@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "portList.h"
 #include "NetDiscovery.h"
+#include "Network.h"
 
 #define RECV_BUFFER_SIZE 256 * 2
 
@@ -30,7 +31,7 @@ int display(char* name, unsigned int number, unsigned int type, NETBIOS_Info* ne
                 return TRUE;
         }
 
-        netbiosInfo->netBIOSRemoteMachineNameTab = (NETBIOS_R_M_N_TAB*)realloc(netbiosInfo->netBIOSRemoteMachineNameTab, (iNetbiosTab + 1) * sizeof(NETBIOS_R_M_N_TAB));
+        netbiosInfo->netBIOSRemoteMachineNameTab = (NETBIOS_R_M_N_TAB*)xrealloc(netbiosInfo->netBIOSRemoteMachineNameTab, (iNetbiosTab + 1) * sizeof(NETBIOS_R_M_N_TAB));
         if (netbiosInfo->netBIOSRemoteMachineNameTab == NULL) {
             return FALSE;
         }
@@ -61,14 +62,9 @@ int display(char* name, unsigned int number, unsigned int type, NETBIOS_Info* ne
 BOOL EnumNetBios(NetworkPcInfo* networkPcInfo) {
 //BOOL EnumNetBios(char* ipAddress) {
     SOCKET pSocket;
-    SOCKADDR_IN ssin;
     int remoteAddrLen = sizeof(SOCKADDR_IN);
     UCHAR* recv;
-
-    memset(&ssin, 0, sizeof(SOCKADDR_IN));
-    ssin.sin_family = AF_INET;
-    ssin.sin_port = htons(PORT_UDP_NETBIOS); /* netbios-ns */
-    ssin.sin_addr.s_addr = inet_addr(networkPcInfo->ipAddress);
+    SOCKADDR_IN ssin = InitSockAddr(networkPcInfo->ipAddress, PORT_UDP_NETBIOS);
 
     printf("\t[NETBIOS] Enumeration:\n");
 

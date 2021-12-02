@@ -182,7 +182,7 @@ BOOL ICMPdiscoveryMultiThread(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo,
 	free(dwThreadIdArray);
 	free(pDataArray);
 
-	networkPcInfo = (NetworkPcInfo*)realloc(networkPcInfo,(nbHostUp + 1) * sizeof(NetworkPcInfo));
+	networkPcInfo = (NetworkPcInfo*)xrealloc(networkPcInfo,(nbHostUp + 1) * sizeof(NetworkPcInfo));
 	if (networkPcInfo == NULL)
 		return FALSE;
 

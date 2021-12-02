@@ -17,14 +17,14 @@ void decodeblock(unsigned char in[], char* clrstr) {
 }
 
 void Base64Dencode(char* input, char* output) {
-    int c, phase, i;
+    int phase, i;
     unsigned char in[4];
     char* p;
 
     output[0] = '\0';
     phase = 0; i = 0;
     while (input[i]) {
-        c = (int)input[i];
+        int c = (int)input[i];
         if (c == '=') {
             decodeblock(in, output);
             break;

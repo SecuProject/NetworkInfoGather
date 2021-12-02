@@ -2,9 +2,24 @@
 #include <iphlpapi.h>
 #include <stdio.h>
 
-#include "portList.h"
+#include <ws2tcpip.h>   // inet_pton
+#include <iphlpapi.h>   // IPAddr
+
 #include "AdapterInformation.h"
 
+void* xrealloc(void* ptr, size_t size) {
+	void* newptr;
+	if (size == 0 || ptr == NULL)
+		return FALSE;
+
+	newptr = realloc(ptr, size);
+	if (newptr == NULL) {
+		printf("[x] Memory allocation failed. (%lu)\n", GetLastError());
+		free(ptr);
+		return NULL;
+	}
+	return newptr;
+}
 
 BOOL IsIpAddressValid(int a, int b, int c, int d) {
 	return !(a < 0 || a>255 || b < 0 || b>255 || c < 0 || c>255 || d < 0 || d>255);
@@ -50,70 +65,19 @@ DWORD SyncWaitForMultipleObjs(HANDLE* handles, DWORD count) {
 	return res;
 }
 
-/*
-# HTTP
-https://192.168.59.89:9090/             prometheus
-https://192.168.59.76/                  freenas
-https://192.168.59.89:9443/#!/home      portainer
-https://192.168.59.89:8112/             deluge
-https://192.168.59.89:3000/             Grafana
 
+SOCKADDR_IN InitSockAddr(char* ipAddress, int port) {
+	SOCKADDR_IN ssin;
+	IPAddr ipAddressF;
 
-#define PORT_HTTP_GRAFANA	3000
-#define PORT_HTTP_DELUGE		8112
-#define PORT_HTTPS_PORTAINER	9443
-#define PORT_HTTP_PROMETHEUS	9090
+	inet_pton(AF_INET, ipAddress, &ipAddressF);
+	memset(&ssin, 0, sizeof(SOCKADDR_IN));
+	ssin.sin_family = AF_INET;
+	ssin.sin_addr.s_addr = ipAddressF;
+	ssin.sin_port = htons(port);
 
-*/
-
-const int portTcp[] = {
-	PORT_FTP,
-	PORT_SSH,
-	PORT_TELNET,
-	PORT_SMTP,
-	PORT_DNS,
-	PORT_HTTP,
-	PORT_KERBEROS,
-	PORT_NETBIOS_SSN,
-	PORT_LDAP,
-	PORT_HTTPS,
-	PORT_SMB,
-	PORT_MSSQL,
-	PORT_ORACLEDB,
-	PORT_HTTP_GRAFANA,
-	PORT_MYSQL,
-	PORT_RDP,
-	PORT_POSTGRESQL,
-	PORT_WINRM,
-	PORT_HTTP_PORTAINER,
-	PORT_HTTP_TOMCAT,
-	PORT_HTTP_PROXY,
-	PORT_HTTP_OTHER,
-	PORT_HTTP_DELUGE,
-	PORT_HTTPS_PORTAINER,
-	PORT_HTTP_PROMETHEUS,
-};
-/*
-
-#define PORT_UDP_DNS	53
-#define PORT_UDP_DHCP	67
-#define PORT_UDP_DHCP	68
-#define PORT_UDP_NTP	123
-#define PORT_UDP_SNMP	161
-#define PORT_UDP_SNMP	162
-
-67, 68	Dynamic Host Configuration Protocol (DHCP)
-*/
-const int portUdp[] = {
-	PORT_UDP_NETBIOS,
-	PORT_UDP_DHCP,
-	PORT_UDP_DHCP2,
-	PORT_UDP_NTP,
-	PORT_UDP_SNMP,
-	PORT_UDP_SNMP2,
-};
-
-
+	return ssin;
+}
 
 
 BOOL initWSA(FILE* pFile) {

@@ -34,8 +34,6 @@
 
 
 
-extern const int portTcp[NB_TAB_PORT_TCP];
-extern const int portUdp[NB_TAB_PORT_UDP];
 
 
 typedef struct {
@@ -48,6 +46,8 @@ typedef struct {
 
 
 BOOL initWSA(FILE* pFile);
+SOCKADDR_IN InitSockAddr(char* ipAddress, int port);
+
 
 BOOL IsIpAddressValid(int a, int b, int c, int d);
 BOOL isNetworkRange(char* ipAddress, INT32 ipRangeInt32);
@@ -56,5 +56,8 @@ BOOL isNetworkRange(char* ipAddress, INT32 ipRangeInt32);
 BOOL printOut(FILE* pFile, const char* format, ...);
 DWORD SyncWaitForMultipleObjs(HANDLE* handles, DWORD count);
 
+
+
+void* xrealloc(void* ptr, size_t size);
 
 #endif

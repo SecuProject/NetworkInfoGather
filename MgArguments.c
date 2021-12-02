@@ -4,6 +4,7 @@
 
 #include "MgArguments.h"
 #include "wordlist.h"
+#include "Network.h"
 
 /*
 TARGET_IP -> IP of the target
@@ -44,7 +45,7 @@ BOOL GetPortList(char* portListRaw, pScanStruct pScanStruct) {
             }
             portList = strtok_s(NULL, ",", &next_token);
         }
-        portListInt = (int*)realloc(portListInt, (countPort + 1) * sizeof(int));
+        portListInt = (int*)xrealloc(portListInt, (countPort + 1) * sizeof(int));
         if (portListInt == NULL)
             return FALSE;
 

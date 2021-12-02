@@ -65,15 +65,7 @@ BOOL scanPortOpenTCP(char* dest_ip, int port,FILE* pFile) {
 		closesocket(tcp_sock);
 		return FALSE;
 	} else {
-		SOCKADDR_IN ssin;
-		IPAddr DestIp;
-
-		inet_pton(AF_INET, dest_ip, &DestIp);
-
-		memset(&ssin, 0, sizeof(SOCKADDR_IN));
-		ssin.sin_family = AF_INET;
-		ssin.sin_port = htons(port);
-		ssin.sin_addr.s_addr = DestIp;
+		SOCKADDR_IN ssin = InitSockAddr(dest_ip, port);
 
 		if (!set_options(tcp_sock)) {
 			printOut(pFile,"\t[X] Error setting socket options\n");
@@ -89,7 +81,7 @@ BOOL scanPortOpenTCP(char* dest_ip, int port,FILE* pFile) {
 	return FALSE;
 }
 
-void scanPort(NetworkPcInfo* networkPcInfo, int nbDetected, ScanStruct scanStruct) {
+/*void scanPort(NetworkPcInfo* networkPcInfo, int nbDetected, ScanStruct scanStruct) {
 	for (int iPC = 0; iPC < nbDetected; iPC++) {
 		printOut(scanStruct.ouputFile,"[%s] PORT SCAN\n", networkPcInfo[iPC].ipAddress);
 		networkPcInfo[iPC].nbOpenPort = 0;
@@ -100,8 +92,8 @@ void scanPort(NetworkPcInfo* networkPcInfo, int nbDetected, ScanStruct scanStruc
 					printOut(scanStruct.ouputFile, "\tOPEN PORT %i\n", scanStruct.portList[iPort]);
 					networkPcInfo[iPC].port[networkPcInfo[iPC].nbOpenPort].portNumber = scanStruct.portList[iPort];
 					networkPcInfo[iPC].nbOpenPort++;
-				}/*else
-					printOut(pFile,"\t[%s] CLOSE PORT %i\n", networkPcInfo[iPC].ipAddress, port[iPort]);*/
+				}//else
+					//printOut(pFile,"\t[%s] CLOSE PORT %i\n", networkPcInfo[iPC].ipAddress, port[iPort]);
 			}
 		} else {
 			// Scan TCP
@@ -125,7 +117,7 @@ void scanPort(NetworkPcInfo* networkPcInfo, int nbDetected, ScanStruct scanStruc
 		}
 	}
 	return;
-}
+}*/
 
 
 

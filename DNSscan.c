@@ -1,14 +1,17 @@
+#include <ws2tcpip.h>   // inet_pton
+#include <iphlpapi.h>   // IPAddr
 #include <Windows.h>
 #include <stdio.h>
 #include <windns.h>
-#include <iphlpapi.h>
-
-#pragma warning(disable:4996)
 
 #include "Network.h"
 #include "NetDiscovery.h"
 
-#pragma comment(lib, "Dnsapi.lib")
+#pragma warning(disable:4996)
+
+
+#define MALLOC(x) HeapAlloc(GetProcessHeap(), 0, (x))
+#define FREE(x) HeapFree(GetProcessHeap(), 0, (x))
 
 void ReverseIP(char* pIP, UINT bufferSize) {
 	char seps[] = ".";
@@ -31,13 +34,18 @@ BOOL DnsRequest(char* pOwnerName, char* DnsServIp, WORD wType, char** hostname, 
 	PDNS_RECORD pDnsRecord;
 
 	// Allocate memory for IP4_ARRAY structure.
-	PIP4_ARRAY pSrvList = (PIP4_ARRAY)LocalAlloc(LPTR, sizeof(IP4_ARRAY));
+
+	PIP4_ARRAY pSrvList = (PIP4_ARRAY)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(IP4_ARRAY));
 	if (pSrvList == NULL) {
 		printf("Memory allocation failed \n");
 		return FALSE;
 	}
+
+	IPAddr ipAddressF;
+	inet_pton(AF_INET, DnsServIp, &ipAddressF);
+
 	pSrvList->AddrCount = 1;
-	pSrvList->AddrArray[0] = inet_addr(DnsServIp); //DNS server IP address
+	pSrvList->AddrArray[0] = ipAddressF; //DNS server IP address
 
 	//printf("To test: %s (Server:%s)\n", pOwnerName, DnsServIp);
 	if (!DnsQuery_A(pOwnerName, wType, DNS_QUERY_STANDARD, pSrvList, &pDnsRecord, NULL)) {
@@ -52,11 +60,11 @@ BOOL DnsRequest(char* pOwnerName, char* DnsServIp, WORD wType, char** hostname, 
 			DnsRecordListFree(pDnsRecord, freetype);
 		}
 	}
-	LocalFree(pSrvList);
+	HeapFree(GetProcessHeap(), 0, pSrvList);
 	return result;
 }
-#define MALLOC(x) HeapAlloc(GetProcessHeap(), 0, (x))
-#define FREE(x) HeapFree(GetProcessHeap(), 0, (x))
+
+
 BOOL GetDnsServer(char* serverDnsIp, UINT bufferSize) {
 	FIXED_INFO* pFixedInfo;
 	ULONG ulOutBufLen;
@@ -260,7 +268,7 @@ BOOL DNSdiscoveryMultiThread(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo, 
 	free(dwThreadIdArray);
 	free(pDataArray);
 
-	networkPcInfo = (NetworkPcInfo*)realloc(networkPcInfo, (nbHostUp + 1) * sizeof(NetworkPcInfo));
+	networkPcInfo = (NetworkPcInfo*)xrealloc(networkPcInfo, (nbHostUp + 1) * sizeof(NetworkPcInfo));
 	if (networkPcInfo == NULL)
 		return FALSE;
 

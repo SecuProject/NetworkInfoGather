@@ -20,6 +20,8 @@
 #pragma comment(lib, "Winhttp.lib")
 #pragma comment(lib, "Ws2_32.lib")
 #pragma comment(lib, "wininet.lib")
+#pragma comment(lib, "Dnsapi.lib")
+
 
 #define MAX_NB_ADAPTER	50
 
@@ -59,8 +61,6 @@ BOOL Scan(ScanStruct scanStruct) {
 	}
 	
 
-	srand((UINT)time(0));
-
 	if (scanStruct.isListInterface || scanStruct.interfaceNb == 0 || scanStruct.interfaceNb > nbAdapter) {
 		if (scanStruct.interfaceNb > nbAdapter)
 			printOut(scanStruct.ouputFile, "[x] Invalid number for the adapter !\n\n");
@@ -97,7 +97,7 @@ BOOL Scan(ScanStruct scanStruct) {
 					PortFingerPrint(networkPcInfo, nbDetected, scanStruct.bruteforce, scanStruct.ouputFile); // BOOL
 				}
 			}
-			// FreeStrcutNetPcInfo(networkPcInfo, nbDetected);
+			FreeStrcutNetPcInfo(networkPcInfo, nbDetected);
 		}
 	}
 	free(adapterInfo);
@@ -111,6 +111,10 @@ BOOL BruteForce(BruteforceStruct bruteforceStruct) {
 		// TODO
 		break;
 	case SMB:
+		//TODO
+		break;
+	case HTTP_BASIC:
+		//TODO
 		break;
 	case FTP:
 		return FtpBruteForce(bruteforceStruct.ipAddress, bruteforceStruct.usernameTab, bruteforceStruct.nbUsername, bruteforceStruct.passwordTab, bruteforceStruct.nbPassword, NULL);
@@ -135,10 +139,13 @@ Arg manage output file !!!
 int main(int argc, char* argv[]) {
 	Arguments listAgrument;
 
+
 	if (GetArguments(argc, argv, &listAgrument)) {
 
-		if (!initWSA(NULL))// scanStruct.ouputFile
+		if (!initWSA(NULL))
 			return FALSE;
+
+		srand((UINT)time(0));
 
 		switch (listAgrument.programMode) {
 		case ModeScan:

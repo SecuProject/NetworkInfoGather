@@ -22,13 +22,10 @@ BOOL ProcessPacket(char* Buffer, int Size, NetworkPcInfo** ppNetworkPcInfo, int*
 	char ipAddressDst[IP_ADDRESS_LEN];
 	struct sockaddr_in source;
 	struct sockaddr_in  dest;
-	//int iphdrlen;
 	NetworkPcInfo* pNetworkPcInfo = *ppNetworkPcInfo;
-
 	IPV4_HDR* iphdr = (IPV4_HDR*)Buffer;
-	//iphdrlen = iphdr->ip_header_len * 4;
 
-	//TCP_HDR* tcpHdr = (TCP_HDR*)(Buffer + sizeof(IPV4_HDR));
+
 
 	memset(&source, 0, sizeof(source));
 	source.sin_addr.s_addr = iphdr->ip_srcaddr;
@@ -54,7 +51,7 @@ BOOL ProcessPacket(char* Buffer, int Size, NetworkPcInfo** ppNetworkPcInfo, int*
 			//printOut(pFile,"\t[%i] - [%s]\t", (*nbPcInfo) +1, ipAddressSrc);
 			pNetworkPcInfo[*nbPcInfo].osName = DetectOSBaseTTL(iphdr->ip_ttl);
 			(*nbPcInfo)++;
-			pNetworkPcInfo = (NetworkPcInfo*)realloc(pNetworkPcInfo, ((*nbPcInfo) + 1) * sizeof(NetworkPcInfo));
+			pNetworkPcInfo = (NetworkPcInfo*)xrealloc(pNetworkPcInfo, ((*nbPcInfo) + 1) * sizeof(NetworkPcInfo));
 			if (pNetworkPcInfo == NULL)
 				return FALSE;
 		}
@@ -74,7 +71,7 @@ BOOL ProcessPacket(char* Buffer, int Size, NetworkPcInfo** ppNetworkPcInfo, int*
 			//printOut(pFile, "\t[%i] - [%s]\n", (*nbPcInfo) + 1, ipAddressDst);
 			pNetworkPcInfo[*nbPcInfo].osName = DetectOSBaseTTL(iphdr->ip_ttl);
 			(*nbPcInfo)++;
-			pNetworkPcInfo = (NetworkPcInfo*)realloc(pNetworkPcInfo, ((*nbPcInfo) + 1) * sizeof(NetworkPcInfo));
+			pNetworkPcInfo = (NetworkPcInfo*)xrealloc(pNetworkPcInfo, ((*nbPcInfo) + 1) * sizeof(NetworkPcInfo));
 			if (pNetworkPcInfo == NULL)
 				return FALSE;
 		}

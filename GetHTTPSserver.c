@@ -127,7 +127,7 @@ BOOL RequestBody(HINTERNET hRequest, char** serverResponce, FILE* pFile) {
             DWORD dwDownloaded = 0;
 
             srvResponseSize += dwSize;
-            *serverResponce = (char*)realloc(*serverResponce, srvResponseSize + 1);
+            *serverResponce = (char*)xrealloc(*serverResponce, srvResponseSize + 1);
             if (*serverResponce == NULL)
                 return FALSE;
             if (!WinHttpReadData(hRequest, (LPVOID)((*serverResponce) + dwTmp), dwSize, &dwDownloaded)) {

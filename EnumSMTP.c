@@ -1,63 +1,15 @@
 #include <winsock2.h>
 #include <Windows.h>
 #include <stdio.h>
+#include <ws2tcpip.h>
+#include <iphlpapi.h>
 
 #include "NetDiscovery.h"
 #include "Network.h"
+#include "wordlist.h"
 
 
 #define SMTP_ERROR -2
-
-#pragma warning(disable:4996)
-
-
-const char* smtpUser[] = {
-	"adm",
-	"admin",
-	"apache",
-	"at",
-	"bb",
-	"bin",
-	"cron",
-	"daemon",
-	"db2fenc1",
-	"db2inst1",
-	"ftp",
-	"games",
-	"gdm",
-	"guest",
-	"halt",
-	"lp",
-	"mail",
-	"man",
-	"mysql",
-	"named",
-	"news",
-	"nobody",
-	"ntp",
-	"operator",
-	"oracle",
-	"oracle8",
-	"portage",
-	"postfix",
-	"postgres",
-	"postmaster",
-	"public",
-	"root",
-	"rpc",
-	"shutdown",
-	"squid",
-	"sshd",
-	"sync",
-	"system",
-	"test",
-	"toor",
-	"user",
-	"uucp",
-	"websphere",
-	"www-data",
-};
-
 
 typedef struct {
 	SOCKET SocketFD;
@@ -78,28 +30,25 @@ SMTP_DATA* InitSmtpData() {
 VOID FreeSmtpData(SMTP_DATA* smtpData) {
 	if (smtpData == NULL)
 		return;
+	if (smtpData->listUser == NULL)
+		return;
 
 	for (int i = (int)smtpData->numUser - 1; i > 0; i--)
 		free(smtpData->listUser[i]);
 	if (smtpData->ntlmData != NULL)
 		free(smtpData->ntlmData);
+	free(smtpData->listUser);
 	free(smtpData);
 }
 
 BOOL ConnectToSmtp(NETSOCK_DATA* netSockData,FILE* pFile) {
 	SOCKET SocketFD;
-	SOCKADDR_IN ssin;
+	SOCKADDR_IN ssin = InitSockAddr(netSockData->ipAddress, netSockData->port);
 
 	SocketFD = socket(AF_INET, SOCK_STREAM, 0);
 	if (SocketFD == INVALID_SOCKET)
 		return FALSE;
 	
-
-	memset(&ssin, 0, sizeof(ssin));
-	ssin.sin_family = AF_INET;
-	ssin.sin_addr.s_addr = inet_addr(netSockData->ipAddress);
-	ssin.sin_port = htons(netSockData->port);
-
 	if (connect(SocketFD, (LPSOCKADDR)&ssin, sizeof(ssin)) != SOCKET_ERROR) {
 		netSockData->SocketFD = SocketFD;
 		return TRUE;
@@ -111,18 +60,16 @@ BOOL ConnectToSmtp(NETSOCK_DATA* netSockData,FILE* pFile) {
 int recvSmpt(NETSOCK_DATA* netSockData, char* recvBuffer, int bufferSize, FILE* pFile) {
 	int sizeRecv = recv(netSockData->SocketFD, recvBuffer, bufferSize, 0);
 	if (sizeRecv == SOCKET_ERROR) {
-		printOut(pFile, "\t[SMTP] Fail to recv data !\n");
+		//printOut(pFile, "\t[SMTP] Fail to recv data !\n");
 		return SOCKET_ERROR;
 	}
 	if (strstr(recvBuffer, "Error: too many errors") != NULL) {
 		closesocket(netSockData->SocketFD);
-		if (!ConnectToSmtp(netSockData,pFile)) {
+		if (!ConnectToSmtp(netSockData,pFile))
 			return SOCKET_ERROR;
-		}
-		sizeRecv = recv(netSockData->SocketFD, recvBuffer, BUFFER_SIZE, 0); // Banner
-		return SMTP_ERROR;
+		sizeRecv = recv(netSockData->SocketFD, recvBuffer, bufferSize, 0);
 	}
-	return sizeRecv;
+	return sizeRecv; // OK ??
 }
 
 
@@ -171,10 +118,11 @@ BOOL UserEnumRCPT(NETSOCK_DATA netSockData, SMTP_DATA* smtpData, FILE* pFile) {
 							return FALSE;
 						}
 					}
+					printf("\t\t%u/%u\r", i, ARRAY_SIZE_CHAR(smtpUser));
 				}
 				free(sendBuffer);
 
-				smtpData->listUser = (char**)realloc(smtpData->listUser, nbUser * sizeof(char*));
+				smtpData->listUser = (char**)xrealloc(smtpData->listUser, nbUser * sizeof(char*));
 				if (smtpData->listUser == NULL)
 					return FALSE;
 				smtpData->numUser = nbUser;
@@ -216,14 +164,15 @@ BOOL UserEnumVRFY(NETSOCK_DATA netSockData, SMTP_DATA* smtpData, FILE* pFile) {
 					strcpy_s(smtpData->listUser[nbUser], userLen, smtpUser[i]);
 					nbUser++;
 				} else if (sizeRecv == SMTP_ERROR)
-					i--;	// Retry user after reconnection 
+					i--;	// Retry user after reconnection
 
+				printf("\t\t%u/%u\r", i, ARRAY_SIZE_CHAR(smtpUser));
 			}
 			free(sendBuffer);
 			free(recvBuffer);
 
 
-			smtpData->listUser = (char**)realloc(smtpData->listUser, nbUser * sizeof(char*));
+			smtpData->listUser = (char**)xrealloc(smtpData->listUser, nbUser * sizeof(char*));
 			if (smtpData->listUser == NULL)
 				return FALSE;
 			smtpData->numUser = nbUser;
@@ -254,7 +203,7 @@ BOOL NtlmAuth(NETSOCK_DATA netSockData, SMTP_DATA* smtpData, FILE* pFile) {
 	int sizeRecv = recvSmpt(&netSockData, recvBuffer, BUFFER_SIZE,pFile);
 	if (sizeRecv > 0) {
 		if (strstr(recvBuffer, "NTLM supported") != NULL) {
-			printOut(pFile, "\t[ntlm] AUTH NTLM 334");
+			printOut(pFile, "\t\t[NTLM] AUTH NTLM 334");
 
 			// send anonymous (null) credentials
 			const char ntlmAnonymous[] = "TlRMTVNTUAABAAAAB4IIAAAAAAAAAAAAAAAAAAAAAAA=\r\n";
@@ -307,9 +256,9 @@ BOOL SmtpUserEnum(NETSOCK_DATA netSockData, SMTP_DATA* smtpData, FILE* pFile) {
 BOOL CheckConnectionMsg(char* ConMsg) {
 	// e.g.
 	// 421 Cannot connect to SMTP server 192.168.59.2 (192.168.59.2:25), connect error 10061
+	// 421 Cannot connect to SMTP server 192.168.59.1 (192.168.59.1:25), connect error 10061
 	const char errorMsg[] = "421 Cannot connect to SMTP server";
-	
-	return strncmp(ConMsg, errorMsg,sizeof(errorMsg)) == 0;
+	return strncmp(ConMsg, errorMsg,sizeof(errorMsg) -1);
 }
 
 BOOL SmtpEnum(NETSOCK_DATA netSockData, SMTP_DATA* smtpData, FILE* pFile) {
@@ -322,7 +271,6 @@ BOOL SmtpEnum(NETSOCK_DATA netSockData, SMTP_DATA* smtpData, FILE* pFile) {
 			smtpData->banner[sizeRecv] = 0x00;
 			
 			if (CheckConnectionMsg(smtpData->banner)) {
-				
 				printOut(pFile, "\t[SMTP] Banner %s", smtpData->banner);
 
 				if (!SmtpUserEnum(netSockData, smtpData,pFile))
@@ -332,7 +280,7 @@ BOOL SmtpEnum(NETSOCK_DATA netSockData, SMTP_DATA* smtpData, FILE* pFile) {
 
 				result = TRUE;
 			} else {
-				printOut(pFile, "\t[SMTP] Connection fail!\n");
+				printOut(pFile, "\t[SMTP] Connection fail !\n");
 				memset(smtpData->banner, 0x00, sizeRecv);
 			}
 			send(netSockData.SocketFD, smtpQuit, sizeof(smtpQuit), 0);

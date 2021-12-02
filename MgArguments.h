@@ -1,7 +1,11 @@
 #pragma once
 
+
 #ifndef MG_ARGUMENTS_HEADER_H
 #define MG_ARGUMENTS_HEADER_H
+
+#include <Windows.h>
+#include <stdio.h>
 
 ////////////////////// SCAN ///////////////////////////
 //
@@ -38,6 +42,7 @@ typedef enum {
     SMB,
     FTP,
     LDAP,
+    HTTP_BASIC
     /*
     SSH,
     RDP,

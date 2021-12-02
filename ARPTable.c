@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <ws2tcpip.h>
 
-//#pragma warning(disable:4996)
 
 #include "Network.h"
 #include "AdapterInformation.h"
@@ -58,7 +57,7 @@ BOOL GetARPTable(NetworkPcInfo** ptrArpTable, int* arpTableSize, INT32 ipRangeIn
 					sprintf_s(arpTable[*arpTableSize].macAddress, MAC_ADDRESS_LEN + 1, "%.2X%.2X%.2X%.2X%.2X%.2X",
 							bPhysAddr[0], bPhysAddr[1], bPhysAddr[2], bPhysAddr[3], bPhysAddr[4], bPhysAddr[5]);
 
-					arpTable = (NetworkPcInfo*)realloc(arpTable, ((*arpTableSize) + 2) * sizeof(NetworkPcInfo));
+					arpTable = (NetworkPcInfo*)xrealloc(arpTable, ((*arpTableSize) + 2) * sizeof(NetworkPcInfo));
 					if (arpTable == NULL)
 						return FALSE;
 
@@ -75,7 +74,7 @@ BOOL GetARPTable(NetworkPcInfo** ptrArpTable, int* arpTableSize, INT32 ipRangeIn
 }
 
 
-
+/*
 BOOL IsIpInArpTable(char* ipAddress,char* macAddress, FILE* pFile) {
 	PMIB_IPNET_TABLE2 pipTable = NULL;
 	int status = GetIpNetTable2(AF_INET, &pipTable);
@@ -99,5 +98,5 @@ BOOL IsIpInArpTable(char* ipAddress,char* macAddress, FILE* pFile) {
 		printOut(pFile, "[x] GetIpNetTable for IPv4 table returned error: %i\n", status);
 	FreeMibTable(pipTable);
 	return FALSE;
-}
+}*/
 

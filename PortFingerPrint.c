@@ -2,6 +2,9 @@
 #include <windows.h>
 #include <stdio.h>
 #include <time.h>
+#include <ws2tcpip.h>   // inet_pton
+#include <iphlpapi.h>   // IPAddr
+
 
 #include "Network.h"
 #include "EnumFTP.h"
@@ -10,7 +13,6 @@
 #include "EnumNetBios.h"
 #include "EnumSMTP.h"
 
-#pragma warning(disable:4996)
 
 #define NO_OFFSET			0
 #define MYSQL_OFFSET		5
@@ -29,15 +31,13 @@ VOID AddEndLine(char* banner,int bannerSize) {
 	}
 	return;
 }
+
 BOOL GrabBanner(char* protocalName, char* ipAddress, unsigned int port, char* buffer, int bufferSize, int offset, FILE* pFile) {
 	SOCKET SocketFD = socket(AF_INET, SOCK_STREAM, 0);
 	if (SocketFD  == INVALID_SOCKET)
 		return FALSE;
-	SOCKADDR_IN ssin;
-	memset(&ssin, 0, sizeof(ssin));
-	ssin.sin_family = AF_INET;
-	ssin.sin_addr.s_addr = inet_addr(ipAddress);
-	ssin.sin_port = htons(port);
+	SOCKADDR_IN ssin = InitSockAddr(ipAddress, port);
+
 	if (connect(SocketFD, (LPSOCKADDR)&ssin, sizeof(ssin)) != SOCKET_ERROR) {
 		int sizeRecv = recv(SocketFD, buffer, bufferSize, 0);
 		if (sizeRecv > 0) {

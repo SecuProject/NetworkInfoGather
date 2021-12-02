@@ -94,6 +94,9 @@
     <Filter Include="Source Files\Tools\MD5">
       <UniqueIdentifier>{dc280b89-ad85-43c0-a1ce-4e8fc32a930c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\3. PortScan\PortList">
+      <UniqueIdentifier>{3cd9dd40-88a8-44a2-977f-e6787250df41}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -180,6 +183,9 @@
     <ClCompile Include="Base64.c">
       <Filter>Source Files\Tools\Base64</Filter>
     </ClCompile>
+    <ClCompile Include="portList.c">
+      <Filter>Source Files\3. PortScan\PortList</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AdapterInformation.h">
@@ -187,9 +193,6 @@
     </ClInclude>
     <ClInclude Include="NetDiscovery.h">
       <Filter>Source Files\2. NetDiscovery</Filter>
-    </ClInclude>
-    <ClInclude Include="portList.h">
-      <Filter>Resource Files</Filter>
     </ClInclude>
     <ClInclude Include="Network.h">
       <Filter>Source Files\Tools\Network</Filter>
@@ -277,6 +280,9 @@
     </ClInclude>
     <ClInclude Include="Base64.h">
       <Filter>Source Files\Tools\Base64</Filter>
+    </ClInclude>
+    <ClInclude Include="portList.h">
+      <Filter>Source Files\3. PortScan\PortList</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
