@@ -66,10 +66,12 @@ BOOL PortFingerPrint(NetworkPcInfo* networkPcInfo, int nbDetected, BOOL isBrutef
 				// TCP
 				switch (portNb) {
 				case PORT_FTP:
+				case PORT_FTP_ALT:
 					GrabBanner("FTP", ipAddress, portNb, networkPcInfo[i].port[j].banner, BANNER_BUFFER_SIZE, NO_OFFSET, pFile);
 					FtpEnum(ipAddress, isBruteforce, pFile);
 					break;
 				case PORT_SSH:
+				case PORT_SSH_ALT:
 					GrabBanner("SSH", ipAddress, portNb, networkPcInfo[i].port[j].banner, BANNER_BUFFER_SIZE, NO_OFFSET, pFile);
 					break;
 				case PORT_TELNET:
@@ -79,6 +81,7 @@ BOOL PortFingerPrint(NetworkPcInfo* networkPcInfo, int nbDetected, BOOL isBrutef
 					EnumSMTP(&(networkPcInfo[i]), PORT_SMTP, pFile);
 					break;
 				case PORT_DNS:
+				case PORT_DNS_ALT:
 					// TODO
 					break;
 				case PORT_HTTP:

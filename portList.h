@@ -18,12 +18,14 @@
 #define PORT_SMB				445
 #define PORT_MSSQL				1433
 #define PORT_ORACLEDB			1521
+#define PORT_FTP_ALT			2121
+#define PORT_SSH_ALT			2222
 #define PORT_HTTP_GRAFANA		3000
 #define PORT_MYSQL				3306
 #define PORT_RDP				3389
 #define PORT_POSTGRESQL			5432
+#define PORT_DNS_ALT			5353
 #define PORT_WINRM				5985
-
 #define PORT_HTTP_TOMCAT		8009
 #define PORT_HTTP_PROXY			8080
 #define PORT_HTTP_OTHER			8180
@@ -47,7 +49,7 @@
 //
 ////////////////// UDP //////////////////
 
-#define NB_TAB_PORT_TCP		25
+#define NB_TAB_PORT_TCP		28
 #define NB_TAB_PORT_UDP		6
 
 
