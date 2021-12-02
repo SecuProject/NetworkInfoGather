@@ -20,7 +20,7 @@ typedef enum {
 	AWS4
 }AuthScheme;
 
-BOOL GetAuthRealm(char* authData, BOOL isSsl) {
+BOOL GetAuthRealm(char* authData) {
 	const char delim1[] = "realm=\"";
 	const char delim2[] = "\"";
 
@@ -37,7 +37,7 @@ BOOL GetAuthRealm(char* authData, BOOL isSsl) {
 	}
 	return FALSE;
 }
-AuthScheme GetAuthScheme(char* authData, BOOL isSsl) {
+AuthScheme GetAuthScheme(char* authData) {
 	const char* authSchemeTab[] = {
 		"basic",
 		"bearer",
@@ -52,13 +52,13 @@ AuthScheme GetAuthScheme(char* authData, BOOL isSsl) {
 	for (i = 0; i < ARRAY_SIZE_CHAR(authSchemeTab) && strncmp(authSchemeTab[i], authData, strlen(authSchemeTab[i])) != 0; i++);
 
 	if (i < ARRAY_SIZE_CHAR(authSchemeTab) && strncmp(authSchemeTab[i], authData, strlen(authSchemeTab[i])) == 0) {
-		GetAuthRealm(authData, isSsl);
+		GetAuthRealm(authData);
 		return i;
 	}
 
 	return INVALIDE;
 }
-AuthScheme GetAuthHeader(char* serverResponce, UINT responceSize, char** ppAuthHerder, BOOL isSsl) {
+AuthScheme GetAuthHeader(char* serverResponce, UINT responceSize, char** ppAuthHerder) {
 	const char delim1[] = "www-authenticate: ";
 	const char delim2[] = "\r\n";
 	char* ptr1;
@@ -81,7 +81,7 @@ AuthScheme GetAuthHeader(char* serverResponce, UINT responceSize, char** ppAuthH
 				return INVALIDE;
 
 			strncpy_s(buffer, responceSize + 1, ptr1, ptr2 - ptr1);
-			authScheme = GetAuthScheme(buffer, isSsl);
+			authScheme = GetAuthScheme(buffer);
 
 			*ppAuthHerder = buffer;
 			return authScheme;
@@ -154,7 +154,7 @@ BOOL BruteforceBasic(char* ipAddress, int port, BOOL isSsl, BOOL isProxy, const 
 					strcpy_s(*httpAuthHead, httpAuthHeadSize, bufAuthHead);
 
 				} else if (IS_HTTP_ERROR_SERVER(returnCode)) {
-					printf("\t[d] Critical fail return status code: %i\n", returnCode);
+					printf("\t[d] Critical fail return status code: %u\n", returnCode);
 					free(bufAuthHead);
 					free(bufEncode64);
 					free(bufCread);
@@ -185,23 +185,19 @@ VOID GetStatusCodeAuth(UINT responceCode) {
 	default:
 		break;
 	}
-	printf(" (%i).\n", responceCode);
+	printf(" (%u).\n", responceCode);
 }
 
-/*
-HttpBasicAuth(ipAddress, port, pHttpStructPage->rawData, pHttpStructPage->responseLen, pHttpStructPage->returnCode, isBruteForce, isSSL);
-*/
-//BOOL HttpBasicAuth(char* ipAddress, int port, char* responceBuffer, int responceSize, UINT responceCode, BOOL isBruteForce, BOOL isSsl) {
+
 BOOL HttpBasicAuth(char* ipAddress, int port, PHTTP_STRUC pHttpStructPage, BOOL isBruteForce, BOOL isSsl) {
 	char* HeaderAuth = NULL;
 	char* httpAuthHead = NULL;
-	AuthScheme authScheme = GetAuthHeader(pHttpStructPage->rawData, pHttpStructPage->responseLen, &HeaderAuth, isSsl);
+	AuthScheme authScheme = GetAuthHeader(pHttpStructPage->rawData, pHttpStructPage->responseLen, &HeaderAuth);
 
 	if (authScheme == INVALIDE) {
 		//printf("\t[HTTP%s] Header not found !\n", isSsl ? "S" : "");
 		return FALSE;
 	}
-
 
 	printf("\t\t[Auth Basic] Authorization ");
 	switch (authScheme) {

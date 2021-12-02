@@ -211,7 +211,7 @@ BOOL WinHttpSetCustomHeader(HINTERNET hRequest, char* customHeader, FILE* pFile)
         int CustHeadSize = swprintf(wCustomHeader, 1042, L"%hs", customHeader);
 
         if (!WinHttpAddRequestHeaders(hRequest, wCustomHeader, CustHeadSize, WINHTTP_ADDREQ_FLAG_ADD)) {
-            printf("\t[-] Fail to set custom header (%ld)!\n", GetLastError());
+            printf("\t[-] Fail to set custom header (%lu)!\n", GetLastError());
             free(wCustomHeader);
             return FALSE;
         }

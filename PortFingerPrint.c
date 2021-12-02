@@ -30,9 +30,8 @@ VOID AddEndLine(char* banner,int bannerSize) {
 	return;
 }
 BOOL GrabBanner(char* protocalName, char* ipAddress, unsigned int port, char* buffer, int bufferSize, int offset, FILE* pFile) {
-	SOCKET SocketFD;
-
-	if ((SocketFD = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+	SOCKET SocketFD = socket(AF_INET, SOCK_STREAM, 0);
+	if (SocketFD  == INVALID_SOCKET)
 		return FALSE;
 	SOCKADDR_IN ssin;
 	memset(&ssin, 0, sizeof(ssin));

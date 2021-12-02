@@ -22,11 +22,11 @@ BOOL ProcessPacket(char* Buffer, int Size, NetworkPcInfo** ppNetworkPcInfo, int*
 	char ipAddressDst[IP_ADDRESS_LEN];
 	struct sockaddr_in source;
 	struct sockaddr_in  dest;
-	int iphdrlen;
+	//int iphdrlen;
 	NetworkPcInfo* pNetworkPcInfo = *ppNetworkPcInfo;
 
 	IPV4_HDR* iphdr = (IPV4_HDR*)Buffer;
-	iphdrlen = iphdr->ip_header_len * 4;
+	//iphdrlen = iphdr->ip_header_len * 4;
 
 	//TCP_HDR* tcpHdr = (TCP_HDR*)(Buffer + sizeof(IPV4_HDR));
 
@@ -103,8 +103,10 @@ BOOL StartSniffing(SOCKET sniffer, int timeSniffing, NetworkPcInfo** ppNetworkPc
 		return FALSE;
 
 	mangobyte = recvfrom(sniffer, Buffer, PACKET_BUFFER_SIZE, 0, 0, 0);
-	if (mangobyte <= 0)
+	if (mangobyte <= 0){
+		HeapFree(GetProcessHeap(), 0, Buffer);
 		return FALSE;
+	}
 
 	start = clock();
 	while (mangobyte > 0 && CheckTimeSniffing(start, timeSniffing) && nbPcInfo < 255) {

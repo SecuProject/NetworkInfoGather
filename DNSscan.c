@@ -79,7 +79,8 @@ BOOL GetDnsServer(char* serverDnsIp, UINT bufferSize) {
 			return FALSE;
 		}
 	}
-	if (dwRetVal = GetNetworkParams(pFixedInfo, &ulOutBufLen) == NO_ERROR) {
+	dwRetVal = GetNetworkParams(pFixedInfo, &ulOutBufLen);
+	if (dwRetVal == NO_ERROR) {
 		IP_ADDR_STRING pDnsServerList = pFixedInfo->DnsServerList;
 
 		char* pDnsServer = pDnsServerList.IpAddress.String;
@@ -93,7 +94,7 @@ BOOL GetDnsServer(char* serverDnsIp, UINT bufferSize) {
 			result = TRUE;
 		}
 	} else {
-		printf("GetNetworkParams failed with error: %d\n", dwRetVal);
+		printf("GetNetworkParams failed with error: %lu\n", dwRetVal);
 		return FALSE;
 	}
 
@@ -179,6 +180,10 @@ BOOL DNSdiscoveryMultiThread(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo, 
 
 	if (!GetDnsServer(serverDnsIp, IP_ADDRESS_LEN)) {
 		printf("\t[x] Server DNS IP address is public !\n");
+		free(hThreadArray);
+		free(dwThreadIdArray);
+		free(pDataArray);
+		free(networkPcInfo);
 		return FALSE;
 	}
 

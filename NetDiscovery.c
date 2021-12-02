@@ -15,12 +15,14 @@
 
 
 EnumOS DetectOSBaseTTL(UINT computerTTL) {
-	if (computerTTL < 65)
+	if (computerTTL < 64)
 		return OsLinux;
-	else if (computerTTL > 64 || computerTTL < 129)
+	else if (computerTTL < 128)
 		return OsWindows;
 	else if (computerTTL < 256)
 		return OsCisco;
+	else
+		return OsUnknown;
 	return OsUnknown;
 }
 VOID PrintHostOS(EnumOS hostOs, FILE* pFile) {
@@ -131,8 +133,8 @@ BOOL AddHostNotScan(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo, INT32 ipA
 	return TRUE;
 }
 
-VOID PrintDiscoveredHost(ScanStruct scanStruct, NetworkPcInfo** networkPcInfo, int* nbDetected, FILE* pFile) {
-	for (int i = 0; i < *nbDetected; i++) {
+VOID PrintDiscoveredHost(ScanStruct scanStruct, NetworkPcInfo** networkPcInfo, int nbDetected, FILE* pFile) {
+	for (int i = 0; i < nbDetected; i++) {
 		if ((*networkPcInfo)[i].macAddress == NULL)
 			printOut(scanStruct.ouputFile, "\t%3i - %15s", i + 1, (*networkPcInfo)[i].ipAddress);
 		else
@@ -185,7 +187,7 @@ BOOL NetDiscovery(ScanStruct scanStruct, INT32 ipRangeInt32, int maskSizeInt,cha
 		break;
 	}
 	if(*nbDetected > 0)
-		PrintDiscoveredHost(scanStruct, networkPcInfo, nbDetected, pFile);
+		PrintDiscoveredHost(scanStruct, networkPcInfo, *nbDetected, pFile);
 
 	return *nbDetected > 0;
 }

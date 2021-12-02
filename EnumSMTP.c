@@ -90,8 +90,10 @@ BOOL ConnectToSmtp(NETSOCK_DATA* netSockData,FILE* pFile) {
 	SOCKET SocketFD;
 	SOCKADDR_IN ssin;
 
-	if ((SocketFD = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+	SocketFD = socket(AF_INET, SOCK_STREAM, 0);
+	if (SocketFD == INVALID_SOCKET)
 		return FALSE;
+	
 
 	memset(&ssin, 0, sizeof(ssin));
 	ssin.sin_family = AF_INET;
@@ -110,14 +112,14 @@ int recvSmpt(NETSOCK_DATA* netSockData, char* recvBuffer, int bufferSize, FILE* 
 	int sizeRecv = recv(netSockData->SocketFD, recvBuffer, bufferSize, 0);
 	if (sizeRecv == SOCKET_ERROR) {
 		printOut(pFile, "\t[SMTP] Fail to recv data !\n");
-		return -1;
+		return SOCKET_ERROR;
 	}
 	if (strstr(recvBuffer, "Error: too many errors") != NULL) {
 		closesocket(netSockData->SocketFD);
 		if (!ConnectToSmtp(netSockData,pFile)) {
 			return SOCKET_ERROR;
 		}
-		int sizeRecv = recv(netSockData->SocketFD, recvBuffer, BUFFER_SIZE, 0); // Banner
+		sizeRecv = recv(netSockData->SocketFD, recvBuffer, BUFFER_SIZE, 0); // Banner
 		return SMTP_ERROR;
 	}
 	return sizeRecv;
@@ -246,6 +248,9 @@ BOOL NtlmAuth(NETSOCK_DATA netSockData, SMTP_DATA* smtpData, FILE* pFile) {
 
 	int sizeSend = sprintf_s(sendBuffer, BUFFER_SIZE, "AUTH NTLM 334\r\n");
 	send(netSockData.SocketFD, sendBuffer, sizeSend, 0);
+	free(sendBuffer);
+
+
 	int sizeRecv = recvSmpt(&netSockData, recvBuffer, BUFFER_SIZE,pFile);
 	if (sizeRecv > 0) {
 		if (strstr(recvBuffer, "NTLM supported") != NULL) {
@@ -255,7 +260,7 @@ BOOL NtlmAuth(NETSOCK_DATA netSockData, SMTP_DATA* smtpData, FILE* pFile) {
 			const char ntlmAnonymous[] = "TlRMTVNTUAABAAAAB4IIAAAAAAAAAAAAAAAAAAAAAAA=\r\n";
 
 			send(netSockData.SocketFD, ntlmAnonymous, sizeof(ntlmAnonymous), 0);
-			int sizeRecv = recvSmpt(&netSockData, recvBuffer, BUFFER_SIZE,pFile);
+			sizeRecv = recvSmpt(&netSockData, recvBuffer, BUFFER_SIZE,pFile);
 			if (sizeRecv > 0) {
 				if (strstr(recvBuffer, "334") != NULL) {
 					smtpData->ntlmData = (char*)malloc(sizeRecv + 1);
@@ -268,7 +273,6 @@ BOOL NtlmAuth(NETSOCK_DATA netSockData, SMTP_DATA* smtpData, FILE* pFile) {
 			}
 		}
 	}
-	free(sendBuffer);
 	free(recvBuffer);
 	return FALSE;
 }

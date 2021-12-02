@@ -36,7 +36,6 @@ BOOL FRITZBoxUserEnum(char* serverResponce) {
     BOOL retVal = FALSE;
 
     if (pInit != NULL) {
-        char* pStop;
         const char delim1[] = "\"value\":\"";
         const char delim2[] = "\"";
         pInit += sizeof(detectionUiViewUser);
@@ -48,6 +47,8 @@ BOOL FRITZBoxUserEnum(char* serverResponce) {
 
         printf("\t[FRITZBox] username: \n"); // Print !!!!
         while (isNewUser && pStart != NULL) {
+            char* pStop;
+
             pStart += sizeof(delim1) -1 ;
             pStop = strstr(pStart, delim2);
             if (pStop != NULL) {

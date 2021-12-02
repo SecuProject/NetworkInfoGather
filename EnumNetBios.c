@@ -38,7 +38,7 @@ int display(char* name, unsigned int number, unsigned int type, NETBIOS_Info* ne
         char* description = (char*)malloc(RECV_BUFFER_SIZE);
         if (description == NULL)
             return FALSE;
-        memset(description, 0x0, sizeof(description));
+        memset(description, 0x0, RECV_BUFFER_SIZE);
 
 
         
@@ -72,9 +72,10 @@ BOOL EnumNetBios(NetworkPcInfo* networkPcInfo) {
 
     printf("\t[NETBIOS] Enumeration:\n");
 
-    if ((pSocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
-        printf("\t\t[-] Fail to create socket !\n");
-        return FALSE; 
+    pSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if (pSocket == INVALID_SOCKET) {
+        printf("\t\t[NETBIOS] Error: Could not create socket.\n");
+        return FALSE;
     }
 
     recv = (UCHAR*)calloc(RECV_BUFFER_SIZE, 1);
@@ -124,7 +125,7 @@ BOOL EnumNetBios(NetworkPcInfo* networkPcInfo) {
             unsigned int nb_type;
 
             memset(temp, 0x0, sizeof(temp));
-            strncpy_s(temp, 16, ptr, 15);   /* copies the name into temp */
+            strncpy_s(temp, sizeof(temp), ptr, 15);   /* copies the name into temp */
 
             ptr += 15;
             nb_num = *ptr;
@@ -138,7 +139,7 @@ BOOL EnumNetBios(NetworkPcInfo* networkPcInfo) {
                     *(ptr + 4), *(ptr + 5), *(ptr + 6));
                 break;
             }
-            if(temp && temp[0] != 0x00)
+            if(temp[0] != 0x00)
                 display(temp, nb_num, nb_type, networkPcInfo->NetbiosInfo);
         }
     }

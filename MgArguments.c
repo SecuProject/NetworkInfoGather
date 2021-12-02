@@ -205,7 +205,7 @@ BOOL ParseScanArg(int argc, char* argv[], pScanStruct pScanStruct) {
                         case 't':
                             strSize = strlen(argv[count + 1]);
                             pScanStruct->ipAddress = (char*)calloc(strSize + 1, 1);
-                            if (pScanStruct->ipAddress == NULL)
+                            if(pScanStruct->ipAddress == NULL)
                                 return FALSE;
                             strcpy_s(pScanStruct->ipAddress, strSize + 1, argv[count + 1]);
                             count++;

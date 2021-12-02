@@ -138,7 +138,7 @@ void MD5Init(MD5_CTX* mdContext, unsigned long pseudoRandomNumber) {
 void MD5Update(MD5_CTX* mdContext, unsigned char* inBuf, unsigned int inLen) {
 	UINT4 in[16];
 	int mdi = 0;
-	unsigned int i = 0, ii = 0;
+	
 
 	/* Compute number of bytes mod 64 */
 	mdi = (int)((mdContext->i[0] >> 3) & 0x3F);
@@ -155,7 +155,7 @@ void MD5Update(MD5_CTX* mdContext, unsigned char* inBuf, unsigned int inLen) {
 
 		/* Transform if necessary */
 		if (mdi == 0x40) {
-			for (i = 0, ii = 0; i < 16; i++, ii += 4)
+			for (UINT i = 0, ii = 0; i < 16; i++, ii += 4)
 				in[i] = (((UINT4)mdContext->in[ii + 3]) << 24) |
 				(((UINT4)mdContext->in[ii + 2]) << 16) |
 				(((UINT4)mdContext->in[ii + 1]) << 8) |

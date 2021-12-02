@@ -277,6 +277,7 @@ BOOL MultiScanPort(NetworkPcInfo* networkPcInfo, int nbDetected, ScanStruct scan
 	}
 
 	if (!InitializeCriticalSectionAndSpinCount(&CriticalSection, 0x00000400)) {
+		free(pThreadData);
 		free(hThreadArray);
 		free(dwThreadIdArray);
 		return FALSE;

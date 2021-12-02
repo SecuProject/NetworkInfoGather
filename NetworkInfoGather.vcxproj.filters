@@ -82,17 +82,17 @@
     <Filter Include="Source Files\4. FingerPrintInfo\EnumHTTP\FaviconDetection">
       <UniqueIdentifier>{34850fa1-d6fd-443d-a5b5-edb74e0b82e6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\4. FingerPrintInfo\EnumHTTP\FaviconDetection\MD5">
-      <UniqueIdentifier>{dc280b89-ad85-43c0-a1ce-4e8fc32a930c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\4. FingerPrintInfo\EnumHTTP\ToolsHTTP">
       <UniqueIdentifier>{667100e0-55ba-4d33-ac45-159c92fef4ca}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\4. FingerPrintInfo\EnumHTTP\DetectHttpBasicAuth">
       <UniqueIdentifier>{63674d7f-5e96-44a5-960f-161c04d000c6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\4. FingerPrintInfo\EnumHTTP\DetectHttpBasicAuth\Base64">
+    <Filter Include="Source Files\Tools\Base64">
       <UniqueIdentifier>{7f4d73a6-e5f7-46ad-a62c-6350f87344d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Tools\MD5">
+      <UniqueIdentifier>{dc280b89-ad85-43c0-a1ce-4e8fc32a930c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -166,7 +166,7 @@
       <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\FaviconDetection</Filter>
     </ClCompile>
     <ClCompile Include="md5.c">
-      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\FaviconDetection\MD5</Filter>
+      <Filter>Source Files\Tools\MD5</Filter>
     </ClCompile>
     <ClCompile Include="ToolsHTTP.c">
       <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\ToolsHTTP</Filter>
@@ -178,7 +178,7 @@
       <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\DetectHttpBasicAuth</Filter>
     </ClCompile>
     <ClCompile Include="Base64.c">
-      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\DetectHttpBasicAuth\Base64</Filter>
+      <Filter>Source Files\Tools\Base64</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -261,7 +261,7 @@
       <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\FaviconDetection</Filter>
     </ClInclude>
     <ClInclude Include="md5.h">
-      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\FaviconDetection\MD5</Filter>
+      <Filter>Source Files\Tools\MD5</Filter>
     </ClInclude>
     <ClInclude Include="FaviconDatabase.h">
       <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\FaviconDetection</Filter>
@@ -276,7 +276,7 @@
       <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\DetectHttpBasicAuth</Filter>
     </ClInclude>
     <ClInclude Include="Base64.h">
-      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\DetectHttpBasicAuth\Base64</Filter>
+      <Filter>Source Files\Tools\Base64</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

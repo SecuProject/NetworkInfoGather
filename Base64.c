@@ -57,13 +57,12 @@ void encodeblock(unsigned char in[], char b64str[], int len) {
 /* encode - base64 encode a stream, adding padding if needed */
 void Base64Encode(char* input, char* output) {
     unsigned char in[3];
-    int i, len = 0;
     int j = 0;
 
     output[0] = '\0';
     while (input[j]) {
-        len = 0;
-        for (i = 0; i < 3; i++) {
+        int len = 0;
+        for (int i = 0; i < 3; i++) {
             in[i] = (unsigned char)input[j];
             if (input[j]) {
                 len++; j++;

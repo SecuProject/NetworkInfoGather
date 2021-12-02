@@ -184,7 +184,7 @@ BOOL GetHttpBody(PHTTP_STRUC httpStruct) {
 
 BOOL GetHttpRequestInfo(PHTTP_STRUC httpStruct) {
     if (httpStruct->responseLen == 0) {
-        printf("[d] Test response size: %i !!!\n", httpStruct->contentLen);
+        printf("[d] Test response size: %u !!!\n", httpStruct->contentLen);
         system("pause");
         return FALSE;
     }
@@ -470,7 +470,7 @@ BOOL HttpDirEnum(char* ipAddress, int port,char* httpAuthHeader, FILE* pFile, BO
     for (UINT i = 0; i < ARRAY_SIZE_CHAR(wordListCommon); i++) {
         PHTTP_STRUC pHttpStructPage = GetHttpRequest(ipAddress, port, (char*)wordListCommon[i], "HEAD", httpAuthHeader, isSSL, pFile);
         if (pHttpStructPage != NULL) {
-            printf("\t\t[i] %i/%u\r", i+1, (UINT)ARRAY_SIZE_CHAR(wordListCommon));
+            printf("\t\t[i] %u/%u\r", i+1, (UINT)ARRAY_SIZE_CHAR(wordListCommon));
             switch (enulPageNotFound) {
             case BASE_CODE_ERROR_CODE:
                 if (!IS_HTTP_ERROR(pHttpStructPage->returnCode)) {
@@ -559,7 +559,7 @@ BOOL GetHttpServerInfo(char* ipAddress, int port, char* httpAuthHeader, FILE* pF
         if (IS_HTTP_AUTH(pHttpStructPage->returnCode)) {
             if (HttpBasicAuth(ipAddress, port, pHttpStructPage, isBruteForce, isSSL)) {
                 if (pHttpStructPage->AuthHeader != NULL) {
-                    size_t strSize = strlen(pHttpStructPage->AuthHeader);
+                    //size_t strSize = strlen(pHttpStructPage->AuthHeader);
                     strcpy_s(httpAuthHeader, 1024, pHttpStructPage->AuthHeader);
                 }
             }

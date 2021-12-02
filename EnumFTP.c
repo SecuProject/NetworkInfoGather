@@ -30,12 +30,12 @@ BOOL ListCurrentDirectory(char* IpAddress, char* username, char* password) {
     const char* userAgent = "Microsoft Internet Explorer";
     HINTERNET hInternet = InternetOpenA(userAgent, INTERNET_OPEN_TYPE_DIRECT, NULL, NULL, 0);
     if (hInternet == NULL) {
-        printf("\t[FTP] InternetOpenA failed: %ld\n", GetLastError());
+        printf("\t[FTP] InternetOpenA failed: %lu\n", GetLastError());
         return FALSE;
     }
     HINTERNET hFtpSession = InternetConnectA(hInternet, IpAddress, INTERNET_DEFAULT_FTP_PORT, username, password, INTERNET_SERVICE_FTP, INTERNET_FLAG_PASSIVE, 0);
     if (hFtpSession == NULL) {
-        printf("\t[-] InternetConnectA failed: %ld\n", GetLastError());
+        printf("\t[-] InternetConnectA failed: %lu\n", GetLastError());
         InternetCloseHandle(hInternet);
         return FALSE;
     }
@@ -53,7 +53,7 @@ BOOL ListCurrentDirectory(char* IpAddress, char* username, char* password) {
         if (lastError == NO_MORE_FILES)
             printf("\t\t[-] Directory is empty\n");
         else
-            printf("\t\t[-] FtpFindFirstFileA failed: %ld\n", lastError);
+            printf("\t\t[-] FtpFindFirstFileA failed: %lu\n", lastError);
         
         InternetCloseHandle(hFtpSession);
         InternetCloseHandle(hInternet);
@@ -84,9 +84,9 @@ BOOL ListCurrentDirectory(char* IpAddress, char* username, char* password) {
 
     } while (InternetFindNextFileA(hFtpFile, &FileData));
 
-    int lastError = GetLastError();
+    DWORD lastError = GetLastError();
     if (ERROR_NO_MORE_FILES != lastError) {
-        printf("\t[-] FtpFindFirstFileA failed: %ld\n", lastError);
+        printf("\t[-] FtpFindFirstFileA failed: %lu\n", lastError);
         InternetCloseHandle(hFtpFile);
         InternetCloseHandle(hFtpSession);
         InternetCloseHandle(hInternet);

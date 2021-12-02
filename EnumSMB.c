@@ -8,9 +8,9 @@
 #include "wordlist.h"
 #include "Network.h"
 
-BOOL PrintfSmbShareInfo(LPTSTR lpszServer, PSHARE_INFO_502 BufPtr, DWORD* er, FILE* pFile) {
+BOOL PrintfSmbShareInfo(LPTSTR lpszServer, PSHARE_INFO_502 BufPtr, DWORD er, FILE* pFile) {
     PSHARE_INFO_502 p = BufPtr;
-    for (DWORD i = 1; i <= *er; i++) {
+    for (DWORD i = 1; i <= er; i++) {
         printOut(pFile,"\t\t%-17S%-30S%ws\n", p->shi502_netname, p->shi502_path, p->shi502_remark);
         /*if (IsValidSecurityDescriptor(BufPtr->shi502_security_descriptor)) {
             printOut(pFile,"%d", p->shi502_permissions);
@@ -32,13 +32,13 @@ BOOL SmbPublic(LPWSTR lpszServer, FILE* pFile) {
         //printOut(pFile,"Share:           Local Path:                   Descriptor:\n");
         //printOut(pFile,"----------------------------------------------------------\n");
 
-        PrintfSmbShareInfo(lpszServer, BufPtr, &er,pFile);
+        PrintfSmbShareInfo(lpszServer, BufPtr, er,pFile);
         NetApiBufferFree(BufPtr);
 
         while (res == ERROR_MORE_DATA) {
             res = NetShareEnum(lpszServer, 502, (LPBYTE*)&BufPtr, MAX_PREFERRED_LENGTH, &er, &tr, &resume);
             if (res == ERROR_SUCCESS || res == ERROR_MORE_DATA) {
-                PrintfSmbShareInfo(lpszServer, BufPtr, &er,pFile);
+                PrintfSmbShareInfo(lpszServer, BufPtr, er,pFile);
                 NetApiBufferFree(BufPtr);
             } else {
                 printOut(pFile,"Error: %ld\n", res);
@@ -97,8 +97,10 @@ BOOL SmbEnum(char* serverIp, BOOL isBurtForce, FILE* pFile) {
         return TRUE;
     } else {
         char* sharePath = (char*)calloc(serverIpSize + 4, sizeof(char*));
-        if (sharePath == NULL)
+        if (sharePath == NULL){
+            free(lpszServer);
             return FALSE;
+        }
 
         sprintf_s(sharePath, serverIpSize + 4 , "\\\\%s", serverIp);
 
