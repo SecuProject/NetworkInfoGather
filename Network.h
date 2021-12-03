@@ -50,8 +50,8 @@ SOCKADDR_IN InitSockAddr(char* ipAddress, int port);
 
 
 BOOL IsIpAddressValid(int a, int b, int c, int d);
-BOOL isNetworkRange(char* ipAddress, INT32 ipRangeInt32);
-
+BOOL GetNetworkRange(char* ipAddress, INT32 ipRangeInt32);
+BOOL GetIpPortFromArg(char* argv, pBruteforceStruct pBruteforceStruct);
 
 BOOL printOut(FILE* pFile, const char* format, ...);
 DWORD SyncWaitForMultipleObjs(HANDLE* handles, DWORD count);

@@ -48,21 +48,24 @@ const char* smtpUser[] = {
 };
 
 const char* usernameList[] = {
+    "",
     "root",
     "admin",
-    "",
     "administrator",
     "anonymous",
     "user",
     "Admin",
     "guest",
     "manager",
+    "backup",
+    "default",
     // ftpuser
 };
 const char* passwordList[] = {
+    ""
     "root",
     "password",
-    ""
+    "Password",
     "default",
     "123456",
     "admin",
@@ -73,5 +76,10 @@ const char* passwordList[] = {
     "linux",
     "1111111",
     "manager",
+    "security",
+    "secret",
+    "secure",
+    "master",
     // ftpuser
-};
+}; 
+

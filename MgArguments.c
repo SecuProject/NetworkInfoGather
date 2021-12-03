@@ -74,26 +74,33 @@ BOOL CheckFQDN(char* fqdn) {
 }
 
 VOID PrintMenuBruteForce() {
-    printf("NetworkInfoGather.exe bf PROTOCOL TARGET_IP [-u username/-U usernameFile.lst] [-p password/-P passwordFile.lst] [--continue-success]\n\n");
-    printf("smb [-u username/-U usernameFile.lst] [-p password/-P passwordFile.lst]\n");
-    printf("ftp [-u username/-U usernameFile.lst] [-p password/-P passwordFile.lst]\n");
-    printf("ldap [-u username/-U usernameFile.lst] [-p password/-P passwordFile.lst]\n\n");
-    /*printf("http [-u username/-U usernameFile.lst] [-p password/-P passwordFile.lst]\n");
-    printf("https [-u username/-U usernameFile.lst] [-p password/-P passwordFile.lst]\n");
-    printf("ssh [-u username/-U usernameFile.lst] [-p password/-P passwordFile.lst]\n\n");
-    printf("telnet [-u username/-U usernameFile.lst] [-p password/-P passwordFile.lst]\n");
-    printf("rdp [-u username/-U usernameFile.lst] [-p password/-P passwordFile.lst]\n");
-    printf("vnc [-u username/-U usernameFile.lst] [-p password/-P passwordFile.lst]\n");*/
+    printf("NetworkInfoGather.exe bf PROTOCOL TARGET_IP[:PORT] [-u username/-U usernameFile.lst] [-p password/-P passwordFile.lst] [--continue-success]\n\n");
+    
+    printf("PROTOCOL:\n");
+    printf("\tftp\n");
+    printf("\thttp\n");
+    printf("\thttps\n\n");
+    /*printf("\tldap\n\n");
+    printf("\tsmb\n\n");
+    printf("\tssh\n\n");
+    printf("\ttelnet\n\n");
+    printf("\trdp\n\n");
+    printf("\trdp\n\n");*/
 
-    printf("IP_ADDRESS\tTarget IP Address or range. Allowed formats:\n");
-    printf("\t\te.g. '192.168.1.1'\n\n");
+
+    printf("TARGET_IP:\n");
+    printf("\tTarget IP Address and port (if port not set the default port will be used).\n");
+    printf("\t\te.g. '192.168.1.1' or '192.168.1.1:80'\n\n");   
+
 
     printf("Optional parameter:\n");
-    printf("-u username\t\tThe username of the targeted account\n");
-    printf("-p password\t\tThe password of the targeted account\n");
-    printf("-U usernameFile.lst\tThe word list of the targeted account\n");
-    printf("-P passwordFile.lst\tThe word list of the targeted account\n");
-    printf("--continue-success\tContinues authentication attempts even after successes\n\n");
+    printf("\t-u username\t\tThe username of the targeted account\n");
+    printf("\t-p password\t\tThe password of the targeted account\n");
+    printf("\t-U usernameFile.lst\tThe word list of the targeted account\n");
+    printf("\t-P passwordFile.lst\tThe word list of the targeted account\n");
+    printf("\t--continue-success\tContinues authentication attempts even after successes\n\n");
+
+
     printf("Note:\n");
     printf("If the username and password are not set the tool will use is internal wordlist.\n\n");
     return;
@@ -349,32 +356,47 @@ VOID LoadFileEG(){
 */
 
 
-// program bf smb 192.168.1.1
+
+
 BOOL ParseBruteForceArg(int argc, char* argv[], pBruteforceStruct pBruteforceStruct) {
     pBruteforceStruct->nbUsername = 0;
     pBruteforceStruct->usernameTab = NULL;
     pBruteforceStruct->nbPassword = 0;
     pBruteforceStruct->passwordTab = NULL;
     pBruteforceStruct->continueSuccess = FALSE;
+    pBruteforceStruct->port = 0;
 
-    if (argc < 3) {
+    if (argc < 4) {
         PrintMenuBruteForce();
         return FALSE;
     }
-    if (strcmp(argv[2], "smb") == 0) {
-        pBruteforceStruct->protocol = SMB;
-    } else if (strcmp(argv[2], "ldap") == 0) {
-        pBruteforceStruct->protocol = LDAP;
-    } else if (strcmp(argv[2], "ftp") == 0) {
+    if (strcmp(argv[2], "ftp") == 0) {
         pBruteforceStruct->protocol = FTP;
+        pBruteforceStruct->port = PORT_FTP;
+    } else if (strcmp(argv[2], "http") == 0) {
+        pBruteforceStruct->protocol = HTTP_BASIC;
+        pBruteforceStruct->port = PORT_HTTP;
+    } else if (strcmp(argv[2], "https") == 0) {
+        pBruteforceStruct->protocol = HTTPS_BASIC;
+        pBruteforceStruct->port = PORT_HTTPS;
+    /* } else if (strcmp(argv[2], "ldap") == 0) {
+        pBruteforceStruct->protocol = LDAP;
+        pBruteforceStruct->port = PORT_LDAP;
+    } else if (strcmp(argv[2], "smb") == 0) {
+        pBruteforceStruct->protocol = SMB;
+        pBruteforceStruct->port = PORT_SMB;*/
     } else {
         printf("[!] Invalid protocol !!!\n");
         PrintMenuBruteForce();
         return FALSE;
     }
 
-    // Check ip_address validity
-    strcpy_s(pBruteforceStruct->ipAddress, 16, argv[3]);
+    // Parse IP address and port (FORMATE: 1.1.1.1 or 1.1.1.1:53)
+    if (!GetIpPortFromArg(argv[3], pBruteforceStruct)) {
+        printf("[!] Invalid format for the ip address '%s'\n", argv[3]);
+        printf("[i] Valid format: 192.168.1.1 or 192.168.1.1:80\n");
+        return FALSE;
+    }
 
     if (argc > 4) {
         for (int count = 4; count < argc; count++) {
@@ -390,7 +412,7 @@ BOOL ParseBruteForceArg(int argc, char* argv[], pBruteforceStruct pBruteforceStr
                     }
                     pBruteforceStruct->usernameTab[0] = (char*)malloc(stringSize);
                     if (pBruteforceStruct->usernameTab[0] == NULL) {
-                        // Memory full !! 
+                        free(pBruteforceStruct->usernameTab);
                         return FALSE;
                     }
                     strcpy_s(pBruteforceStruct->usernameTab[0], stringSize, argv[count + 1]);

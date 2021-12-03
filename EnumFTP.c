@@ -112,7 +112,7 @@ BOOL FtpEnum(char* serverIp, BOOL isBurtForce, FILE* pFile) {
         printOut(pFile, "\t[FTP] Brute Forcing FTP server:\n");
         for (int i = 0; i < ARRAY_SIZE_CHAR(usernameList) && !isFtpCreadValid; i++) {
             for (int j = 0; j < ARRAY_SIZE_CHAR(passwordList) && !isFtpCreadValid; j++) {
-                printOut(pFile, "\t%i/%i\r", i * ARRAY_SIZE_CHAR(usernameList) + j, ARRAY_SIZE_CHAR(passwordList) * ARRAY_SIZE_CHAR(usernameList));
+                printOut(pFile, "\t\t[i] %i/%i\r", i * ARRAY_SIZE_CHAR(passwordList) + j, ARRAY_SIZE_CHAR(passwordList) * ARRAY_SIZE_CHAR(usernameList));
                 isFtpCreadValid = TestPasswordFTP(serverIp, usernameList[i], passwordList[j]);
                 if (isFtpCreadValid) {
                     printf("\t\t[i] VALID: '%s:%s'\n", usernameList[i], passwordList[j]);
@@ -129,10 +129,11 @@ BOOL FtpBruteForce(char* serverIp,char** usernameList,UINT usernameListSize, cha
     printOut(pFile, "\t[FTP] Brute Forcing FTP server:\n");
     for (UINT i = 0; i < usernameListSize && !isFtpCreadValid; i++) {
         for (UINT j = 0; j < passwordListSize && !isFtpCreadValid; j++) {
-            printOut(pFile, "\t%i/%i\r", i * usernameListSize + j, passwordListSize * usernameListSize);
+            printOut(pFile, "\t\t[i] %i/%i\r", i * passwordListSize + j, passwordListSize * usernameListSize);
             isFtpCreadValid = TestPasswordFTP(serverIp, usernameList[i], passwordList[j]);
             if (isFtpCreadValid) {
-                ListCurrentDirectory(serverIp, (char*)usernameList[i], (char*)passwordList[j]);
+                printf("\t\t[i] VALID: '%s:%s'\n", usernameList[i], passwordList[j]);
+                //ListCurrentDirectory(serverIp, (char*)usernameList[i], (char*)passwordList[j]);
             }
         }
     }

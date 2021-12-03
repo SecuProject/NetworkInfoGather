@@ -10,8 +10,10 @@
 #include "MgArguments.h"
 #include "Network.h"
 
-// New
+// For the brute force
+#include "portList.h"
 #include "EnumFTP.h"
+#include "DetectHttpBasicAuth.h"
 
 #pragma comment(lib, "Advapi32.lib")
 #pragma comment(lib, "iphlpapi.lib")
@@ -105,22 +107,55 @@ BOOL Scan(ScanStruct scanStruct) {
 		free(scanStruct.ipAddress);
 	return FALSE;
 }
+
+
+VOID PrintInfoBf(char* protocol, char* ipAddress,int port,UINT nbCreadTry) {
+	printf("[-] %s basic authentication brute force:\n", protocol);
+	printf("\t[+] Target: %s:%i\n", ipAddress, port);
+	printf("\t[+] Number of cread to try: %u\n", nbCreadTry);
+}
 BOOL BruteForce(BruteforceStruct bruteforceStruct) {
+	UINT nbCreadTry = bruteforceStruct.nbUsername * bruteforceStruct.nbPassword;
+	BOOL result = FALSE;
+	char* httpAuthHeader = NULL;
+	// SET CUSTOM PORT IN ARG !!!
+
+	if (!scanPortOpenTCP(bruteforceStruct.ipAddress, bruteforceStruct.port, NULL)) {
+		printf("[-] Port %u is close on %s !\n", bruteforceStruct.port, bruteforceStruct.ipAddress);
+		return FALSE;
+	}
+	
 	switch (bruteforceStruct.protocol) {
+	case FTP:
+		PrintInfoBf("FTP", bruteforceStruct.ipAddress, bruteforceStruct.port, nbCreadTry);
+		result = FtpBruteForce(bruteforceStruct.ipAddress, bruteforceStruct.usernameTab, bruteforceStruct.nbUsername, bruteforceStruct.passwordTab, bruteforceStruct.nbPassword, NULL);
+		break;
+	case HTTP_BASIC:
+		PrintInfoBf("HTTP", bruteforceStruct.ipAddress, bruteforceStruct.port, nbCreadTry);
+		result = BruteforceBasic(bruteforceStruct.ipAddress, bruteforceStruct.port,FALSE, FALSE, bruteforceStruct.usernameTab, bruteforceStruct.nbUsername, bruteforceStruct.passwordTab, bruteforceStruct.nbPassword, &httpAuthHeader);
+		if (httpAuthHeader != NULL) {
+			printf("\t[i] HTTP Header: \n\t\t%s", httpAuthHeader);
+			free(httpAuthHeader);
+		}
+		break;
+	case HTTPS_BASIC:
+		PrintInfoBf("HTTPS", bruteforceStruct.ipAddress, bruteforceStruct.port, nbCreadTry);
+		result = BruteforceBasic(bruteforceStruct.ipAddress, bruteforceStruct.port, TRUE, FALSE, bruteforceStruct.usernameTab, bruteforceStruct.nbUsername, bruteforceStruct.passwordTab, bruteforceStruct.nbPassword, &httpAuthHeader);
+		if (httpAuthHeader != NULL) {
+			printf("\t[i] HTTPS Header: \n\t\t%s", httpAuthHeader);
+			free(httpAuthHeader);
+		}
+		break;
 	case LDAP:
 		// TODO
+		// PrintInfoBf("LDAP", bruteforceStruct.ipAddress, 443, nbCreadTry);
 		break;
 	case SMB:
 		//TODO
-		break;
-	case HTTP_BASIC:
-		//TODO
-		break;
-	case FTP:
-		return FtpBruteForce(bruteforceStruct.ipAddress, bruteforceStruct.usernameTab, bruteforceStruct.nbUsername, bruteforceStruct.passwordTab, bruteforceStruct.nbPassword, NULL);
+		// PrintInfoBf("SMB", bruteforceStruct.ipAddress, 445, nbCreadTry);
 		break;
 	}
-	return FALSE;
+	return result;
 }
 BOOL Exploit(ExploitStruct exploitStruct) {
 	switch (exploitStruct.exploit) {

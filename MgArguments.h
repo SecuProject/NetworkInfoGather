@@ -42,7 +42,8 @@ typedef enum {
     SMB,
     FTP,
     LDAP,
-    HTTP_BASIC
+    HTTP_BASIC,
+    HTTPS_BASIC
     /*
     SSH,
     RDP,
@@ -52,7 +53,10 @@ typedef enum {
 
 typedef struct BruteforceStruct {
     char ipAddress[16];
+    UINT port;
+
     EnumProtocol protocol;
+
     UINT nbUsername;
     char** usernameTab;
     UINT nbPassword;

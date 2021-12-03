@@ -40,7 +40,7 @@ BOOL GetARPTable(NetworkPcInfo** ptrArpTable, int* arpTableSize, INT32 ipRangeIn
 				inet_ntop(AF_INET, &(pipTable->Table[i].Address.Ipv4.sin_addr), ipAddress, IP_ADDRESS_LEN);
 				
 				if (!isDuplicate(arpTable, *arpTableSize, ipAddress) &&
-					isNetworkRange(ipAddress, ipRangeInt32)) {
+					GetNetworkRange(ipAddress, ipRangeInt32)) {
 					// Check Network
 					arpTable[*arpTableSize].ipAddress = (char*)calloc(IP_ADDRESS_LEN + 1, 1);
 					if (arpTable[*arpTableSize].ipAddress == NULL)
