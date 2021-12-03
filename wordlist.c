@@ -51,6 +51,7 @@ const char* usernameList[] = {
     "",
     "root",
     "admin",
+    "bob",
     "administrator",
     "anonymous",
     "user",

@@ -14,8 +14,8 @@
   - [ ] HTTP -> {servername,powerby}
   - [ ] HTTPS -> {servername,powerby,domain}
 - [ ] Brute force
-  - [ ] HTTP/HTTPS
-  - [ ] SMB
+  - [x] HTTP/HTTPS
+  - [x] SMB
   - [x] FTP
   - [ ] LDAP
 - [ ] Exploit

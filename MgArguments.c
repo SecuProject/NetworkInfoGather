@@ -79,9 +79,9 @@ VOID PrintMenuBruteForce() {
     printf("PROTOCOL:\n");
     printf("\tftp\n");
     printf("\thttp\n");
-    printf("\thttps\n\n");
-    /*printf("\tldap\n\n");
+    printf("\thttps\n");
     printf("\tsmb\n\n");
+    /*printf("\tldap\n\n");
     printf("\tssh\n\n");
     printf("\ttelnet\n\n");
     printf("\trdp\n\n");
@@ -379,12 +379,12 @@ BOOL ParseBruteForceArg(int argc, char* argv[], pBruteforceStruct pBruteforceStr
     } else if (strcmp(argv[2], "https") == 0) {
         pBruteforceStruct->protocol = HTTPS_BASIC;
         pBruteforceStruct->port = PORT_HTTPS;
-    /* } else if (strcmp(argv[2], "ldap") == 0) {
-        pBruteforceStruct->protocol = LDAP;
-        pBruteforceStruct->port = PORT_LDAP;
     } else if (strcmp(argv[2], "smb") == 0) {
         pBruteforceStruct->protocol = SMB;
-        pBruteforceStruct->port = PORT_SMB;*/
+        pBruteforceStruct->port = PORT_SMB;
+    /* } else if (strcmp(argv[2], "ldap") == 0) {
+        pBruteforceStruct->protocol = LDAP;
+        pBruteforceStruct->port = PORT_LDAP;*/
     } else {
         printf("[!] Invalid protocol !!!\n");
         PrintMenuBruteForce();
@@ -425,7 +425,7 @@ BOOL ParseBruteForceArg(int argc, char* argv[], pBruteforceStruct pBruteforceStr
                     }
                     pBruteforceStruct->passwordTab[0] = (char*)malloc(stringSize);
                     if (pBruteforceStruct->passwordTab[0] == NULL) {
-                        printf("[!] Fail to allocate 'passwordTab' in memory !\n");
+                        printf("[!] Fail to allocate 'passwordTab[0]' in memory !\n");
                         return FALSE;
                     }
                     strcpy_s(pBruteforceStruct->passwordTab[0], stringSize, argv[count + 1]);

@@ -64,18 +64,18 @@ BOOL LoginSMB(const char* username, const char* password, char* share) {
     return (result == NO_ERROR);
 }
 
-BOOL BrutForceSMB(char* sharePath, FILE* pFile) {
+BOOL BrutForceSMB(char* sharePath, const char** usernameTab, UINT usernameTabSize, const char** passwordTab, UINT passwordTabSize, FILE* pFile) {
     BOOL isSmbCreadValid = FALSE;
 
     printOut(pFile,"\t[SMB] Brute Forcing SMB server:\n");
 
-    for (int i = 0; i < ARRAY_SIZE_CHAR(usernameList) && !isSmbCreadValid; i++) {
-        for (int j = 0; j < ARRAY_SIZE_CHAR(passwordList) && !isSmbCreadValid; j++) {
-            printOut(pFile,"\t\t%i/%i\r", i * ARRAY_SIZE_CHAR(passwordList) + j +1,
-                ARRAY_SIZE_CHAR(passwordList) * ARRAY_SIZE_CHAR(usernameList));
-            isSmbCreadValid = LoginSMB(usernameList[i], passwordList[j], sharePath);
+    for (UINT i = 0; i < usernameTabSize && !isSmbCreadValid; i++) {
+        for (UINT j = 0; j < passwordTabSize && !isSmbCreadValid; j++) {
+            printOut(pFile,"\t\t[i] %i/%i\r", i * passwordTabSize + j +1,
+                passwordTabSize * usernameTabSize);
+            isSmbCreadValid = LoginSMB(usernameTab[i], passwordTab[j], sharePath);
             if (isSmbCreadValid)
-                printOut(pFile,"\t\t[i] VALID: %s:%s\n\n", usernameList[i], passwordList[j]);
+                printOut(pFile,"\t\t[i] VALID: %s:%s\n\n", usernameTab[i], passwordTab[j]);
             /*else
                 printOut(pFile,"[SMB] FAILED: %s:%s\n", usernameList[i], passwordList[j]);*/
         }
@@ -110,7 +110,7 @@ BOOL SmbEnum(char* serverIp, BOOL isBurtForce, FILE* pFile) {
         sprintf_s(sharePath, serverIpSize + 4 , "\\\\%s", serverIp);
 
         if (LoginSMB("", "", sharePath) || LoginSMB("guest", "guest", sharePath) || 
-            (isBurtForce && BrutForceSMB(sharePath, pFile))) {
+            (isBurtForce && BrutForceSMB(sharePath, usernameList, ARRAY_SIZE_CHAR(usernameList), passwordList, ARRAY_SIZE_CHAR(usernameList), pFile))) {
             if (SmbPublic(lpszServer,pFile))
                 WNetCancelConnection2A(sharePath, 0, TRUE);
             else

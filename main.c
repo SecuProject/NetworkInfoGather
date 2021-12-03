@@ -13,6 +13,7 @@
 // For the brute force
 #include "portList.h"
 #include "EnumFTP.h"
+#include "EnumSMB.h"
 #include "DetectHttpBasicAuth.h"
 
 #pragma comment(lib, "Advapi32.lib")
@@ -114,6 +115,21 @@ VOID PrintInfoBf(char* protocol, char* ipAddress,int port,UINT nbCreadTry) {
 	printf("\t[+] Target: %s:%i\n", ipAddress, port);
 	printf("\t[+] Number of cread to try: %u\n", nbCreadTry);
 }
+BOOL BrutForceSmbFunc(BruteforceStruct bruteforceStruct) {
+	BOOL result = FALSE;
+	size_t serverIpSize = strlen(bruteforceStruct.ipAddress) + 4 + 1;
+	char* sharePath = (char*)malloc(serverIpSize);
+	if (sharePath == NULL)
+		return FALSE;
+
+	sprintf_s(sharePath, serverIpSize, "\\\\%s", bruteforceStruct.ipAddress);
+
+
+	result = BrutForceSMB(sharePath, bruteforceStruct.usernameTab, bruteforceStruct.nbUsername, bruteforceStruct.passwordTab, bruteforceStruct.nbPassword, NULL);
+
+	free(sharePath);
+	return result;
+}
 BOOL BruteForce(BruteforceStruct bruteforceStruct) {
 	UINT nbCreadTry = bruteforceStruct.nbUsername * bruteforceStruct.nbPassword;
 	BOOL result = FALSE;
@@ -146,14 +162,14 @@ BOOL BruteForce(BruteforceStruct bruteforceStruct) {
 			free(httpAuthHeader);
 		}
 		break;
-	case LDAP:
+	case SMB:
+		PrintInfoBf("SMB", bruteforceStruct.ipAddress, 445, nbCreadTry);
+		result = BrutForceSmbFunc(bruteforceStruct);
+		break;
+	/*case LDAP:
 		// TODO
 		// PrintInfoBf("LDAP", bruteforceStruct.ipAddress, 443, nbCreadTry);
-		break;
-	case SMB:
-		//TODO
-		// PrintInfoBf("SMB", bruteforceStruct.ipAddress, 445, nbCreadTry);
-		break;
+		break;*/
 	}
 	return result;
 }
