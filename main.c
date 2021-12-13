@@ -169,6 +169,10 @@ BOOL BruteForce(BruteforceStruct bruteforceStruct) {
 	/*case LDAP:
 		// TODO
 		// PrintInfoBf("LDAP", bruteforceStruct.ipAddress, 443, nbCreadTry);
+
+		StructWordList structWordList;
+		StructCredentials structCredentials;
+		result = BruteForceLDAP(ipAddress, structWordList, structCredentials);
 		break;*/
 	}
 	return result;

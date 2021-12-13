@@ -97,6 +97,9 @@
     <Filter Include="Source Files\3. PortScan\PortList">
       <UniqueIdentifier>{3cd9dd40-88a8-44a2-977f-e6787250df41}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\4. FingerPrintInfo\EnumLDAP">
+      <UniqueIdentifier>{59e795c2-dfff-4295-bc36-586a49584340}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -185,6 +188,9 @@
     </ClCompile>
     <ClCompile Include="portList.c">
       <Filter>Source Files\3. PortScan\PortList</Filter>
+    </ClCompile>
+    <ClCompile Include="EnumLDAP.c">
+      <Filter>Source Files\4. FingerPrintInfo\EnumLDAP</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -283,6 +289,9 @@
     </ClInclude>
     <ClInclude Include="portList.h">
       <Filter>Source Files\3. PortScan\PortList</Filter>
+    </ClInclude>
+    <ClInclude Include="EnumLDAP.h">
+      <Filter>Source Files\4. FingerPrintInfo\EnumLDAP</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -12,6 +12,7 @@
 #include "EnumSMB.h"
 #include "EnumNetBios.h"
 #include "EnumSMTP.h"
+#include "EnumLDAP.h"
 
 
 #define NO_OFFSET			0
@@ -103,7 +104,7 @@ BOOL PortFingerPrint(NetworkPcInfo* networkPcInfo, int nbDetected, BOOL isBrutef
 					// update mac if not 00-00-00-00-00-00
 					break;
 				case PORT_LDAP:
-					// TODO
+					EnumLDAP(ipAddress, portNb, isBruteforce, pFile);// TODO
 					break;
 				case PORT_SMB:
 					SmbEnum(ipAddress, isBruteforce, pFile);
