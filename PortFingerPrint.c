@@ -15,6 +15,11 @@
 #include "EnumLDAP.h"
 
 
+
+//Temp
+#include "wordlist.h"
+
+
 #define NO_OFFSET			0
 #define MYSQL_OFFSET		5
 
@@ -54,7 +59,16 @@ BOOL GrabBanner(char* protocalName, char* ipAddress, unsigned int port, char* bu
 
 BOOL PortFingerPrint(NetworkPcInfo* networkPcInfo, int nbDetected, BOOL isBruteforce, FILE* pFile) {
 	BOOL isWAfDetection = FALSE;
-	
+
+	StructWordList structWordList;
+	structWordList.isBruteForce = isBruteforce;
+
+	structWordList.usernameList = (char**)usernameList;
+	structWordList.usernameListSize = sizeof(usernameList) / sizeof(char*);
+
+	structWordList.passwordList = (char**)passwordList;
+	structWordList.passwordListSize = sizeof(passwordList) / sizeof(char*);
+
 	for (int i = 0; i < nbDetected; i++) {
 		char* ipAddress = networkPcInfo[i].ipAddress;
 		int nbFPInfo = networkPcInfo[i].nbOpenPort;
@@ -104,7 +118,7 @@ BOOL PortFingerPrint(NetworkPcInfo* networkPcInfo, int nbDetected, BOOL isBrutef
 					// update mac if not 00-00-00-00-00-00
 					break;
 				case PORT_LDAP:
-					EnumLDAP(ipAddress, portNb, isBruteforce, pFile);// TODO
+					EnumLDAP(ipAddress, portNb, structWordList, pFile);// TODO
 					break;
 				case PORT_SMB:
 					SmbEnum(ipAddress, isBruteforce, pFile);

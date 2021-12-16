@@ -86,7 +86,7 @@ BOOL BrutForceSMB(char* sharePath, const char** usernameTab, UINT usernameTabSiz
 }
 
 
-BOOL SmbEnum(char* serverIp, BOOL isBurtForce, FILE* pFile) {
+BOOL SmbEnum(char* serverIp, BOOL isBruteForce, FILE* pFile) {
     size_t serverIpSize = strlen(serverIp) + 1;
     LPWSTR lpszServer = (LPWSTR)calloc(serverIpSize, sizeof(LPWSTR));
 
@@ -110,7 +110,7 @@ BOOL SmbEnum(char* serverIp, BOOL isBurtForce, FILE* pFile) {
         sprintf_s(sharePath, serverIpSize + 4 , "\\\\%s", serverIp);
 
         if (LoginSMB("", "", sharePath) || LoginSMB("guest", "guest", sharePath) || 
-            (isBurtForce && BrutForceSMB(sharePath, usernameList, ARRAY_SIZE_CHAR(usernameList), passwordList, ARRAY_SIZE_CHAR(usernameList), pFile))) {
+            (isBruteForce && BrutForceSMB(sharePath, usernameList, ARRAY_SIZE_CHAR(usernameList), passwordList, ARRAY_SIZE_CHAR(usernameList), pFile))) {
             if (SmbPublic(lpszServer,pFile))
                 WNetCancelConnection2A(sharePath, 0, TRUE);
             else
@@ -124,7 +124,7 @@ BOOL SmbEnum(char* serverIp, BOOL isBurtForce, FILE* pFile) {
 }
 
 /*
-BOOL SmbEnum(char* serverIp, BOOL isBurtForce, FILE* pFile) {
+BOOL SmbEnum(char* serverIp, BOOL isBruteForce, FILE* pFile) {
     int serverIpSize = (int)strlen(serverIp);
 
     LPTSTR lpszServer = (LPTSTR)calloc(serverIpSize + 1, sizeof(LPTSTR));
@@ -145,7 +145,7 @@ BOOL SmbEnum(char* serverIp, BOOL isBurtForce, FILE* pFile) {
         free(sharePath);
         return TRUE;
     } else {
-        if (LoginSMB("", "", sharePath) || LoginSMB("guest", "guest", sharePath) || (isBurtForce && BrutForceSMB(sharePath, pFile))) {
+        if (LoginSMB("", "", sharePath) || LoginSMB("guest", "guest", sharePath) || (isBruteForce && BrutForceSMB(sharePath, pFile))) {
             if (SmbPublic(lpszServer,pFile))
                 WNetCancelConnection2A(sharePath, 0, TRUE);
             else

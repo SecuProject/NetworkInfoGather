@@ -98,7 +98,7 @@ BOOL ListCurrentDirectory(char* IpAddress, char* username, char* password) {
     return TRUE;
 }
 
-BOOL FtpEnum(char* serverIp, BOOL isBurtForce, FILE* pFile) {
+BOOL FtpEnum(char* serverIp, BOOL isBruteForce, FILE* pFile) {
     const char* usernameAnomym = "anonymous";
     const char* passwordAnomym = "anonymous";
     BOOL isFtpCreadValid = FALSE;
@@ -108,7 +108,7 @@ BOOL FtpEnum(char* serverIp, BOOL isBurtForce, FILE* pFile) {
         printf("\t\t[i] VALID: '%s:%s'\n", usernameAnomym, passwordAnomym);
         ListCurrentDirectory(serverIp, (char*)usernameAnomym, (char*)passwordAnomym);
         isFtpCreadValid = TRUE;
-    }else if (isBurtForce) {
+    }else if (isBruteForce) {
         printOut(pFile, "\t[FTP] Brute Forcing FTP server:\n");
         for (int i = 0; i < ARRAY_SIZE_CHAR(usernameList) && !isFtpCreadValid; i++) {
             for (int j = 0; j < ARRAY_SIZE_CHAR(passwordList) && !isFtpCreadValid; j++) {

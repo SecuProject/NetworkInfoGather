@@ -11,6 +11,7 @@ typedef struct {
     char** passwordList;
     UINT passwordListSize;
 
+    BOOL isBruteForce;
 } StructWordList;
 
 typedef struct {
@@ -23,8 +24,8 @@ typedef struct {
     */
 } StructCredentials;
 
-BOOL BruteForceLDAP(char* ipAddress, StructWordList structWordList, StructCredentials structCredentials);
-BOOL EnumLDAP(char* ipAddress, int port, BOOL isBurtForce, FILE* pFile);
+BOOL BruteForceLDAP(char* ipAddress, int port, StructWordList structWordList, StructCredentials* structCredentials);
+BOOL EnumLDAP(char* ipAddress, int port, StructWordList structWordList, FILE* pFile);
 
 
 
