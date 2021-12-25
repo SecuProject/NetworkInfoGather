@@ -9,6 +9,7 @@
 #include "PortFingerPrint.h"
 #include "MgArguments.h"
 #include "Network.h"
+#include "Exploit.h"
 
 // For the brute force
 #include "portList.h"
@@ -125,13 +126,13 @@ BOOL BrutForceSmbFunc(BruteforceStruct bruteforceStruct) {
 	sprintf_s(sharePath, serverIpSize, "\\\\%s", bruteforceStruct.ipAddress);
 
 
-	result = BrutForceSMB(sharePath, bruteforceStruct.usernameTab, bruteforceStruct.nbUsername, bruteforceStruct.passwordTab, bruteforceStruct.nbPassword, NULL);
+	result = BrutForceSMB(sharePath, bruteforceStruct.structWordList, NULL);
 
 	free(sharePath);
 	return result;
 }
 BOOL BruteForce(BruteforceStruct bruteforceStruct) {
-	UINT nbCreadTry = bruteforceStruct.nbUsername * bruteforceStruct.nbPassword;
+	UINT nbCreadTry = bruteforceStruct.structWordList.nbUsername * bruteforceStruct.structWordList.nbPassword;
 	BOOL result = FALSE;
 	char* httpAuthHeader = NULL;
 	// SET CUSTOM PORT IN ARG !!!
@@ -144,11 +145,11 @@ BOOL BruteForce(BruteforceStruct bruteforceStruct) {
 	switch (bruteforceStruct.protocol) {
 	case FTP:
 		PrintInfoBf("FTP", bruteforceStruct.ipAddress, bruteforceStruct.port, nbCreadTry);
-		result = FtpBruteForce(bruteforceStruct.ipAddress, bruteforceStruct.usernameTab, bruteforceStruct.nbUsername, bruteforceStruct.passwordTab, bruteforceStruct.nbPassword, NULL);
+		result = FtpBruteForce(bruteforceStruct.ipAddress, bruteforceStruct.structWordList, NULL);
 		break;
 	case HTTP_BASIC:
 		PrintInfoBf("HTTP", bruteforceStruct.ipAddress, bruteforceStruct.port, nbCreadTry);
-		result = BruteforceBasic(bruteforceStruct.ipAddress, bruteforceStruct.port,FALSE, FALSE, bruteforceStruct.usernameTab, bruteforceStruct.nbUsername, bruteforceStruct.passwordTab, bruteforceStruct.nbPassword, &httpAuthHeader);
+		result = BruteforceBasic(bruteforceStruct,FALSE, FALSE, &httpAuthHeader);
 		if (httpAuthHeader != NULL) {
 			printf("\t[i] HTTP Header: \n\t\t%s", httpAuthHeader);
 			free(httpAuthHeader);
@@ -156,7 +157,7 @@ BOOL BruteForce(BruteforceStruct bruteforceStruct) {
 		break;
 	case HTTPS_BASIC:
 		PrintInfoBf("HTTPS", bruteforceStruct.ipAddress, bruteforceStruct.port, nbCreadTry);
-		result = BruteforceBasic(bruteforceStruct.ipAddress, bruteforceStruct.port, TRUE, FALSE, bruteforceStruct.usernameTab, bruteforceStruct.nbUsername, bruteforceStruct.passwordTab, bruteforceStruct.nbPassword, &httpAuthHeader);
+		result = BruteforceBasic(bruteforceStruct, TRUE, FALSE, &httpAuthHeader);
 		if (httpAuthHeader != NULL) {
 			printf("\t[i] HTTPS Header: \n\t\t%s", httpAuthHeader);
 			free(httpAuthHeader);
@@ -177,15 +178,6 @@ BOOL BruteForce(BruteforceStruct bruteforceStruct) {
 	}
 	return result;
 }
-BOOL Exploit(ExploitStruct exploitStruct) {
-	switch (exploitStruct.exploit) {
-	case ZERO_LOGON:
-		break;
-	}
-	return TRUE;
-}
-
-
 
 /*
 Arg manage output file !!!

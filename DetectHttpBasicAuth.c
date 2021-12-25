@@ -92,7 +92,10 @@ AuthScheme GetAuthHeader(char* serverResponce, UINT responceSize, char** ppAuthH
 
 
 
-BOOL BruteforceBasic(char* ipAddress, int port, BOOL isSsl, BOOL isProxy, const char** usernameTab, UINT usernameTabSize, const char** passwordTab, UINT passwordTabSize,char** httpAuthHead) {
+//BOOL BruteforceBasic(char* ipAddress, int port, BOOL isSsl, BOOL isProxy, const char** usernameTab, UINT usernameTabSize, const char** passwordTab, UINT passwordTabSize,char** httpAuthHead) {
+BOOL BruteforceBasic(BruteforceStruct bruteforceStruct, BOOL isSsl, BOOL isProxy, char** httpAuthHead) {
+	StructWordList structWordList = bruteforceStruct.structWordList;
+
 	char* bufCread;
 	char* bufEncode64;
 	char* bufAuthHead;
@@ -118,9 +121,9 @@ BOOL BruteforceBasic(char* ipAddress, int port, BOOL isSsl, BOOL isProxy, const 
 	}
 	UINT i;
 	UINT j;
-	for (i = 0; i < usernameTabSize && !IS_HTTP_SUCCESSFUL(returnCode); i++) {
-		for (j = 0; j < passwordTabSize && !IS_HTTP_SUCCESSFUL(returnCode); j++) {
-			sprintf_s(bufCread, BUFFER_SIZE + 1, "%s:%s", usernameTab[i], passwordTab[j]);
+	for (i = 0; i < structWordList.nbUsername && !IS_HTTP_SUCCESSFUL(returnCode); i++) {
+		for (j = 0; j < structWordList.nbPassword && !IS_HTTP_SUCCESSFUL(returnCode); j++) {
+			sprintf_s(bufCread, BUFFER_SIZE + 1, "%s:%s", structWordList.usernameTab[i], structWordList.passwordTab[j]);
 			int bufferEncode64Size = Base64Encode(bufCread, bufEncode64);
 			bufAuthHead = (char*)malloc(bufferEncode64Size + authDataSize + 1);
 			if (bufAuthHead == NULL) {
@@ -132,9 +135,9 @@ BOOL BruteforceBasic(char* ipAddress, int port, BOOL isSsl, BOOL isProxy, const 
 			UINT responceSize;
 			char* serverResponce = NULL;
 			if (isSsl)
-				responceSize = GetHttpsServer(ipAddress, port, "HEAD", "/", NULL, &serverResponce, bufAuthHead,FALSE, NULL);
+				responceSize = GetHttpsServer(bruteforceStruct.ipAddress, bruteforceStruct.port, "HEAD", "/", NULL, &serverResponce, bufAuthHead,FALSE, NULL);
 			else
-				responceSize = GetHttpServer(ipAddress, port, "HEAD", "/", NULL, &serverResponce, bufAuthHead, NULL);
+				responceSize = GetHttpServer(bruteforceStruct.ipAddress, bruteforceStruct.port, "HEAD", "/", NULL, &serverResponce, bufAuthHead, NULL);
 
 			if (responceSize > 0) {
 				returnCode = GetHttpReturnCode(serverResponce, responceSize);
@@ -142,7 +145,7 @@ BOOL BruteforceBasic(char* ipAddress, int port, BOOL isSsl, BOOL isProxy, const 
 
 				if (IS_HTTP_SUCCESSFUL(returnCode)) {
 					size_t httpAuthHeadSize = strlen(bufAuthHead) +1;
-					printf("\t\t[Credential] %s:%s\n", usernameTab[i], passwordTab[j]);
+					printf("\t\t[Credential] %s:%s\n", structWordList.usernameTab[i], structWordList.passwordTab[j]);
 
 					*httpAuthHead = (char*)malloc(httpAuthHeadSize);
 					if (*httpAuthHead == NULL) {
@@ -204,9 +207,24 @@ BOOL HttpBasicAuth(char* ipAddress, int port, PHTTP_STRUC pHttpStructPage, BOOL 
 	case BASIC:
 		printf("Basic");
 		GetStatusCodeAuth(pHttpStructPage->returnCode);
-		if (isBruteForce)
-			if (BruteforceBasic(ipAddress, port, isSsl, IS_HTTP_PROXY_AUTH(pHttpStructPage->returnCode), usernameList, ARRAY_SIZE_CHAR(usernameList), passwordList, ARRAY_SIZE_CHAR(passwordList), &httpAuthHead))
+		if (isBruteForce) {
+			StructWordList structWordList = {
+				.usernameTab	= (char**)usernameList,
+				.nbUsername		= ARRAY_SIZE_CHAR(usernameList),
+				.passwordTab	= (char**)passwordList,
+				.nbPassword		= ARRAY_SIZE_CHAR(passwordList)
+			};
+			BruteforceStruct bruteforceStruct = {
+				.ipAddress			= 0x00,
+				.port				= (UINT)port,
+				.structWordList		= structWordList
+			};
+			strcpy_s(bruteforceStruct.ipAddress, 16, ipAddress);
+
+			if (BruteforceBasic(bruteforceStruct, isSsl, IS_HTTP_PROXY_AUTH(pHttpStructPage->returnCode), &httpAuthHead))
 				pHttpStructPage->AuthHeader = httpAuthHead;
+		}
+			
 		break;
 	case BEARER:
 		printf("Bearer");

@@ -63,11 +63,11 @@ BOOL PortFingerPrint(NetworkPcInfo* networkPcInfo, int nbDetected, BOOL isBrutef
 	StructWordList structWordList;
 	structWordList.isBruteForce = isBruteforce;
 
-	structWordList.usernameList = (char**)usernameList;
-	structWordList.usernameListSize = sizeof(usernameList) / sizeof(char*);
+	structWordList.usernameTab = (char**)usernameList;
+	structWordList.nbUsername = sizeof(usernameList) / sizeof(char*);
 
-	structWordList.passwordList = (char**)passwordList;
-	structWordList.passwordListSize = sizeof(passwordList) / sizeof(char*);
+	structWordList.passwordTab = (char**)passwordList;
+	structWordList.nbPassword = sizeof(passwordList) / sizeof(char*);
 
 	for (int i = 0; i < nbDetected; i++) {
 		char* ipAddress = networkPcInfo[i].ipAddress;

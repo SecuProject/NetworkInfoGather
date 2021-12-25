@@ -161,6 +161,7 @@
     <ClCompile Include="EnumNetBios.c" />
     <ClCompile Include="EnumSMB.c" />
     <ClCompile Include="EnumSMTP.c" />
+    <ClCompile Include="Exploit.c" />
     <ClCompile Include="FaviconDetection.c" />
     <ClCompile Include="GetHTTPserver.c" />
     <ClCompile Include="GetHTTPSserver.c" />
@@ -177,6 +178,7 @@
     <ClCompile Include="PortScan.c" />
     <ClCompile Include="ToolsHTTP.c" />
     <ClCompile Include="wordlist.c" />
+    <ClCompile Include="ZeroLogon.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AdapterInformation.h" />
@@ -193,6 +195,7 @@
     <ClInclude Include="EnumNetBios.h" />
     <ClInclude Include="EnumSMB.h" />
     <ClInclude Include="EnumSMTP.h" />
+    <ClInclude Include="Exploit.h" />
     <ClInclude Include="FaviconDatabase.h" />
     <ClInclude Include="FaviconDetection.h" />
     <ClInclude Include="GetHTTPserver.h" />
@@ -204,6 +207,7 @@
     <ClInclude Include="md5.h" />
     <ClInclude Include="MgArguments.h" />
     <ClInclude Include="NetDiscovery.h" />
+    <ClInclude Include="NetLogon.h" />
     <ClInclude Include="Network.h" />
     <ClInclude Include="PassifPacketSniffing.h" />
     <ClInclude Include="PortFingerPrint.h" />
@@ -212,6 +216,7 @@
     <ClInclude Include="tcpIpModuel.h" />
     <ClInclude Include="ToolsHTTP.h" />
     <ClInclude Include="wordlist.h" />
+    <ClInclude Include="ZeroLogon.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="TODO.md" />

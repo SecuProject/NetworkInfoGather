@@ -3,6 +3,8 @@
 *.log
 *.lastbuildstate
 *.recipe
+*.iobj
+*.ipdb
 MacUpdate/
 x64/
 Debug/

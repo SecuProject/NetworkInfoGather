@@ -100,6 +100,12 @@
     <Filter Include="Source Files\4. FingerPrintInfo\EnumLDAP">
       <UniqueIdentifier>{59e795c2-dfff-4295-bc36-586a49584340}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Exploit">
+      <UniqueIdentifier>{ed027ce0-2f7f-4cea-b5e5-b62b1084ccc8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Exploit\ZeroLogon">
+      <UniqueIdentifier>{35445645-6255-49b0-a995-d35f446b29b6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -191,6 +197,12 @@
     </ClCompile>
     <ClCompile Include="EnumLDAP.c">
       <Filter>Source Files\4. FingerPrintInfo\EnumLDAP</Filter>
+    </ClCompile>
+    <ClCompile Include="Exploit.c">
+      <Filter>Source Files\Exploit</Filter>
+    </ClCompile>
+    <ClCompile Include="ZeroLogon.c">
+      <Filter>Source Files\Exploit\ZeroLogon</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -292,6 +304,15 @@
     </ClInclude>
     <ClInclude Include="EnumLDAP.h">
       <Filter>Source Files\4. FingerPrintInfo\EnumLDAP</Filter>
+    </ClInclude>
+    <ClInclude Include="Exploit.h">
+      <Filter>Source Files\Exploit</Filter>
+    </ClInclude>
+    <ClInclude Include="ZeroLogon.h">
+      <Filter>Source Files\Exploit\ZeroLogon</Filter>
+    </ClInclude>
+    <ClInclude Include="NetLogon.h">
+      <Filter>Source Files\Exploit\ZeroLogon</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

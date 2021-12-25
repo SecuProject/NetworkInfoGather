@@ -38,6 +38,21 @@ typedef struct ScanStruct {
 
 /////////////////// Brute Force ///////////////////////
 //
+typedef struct {
+    char** usernameTab;
+    UINT nbUsername;
+
+    char** passwordTab;
+    UINT nbPassword;
+
+    BOOL isBruteForce;
+} StructWordList;
+
+typedef struct {
+    char* username;
+    char* password;
+} StructCredentials;
+
 typedef enum {
     SMB,
     FTP,
@@ -57,10 +72,12 @@ typedef struct BruteforceStruct {
 
     EnumProtocol protocol;
 
-    UINT nbUsername;
+    StructWordList structWordList;
+    StructCredentials structCredentials;
+    /*UINT nbUsername;
     char** usernameTab;
     UINT nbPassword;
-    char** passwordTab;
+    char** passwordTab;*/
     BOOL continueSuccess;
 }BruteforceStruct, * pBruteforceStruct;
 //
@@ -71,7 +88,8 @@ typedef struct BruteforceStruct {
 ///////////////////// Exploit /////////////////////////
 //
 typedef struct {
-    char serverFQDN[MAX_PATH]; // check if valid FQDN ('.' * 3)
+    WCHAR serverFQDN[MAX_PATH]; // check if valid FQDN ('.' * 3)
+    WCHAR computerName[MAX_PATH];
     BOOL isOnlyCheck;
 }ExploitZeroLogon;
 

@@ -3,6 +3,7 @@
 #include <wininet.h>
 #include "wordlist.h"
 #include "Network.h"
+#include "MgArguments.h"
 
 
 
@@ -123,16 +124,18 @@ BOOL FtpEnum(char* serverIp, BOOL isBruteForce, FILE* pFile) {
     }
     return isFtpCreadValid;
 }
-BOOL FtpBruteForce(char* serverIp,char** usernameList,UINT usernameListSize, char** passwordList, UINT passwordListSize, FILE* pFile) {
+BOOL FtpBruteForce(char* serverIp, StructWordList structWordList, FILE* pFile) {
     BOOL isFtpCreadValid = FALSE;
     
+
+
     printOut(pFile, "\t[FTP] Brute Forcing FTP server:\n");
-    for (UINT i = 0; i < usernameListSize && !isFtpCreadValid; i++) {
-        for (UINT j = 0; j < passwordListSize && !isFtpCreadValid; j++) {
-            printOut(pFile, "\t\t[i] %i/%i\r", i * passwordListSize + j, passwordListSize * usernameListSize);
-            isFtpCreadValid = TestPasswordFTP(serverIp, usernameList[i], passwordList[j]);
+    for (UINT i = 0; i < structWordList.nbUsername && !isFtpCreadValid; i++) {
+        for (UINT j = 0; j < structWordList.nbPassword && !isFtpCreadValid; j++) {
+            printOut(pFile, "\t\t[i] %i/%i\r", i * structWordList.nbPassword + j, structWordList.nbPassword * structWordList.nbUsername);
+            isFtpCreadValid = TestPasswordFTP(serverIp, structWordList.usernameTab[i], structWordList.passwordTab[j]);
             if (isFtpCreadValid) {
-                printf("\t\t[i] VALID: '%s:%s'\n", usernameList[i], passwordList[j]);
+                printf("\t\t[i] VALID: '%s:%s'\n", structWordList.usernameTab[i], structWordList.passwordTab[j]);
                 //ListCurrentDirectory(serverIp, (char*)usernameList[i], (char*)passwordList[j]);
             }
         }

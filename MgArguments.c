@@ -56,21 +56,28 @@ BOOL GetPortList(char* portListRaw, pScanStruct pScanStruct) {
 }
 
 // t.t.com
-BOOL CheckFQDN(char* fqdn) {
+DWORD CheckFQDN(char* fqdn) {
     //const char* invalidChar = "& '~|";
-    char* nextTokent = NULL;
+    WCHAR* nextTokent = NULL;
     UINT i;
     char* pch;
+    DWORD pComputerName;
 
     if (strlen(fqdn) < 7)
         return FALSE;
 
     pch = strchr(fqdn, '.');
+    if (pch != NULL)
+        pComputerName = (DWORD)(pch - fqdn);
+
     for (i = 0; pch != NULL; i++) {
         //printf("%s\n", pch);
         pch = strchr(pch + 1, '.');
     }
-    return i == 2;
+    if (i == 2)
+        return pComputerName;
+
+    return FALSE;
 }
 
 VOID PrintMenuBruteForce() {
@@ -109,10 +116,10 @@ VOID PrintMenuExploit() {
     printf("NetworkInfoGather.exe exploit EXPLOIT_NAME\n\n");
 
     printf("EXPLOIT_NAME:\n");
-    printf("\tzeroLogon [-c/-e] -d dc1.domain.local\n");
-    printf("\t\t-d\tServer FQDN [REQUIRED]\n");
-    printf("\t\t-c\tCheck if server is vulnerable [DEFAULT]\n");
-    printf("\t\t-e\tExploit vulnerable and set DC password to NULL\n");
+    printf("\tzerologon [-c/-e] -d dc1.domain.local\n");
+    printf("\t\t-d [FQDN]\tServer FQDN [REQUIRED]\n");
+    printf("\t\t-c\t\tCheck if server is vulnerable [DEFAULT]\n");
+    printf("\t\t-e\t\tExploit vulnerable and set DC password to NULL\n");
     return;
 }
 VOID PrintMenuScan() {
@@ -358,14 +365,16 @@ VOID LoadFileEG(){
 
 
 
+//BOOL ParseBruteForceArg(int argc, char* argv[], pBruteforceStruct pBruteforceStruct) {
 BOOL ParseBruteForceArg(int argc, char* argv[], pBruteforceStruct pBruteforceStruct) {
-    pBruteforceStruct->nbUsername = 0;
-    pBruteforceStruct->usernameTab = NULL;
-    pBruteforceStruct->nbPassword = 0;
-    pBruteforceStruct->passwordTab = NULL;
+    StructWordList structWordList;
+    structWordList.nbUsername = 0;
+    structWordList.usernameTab = NULL;
+    structWordList.nbPassword = 0;
+    structWordList.passwordTab = NULL;
     pBruteforceStruct->continueSuccess = FALSE;
     pBruteforceStruct->port = 0;
-
+    
     if (argc < 4) {
         PrintMenuBruteForce();
         return FALSE;
@@ -403,68 +412,76 @@ BOOL ParseBruteForceArg(int argc, char* argv[], pBruteforceStruct pBruteforceStr
             size_t argLen = strlen(argv[count]);
             if ((argv[count][0] == '-' || argv[count][0] == '/') && argLen == 2) {
                 BOOL nextNotNull = (argc > count + 1);
-                if (argv[count][1] == 'u' && nextNotNull) {
-                    size_t stringSize = strlen(argv[count + 1]) + 1;
-                    pBruteforceStruct->usernameTab = (char**)calloc(1, sizeof(char*));
-                    if (pBruteforceStruct->usernameTab == NULL) {
-                        printf("[!] Fail to allocate 'usernameTab' in memory !\n");
+                if (nextNotNull) {
+                    size_t stringSize;
+                    switch (argv[count][1]){
+                    case 'u':
+                        stringSize = strlen(argv[count + 1]) + 1;
+                        structWordList.usernameTab = (char**)malloc(sizeof(char*));
+                        if (structWordList.usernameTab == NULL) {
+                            printf("[!] Fail to allocate 'usernameTab' in memory !\n");
+                            return FALSE;
+                        }
+                        structWordList.usernameTab[0] = (char*)malloc(stringSize);
+                        if (structWordList.usernameTab[0] == NULL) {
+                            free(structWordList.usernameTab);
+                            return FALSE;
+                        }
+                        strcpy_s(structWordList.usernameTab[0], stringSize, argv[count + 1]);
+                        structWordList.nbUsername = 1;
+                        break;
+                    case 'p':
+                        stringSize = strlen(argv[count + 1]) + 1;
+                        structWordList.passwordTab = (char**)malloc(sizeof(char*));
+                        if (structWordList.passwordTab == NULL) {
+                            printf("[!] Fail to allocate 'passwordTab' in memory !\n");
+                            return FALSE;
+                        }
+                        structWordList.passwordTab[0] = (char*)malloc(stringSize);
+                        if (structWordList.passwordTab[0] == NULL) {
+                            printf("[!] Fail to allocate 'passwordTab[0]' in memory !\n");
+                            return FALSE;
+                        }
+                        strcpy_s(structWordList.passwordTab[0], stringSize, argv[count + 1]);
+                        structWordList.nbPassword = 1;
+                        break;
+                    case 'U':
+                        structWordList.nbUsername = LoadWordList(argv[count + 1], &(structWordList.usernameTab));
+                        if (structWordList.nbUsername == 0) {
+                            printf("[x] Fail to open file !\n");
+                            return FALSE;
+                        }
+                        break;
+                    case 'P':
+                        structWordList.nbPassword = LoadWordList(argv[count + 1], &(structWordList.passwordTab));
+                        if (structWordList.nbPassword == 0) {
+                            printf("[x] Fail to open file !\n");
+                            return FALSE;
+                        }
+                        break;
+                    default:
+                        printf("[x] Error unkown argrument '%s'!\n", argv[count]);
                         return FALSE;
                     }
-                    pBruteforceStruct->usernameTab[0] = (char*)malloc(stringSize);
-                    if (pBruteforceStruct->usernameTab[0] == NULL) {
-                        free(pBruteforceStruct->usernameTab);
-                        return FALSE;
-                    }
-                    strcpy_s(pBruteforceStruct->usernameTab[0], stringSize, argv[count + 1]);
-                } else if (argv[count][1] == 'p' && nextNotNull) {
-                    size_t stringSize = strlen(argv[count + 1]) + 1;
-                    pBruteforceStruct->passwordTab = (char**)calloc(1, sizeof(char*));
-                    if (pBruteforceStruct->passwordTab == NULL) {
-                        printf("[!] Fail to allocate 'passwordTab' in memory !\n");
-                        return FALSE;
-                    }
-                    pBruteforceStruct->passwordTab[0] = (char*)malloc(stringSize);
-                    if (pBruteforceStruct->passwordTab[0] == NULL) {
-                        printf("[!] Fail to allocate 'passwordTab[0]' in memory !\n");
-                        return FALSE;
-                    }
-                    strcpy_s(pBruteforceStruct->passwordTab[0], stringSize, argv[count + 1]);
-                } else if (argv[count][1] == 'U' && nextNotNull) {
-                    pBruteforceStruct->nbUsername = LoadWordList(argv[count + 1], &(pBruteforceStruct->usernameTab));
-                    if (pBruteforceStruct->nbUsername == 0) {
-                        printf("[x] Fail to open file !\n");
-                        return FALSE;
-                    }
-                } else if (argv[count][1] == 'P' && nextNotNull) {
-                    pBruteforceStruct->nbPassword = LoadWordList(argv[count + 1], &(pBruteforceStruct->passwordTab));
-                    if (pBruteforceStruct->nbPassword == 0) {
-                        printf("[x] Fail to open file !\n");
-                        return FALSE;
-                    }
-                } else {
-                    printf("[x] Error !\n");
-                    return FALSE;
                 }
-            } else if (strcmp(argv[count], "--continueSuccess") == 0) {
-                pBruteforceStruct->continueSuccess = TRUE;
-            }/* else {
-                printf("[x] Error !\n");
-                return FALSE;
-            }*/
+                if (strcmp(argv[count], "--continueSuccess") == 0) {
+                    pBruteforceStruct->continueSuccess = TRUE;
+                }
+            }
         }
     }
 
-    if (pBruteforceStruct->nbUsername == 0) {
+    if (structWordList.nbUsername == 0) {
         // Load default wordlist
-        pBruteforceStruct->usernameTab = (char**)usernameList;
-        pBruteforceStruct->nbUsername = sizeof(usernameList) / sizeof(char*);
+        structWordList.usernameTab = (char**)usernameList;
+        structWordList.nbUsername = sizeof(usernameList) / sizeof(char*);
     }
-    if (pBruteforceStruct->nbPassword == 0) {
+    if (structWordList.nbPassword == 0) {
         // Load default wordlist
-        pBruteforceStruct->passwordTab = (char**)passwordList;
-        pBruteforceStruct->nbPassword = sizeof(passwordList) / sizeof(char*);
+        structWordList.passwordTab = (char**)passwordList;
+        structWordList.nbPassword = sizeof(passwordList) / sizeof(char*);
     }
-
+    pBruteforceStruct->structWordList = structWordList;
     return TRUE;
 }
 // program exploit zerologon -d dc.domain.local
@@ -474,7 +491,8 @@ BOOL ParseExploitArg(int argc, char* argv[], pExploitStruct pExploitStruct) {
 
         pExploitStruct->exploit = ZERO_LOGON;
         pExploitStruct->exploitZeroLogon.isOnlyCheck = TRUE;
-        strcpy_s(pExploitStruct->exploitZeroLogon.serverFQDN, MAX_PATH, "");
+        pExploitStruct->exploitZeroLogon.serverFQDN[0] = 0x00;
+        pExploitStruct->exploitZeroLogon.computerName[0] = 0x00;
 
         for (int count = 2; count < argc; count++) {
             size_t argLen = strlen(argv[count]);
@@ -482,11 +500,13 @@ BOOL ParseExploitArg(int argc, char* argv[], pExploitStruct pExploitStruct) {
                 BOOL nextNotNull = (argc > count + 1);
 
                 if (argv[count][1] == 'd' && nextNotNull) {
-                    if (!CheckFQDN(pExploitStruct->exploitZeroLogon.serverFQDN)) {
-                        printf("[!] Invalid FQDN %s\n", pExploitStruct->exploitZeroLogon.serverFQDN);
+                    DWORD pComputerName = CheckFQDN(argv[count + 1]);
+                    if (pComputerName <= 0) {
+                        printf("[!] Invalid FQDN %s\n", argv[count + 1]);
                         return FALSE;
                     }
-                    strcpy_s(pExploitStruct->exploitZeroLogon.serverFQDN, MAX_PATH, argv[count + 1]);
+                    swprintf_s(pExploitStruct->exploitZeroLogon.serverFQDN, MAX_PATH, L"%hs", argv[count + 1]);
+                    swprintf_s(pExploitStruct->exploitZeroLogon.computerName, MAX_PATH, L"%.*hs", pComputerName, argv[count + 1]);
                 } else if (argv[count][1] == 'e') {
                     pExploitStruct->exploitZeroLogon.isOnlyCheck = FALSE;
                     checkArgValidity++;
