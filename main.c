@@ -15,6 +15,7 @@
 #include "portList.h"
 #include "EnumFTP.h"
 #include "EnumSMB.h"
+#include "EnumRPC.h"
 #include "DetectHttpBasicAuth.h"
 
 #pragma comment(lib, "Advapi32.lib")
@@ -164,8 +165,12 @@ BOOL BruteForce(BruteforceStruct bruteforceStruct) {
 		}
 		break;
 	case SMB:
-		PrintInfoBf("SMB", bruteforceStruct.ipAddress, 445, nbCreadTry);
+		PrintInfoBf("SMB", bruteforceStruct.ipAddress, bruteforceStruct.port, nbCreadTry);
 		result = BrutForceSmbFunc(bruteforceStruct);
+		break;
+	case RPC:
+		PrintInfoBf("RPC", bruteforceStruct.ipAddress, bruteforceStruct.port, nbCreadTry);
+		result = RpcAuthBruteForce(bruteforceStruct);
 		break;
 	/*case LDAP:
 		// TODO
@@ -186,11 +191,11 @@ Arg manage output file !!!
 int main(int argc, char* argv[]) {
 	Arguments listAgrument;
 
-
+	if (!initWSA(NULL))
+		return FALSE;
 	if (GetArguments(argc, argv, &listAgrument)) {
 
-		if (!initWSA(NULL))
-			return FALSE;
+		
 
 		srand((UINT)time(0));
 

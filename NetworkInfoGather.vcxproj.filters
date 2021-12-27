@@ -100,11 +100,17 @@
     <Filter Include="Source Files\4. FingerPrintInfo\EnumLDAP">
       <UniqueIdentifier>{59e795c2-dfff-4295-bc36-586a49584340}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Exploit">
+    <Filter Include="Source Files\5. Exploit">
       <UniqueIdentifier>{ed027ce0-2f7f-4cea-b5e5-b62b1084ccc8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Exploit\ZeroLogon">
+    <Filter Include="Source Files\5. Exploit\ZeroLogon">
       <UniqueIdentifier>{35445645-6255-49b0-a995-d35f446b29b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\4. FingerPrintInfo\EnumRPC">
+      <UniqueIdentifier>{c89d318e-55a1-428f-8706-5fb18ed906df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\5. Exploit\PrintNightmare">
+      <UniqueIdentifier>{d664edd7-a23a-4204-a43c-3a287d932c2b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -199,10 +205,16 @@
       <Filter>Source Files\4. FingerPrintInfo\EnumLDAP</Filter>
     </ClCompile>
     <ClCompile Include="Exploit.c">
-      <Filter>Source Files\Exploit</Filter>
+      <Filter>Source Files\5. Exploit</Filter>
     </ClCompile>
     <ClCompile Include="ZeroLogon.c">
-      <Filter>Source Files\Exploit\ZeroLogon</Filter>
+      <Filter>Source Files\5. Exploit\ZeroLogon</Filter>
+    </ClCompile>
+    <ClCompile Include="EnumRPC.c">
+      <Filter>Source Files\4. FingerPrintInfo\EnumRPC</Filter>
+    </ClCompile>
+    <ClCompile Include="PrintNightmare.c">
+      <Filter>Source Files\5. Exploit\PrintNightmare</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -254,9 +266,6 @@
     <ClInclude Include="EnumNetBios.h">
       <Filter>Source Files\4. FingerPrintInfo\EnumNetBios</Filter>
     </ClInclude>
-    <ClInclude Include="HttpWordlist.h">
-      <Filter>Resource Files</Filter>
-    </ClInclude>
     <ClInclude Include="DetectWAF.h">
       <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\DetectWAF</Filter>
     </ClInclude>
@@ -306,13 +315,22 @@
       <Filter>Source Files\4. FingerPrintInfo\EnumLDAP</Filter>
     </ClInclude>
     <ClInclude Include="Exploit.h">
-      <Filter>Source Files\Exploit</Filter>
+      <Filter>Source Files\5. Exploit</Filter>
     </ClInclude>
     <ClInclude Include="ZeroLogon.h">
-      <Filter>Source Files\Exploit\ZeroLogon</Filter>
+      <Filter>Source Files\5. Exploit\ZeroLogon</Filter>
     </ClInclude>
     <ClInclude Include="NetLogon.h">
-      <Filter>Source Files\Exploit\ZeroLogon</Filter>
+      <Filter>Source Files\5. Exploit\ZeroLogon</Filter>
+    </ClInclude>
+    <ClInclude Include="EnumRPC.h">
+      <Filter>Source Files\4. FingerPrintInfo\EnumRPC</Filter>
+    </ClInclude>
+    <ClInclude Include="HttpWordlist.h">
+      <Filter>Resource Files\wordlist</Filter>
+    </ClInclude>
+    <ClInclude Include="PrintNightmare.h">
+      <Filter>Source Files\5. Exploit\PrintNightmare</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -13,6 +13,7 @@
 #include "EnumNetBios.h"
 #include "EnumSMTP.h"
 #include "EnumLDAP.h"
+#include "EnumRPC.h"
 
 
 
@@ -112,6 +113,12 @@ BOOL PortFingerPrint(NetworkPcInfo* networkPcInfo, int nbDetected, BOOL isBrutef
 				case PORT_HTTPS:
 				case PORT_HTTPS_PORTAINER:
 					EnumHTTP(ipAddress, portNb, isWAfDetection, pFile, TRUE, isBruteforce);
+					break;
+				case PORT_RPC:
+					if (networkPcInfo[i].isNetbiosInfo)
+						EnumRPC(networkPcInfo[i].NetbiosInfo->netBIOSRemoteMachineNameTab[0].Name, "", structWordList);
+					else
+						EnumRPC(networkPcInfo[i].hostname, "", structWordList);
 					break;
 				case PORT_NETBIOS_SSN:
 					EnumNetBios(&(networkPcInfo[i]));

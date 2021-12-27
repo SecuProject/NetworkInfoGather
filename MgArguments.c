@@ -1,3 +1,6 @@
+#include <winsock2.h>
+#include <ws2tcpip.h>
+
 #include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -5,6 +8,11 @@
 #include "MgArguments.h"
 #include "wordlist.h"
 #include "Network.h"
+
+#pragma warning(disable:4996) 
+// InetPton(AF_INET, _T("192.168.1.1"), &RecvAddr.sin_addr.s_addr);
+
+
 
 /*
 TARGET_IP -> IP of the target
@@ -81,13 +89,14 @@ DWORD CheckFQDN(char* fqdn) {
 }
 
 VOID PrintMenuBruteForce() {
-    printf("NetworkInfoGather.exe bf PROTOCOL TARGET_IP[:PORT] [-u username/-U usernameFile.lst] [-p password/-P passwordFile.lst] [--continue-success]\n\n");
+    printf("NetworkInfoGather.exe bf PROTOCOL HOSTNAME/TARGET_IP[:PORT] [-u username/-U usernameFile.lst] [-p password/-P passwordFile.lst] [-d domain] [--continue-success]\n\n");
     
     printf("PROTOCOL:\n");
     printf("\tftp\n");
     printf("\thttp\n");
     printf("\thttps\n");
-    printf("\tsmb\n\n");
+    printf("\tsmb\n");
+    printf("\trpc\n\n");
     /*printf("\tldap\n\n");
     printf("\tssh\n\n");
     printf("\ttelnet\n\n");
@@ -95,6 +104,8 @@ VOID PrintMenuBruteForce() {
     printf("\trdp\n\n");*/
 
 
+    printf("HOSTNAME:\n");
+    printf("\tThis is required only for RPC brute force !\n\n");
     printf("TARGET_IP:\n");
     printf("\tTarget IP Address and port (if port not set the default port will be used).\n");
     printf("\t\te.g. '192.168.1.1' or '192.168.1.1:80'\n\n");   
@@ -103,6 +114,7 @@ VOID PrintMenuBruteForce() {
     printf("Optional parameter:\n");
     printf("\t-u username\t\tThe username of the targeted account\n");
     printf("\t-p password\t\tThe password of the targeted account\n");
+    printf("\t-d domain\t\tThe domain name of the targeted account\n");
     printf("\t-U usernameFile.lst\tThe word list of the targeted account\n");
     printf("\t-P passwordFile.lst\tThe word list of the targeted account\n");
     printf("\t--continue-success\tContinues authentication attempts even after successes\n\n");
@@ -119,7 +131,11 @@ VOID PrintMenuExploit() {
     printf("\tzerologon [-c/-e] -d dc1.domain.local\n");
     printf("\t\t-d [FQDN]\tServer FQDN [REQUIRED]\n");
     printf("\t\t-c\t\tCheck if server is vulnerable [DEFAULT]\n");
-    printf("\t\t-e\t\tExploit vulnerable and set DC password to NULL\n");
+    printf("\t\t-e\t\tExploit vulnerable and set DC password to NULL\n\n");
+    printf("\tprintnightmare IP_ADDRESS\n");
+    printf("\t\tNote: check for vulnerable to CVE-2021-1675/CVE-2021-34527\n");
+    printf("\t\tIP_ADDRESS:\n");
+    printf("\t\t\te.g. '192.168.1.1'\n\n");
     return;
 }
 VOID PrintMenuScan() {
@@ -363,15 +379,43 @@ VOID LoadFileEG(){
 */
 
 
+int HostnameToIp(char* hostname, char** ppIpAddress){
+    struct hostent* he;
+    struct in_addr** addr_list;
+    *ppIpAddress = (char*)malloc(IP_ADDRESS_LEN + 1);
+    if (*ppIpAddress == NULL)
+        return FALSE;
+
+    he = gethostbyname(hostname);
+    if (he == NULL){
+        printf("[x] Fail to resovle the hostname (%i)!\n", WSAGetLastError());
+        free(*ppIpAddress);
+        return FALSE;
+    }
+    addr_list = (struct in_addr**)he->h_addr_list;
+    strcpy(*ppIpAddress, inet_ntoa(*addr_list[0]));
+    printf("[i] %s resolved to %s\n", hostname, *ppIpAddress);
+    return TRUE;
+}
 
 
-//BOOL ParseBruteForceArg(int argc, char* argv[], pBruteforceStruct pBruteforceStruct) {
+BOOL AddStrToStruct(char* name, char* argData, char** structData){
+    size_t stringSize = strlen(argData) + 1;
+    *structData = (char*)malloc(stringSize);
+    if (*structData == NULL){
+        printf("[!] Fail to allocate '%s' in memory !\n", name);
+        return FALSE;
+    }
+    strcpy_s(*structData, stringSize, argData);
+    return TRUE;
+}
 BOOL ParseBruteForceArg(int argc, char* argv[], pBruteforceStruct pBruteforceStruct) {
     StructWordList structWordList;
     structWordList.nbUsername = 0;
     structWordList.usernameTab = NULL;
     structWordList.nbPassword = 0;
     structWordList.passwordTab = NULL;
+    pBruteforceStruct->domain = NULL;
     pBruteforceStruct->continueSuccess = FALSE;
     pBruteforceStruct->port = 0;
     
@@ -391,6 +435,9 @@ BOOL ParseBruteForceArg(int argc, char* argv[], pBruteforceStruct pBruteforceStr
     } else if (strcmp(argv[2], "smb") == 0) {
         pBruteforceStruct->protocol = SMB;
         pBruteforceStruct->port = PORT_SMB;
+    } else if (strcmp(argv[2], "rpc") == 0) {
+        pBruteforceStruct->protocol = RPC;
+        pBruteforceStruct->port = PORT_RPC;
     /* } else if (strcmp(argv[2], "ldap") == 0) {
         pBruteforceStruct->protocol = LDAP;
         pBruteforceStruct->port = PORT_LDAP;*/
@@ -402,9 +449,18 @@ BOOL ParseBruteForceArg(int argc, char* argv[], pBruteforceStruct pBruteforceStr
 
     // Parse IP address and port (FORMATE: 1.1.1.1 or 1.1.1.1:53)
     if (!GetIpPortFromArg(argv[3], pBruteforceStruct)) {
-        printf("[!] Invalid format for the ip address '%s'\n", argv[3]);
-        printf("[i] Valid format: 192.168.1.1 or 192.168.1.1:80\n");
-        return FALSE;
+        char* ipAddress = NULL;
+        if (!HostnameToIp(argv[3], &ipAddress) ||
+            !GetIpPortFromArg(ipAddress, pBruteforceStruct)){
+            printf("[!] Invalid format for the ip address '%s'\n", argv[3]);
+            printf("[i] Valid format: 192.168.1.1 or 192.168.1.1:80\n");
+            return FALSE;
+        }
+        if (!AddStrToStruct("hostname", argv[3], &(pBruteforceStruct->hostname))){
+            free(ipAddress);
+            return FALSE;
+        }
+        free(ipAddress);
     }
 
     if (argc > 4) {
@@ -415,7 +471,13 @@ BOOL ParseBruteForceArg(int argc, char* argv[], pBruteforceStruct pBruteforceStr
                 if (nextNotNull) {
                     size_t stringSize;
                     switch (argv[count][1]){
+                    case 'd':
+                        if (!AddStrToStruct("domain", argv[count + 1], &(pBruteforceStruct->domain)))
+                            return FALSE;
+                        break;
                     case 'u':
+                        if (!AddStrToStruct("domain", argv[count + 1], &(pBruteforceStruct->domain)))
+                            return FALSE;
                         stringSize = strlen(argv[count + 1]) + 1;
                         structWordList.usernameTab = (char**)malloc(sizeof(char*));
                         if (structWordList.usernameTab == NULL) {
@@ -520,6 +582,20 @@ BOOL ParseExploitArg(int argc, char* argv[], pExploitStruct pExploitStruct) {
             PrintMenuExploit();
             return FALSE;
         }
+    } else if (strcmp(argv[2], "printnightmare") == 0 && argc == 4) {
+        pExploitStruct->exploit = PRINT_NIGHTMARE;
+
+
+        /*if (!GetIpPortFromArg(argv[3], pBruteforceStruct)){
+            char* ipAddress = NULL;
+            if (!HostnameToIp(argv[3], &ipAddress) ||
+                !GetIpPortFromArg(ipAddress, pBruteforceStruct)){
+                printf("[!] Invalid format for the ip address '%s'\n", argv[3]);
+                printf("[i] Valid format: 192.168.1.1 or 192.168.1.1:80\n");
+                return FALSE;
+            }
+        }*/
+        strcpy_s(pExploitStruct->exploitPrintNightmare.ipAddress, 16, argv[3]);
     } else {
         PrintMenuExploit();
         return FALSE;

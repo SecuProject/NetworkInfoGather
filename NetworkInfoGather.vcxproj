@@ -159,6 +159,7 @@
     <ClCompile Include="EnumHTTP.c" />
     <ClCompile Include="EnumLDAP.c" />
     <ClCompile Include="EnumNetBios.c" />
+    <ClCompile Include="EnumRPC.c" />
     <ClCompile Include="EnumSMB.c" />
     <ClCompile Include="EnumSMTP.c" />
     <ClCompile Include="Exploit.c" />
@@ -176,6 +177,7 @@
     <ClCompile Include="PortFingerPrint.c" />
     <ClCompile Include="portList.c" />
     <ClCompile Include="PortScan.c" />
+    <ClCompile Include="PrintNightmare.c" />
     <ClCompile Include="ToolsHTTP.c" />
     <ClCompile Include="wordlist.c" />
     <ClCompile Include="ZeroLogon.c" />
@@ -193,6 +195,7 @@
     <ClInclude Include="EnumHTTP.h" />
     <ClInclude Include="EnumLDAP.h" />
     <ClInclude Include="EnumNetBios.h" />
+    <ClInclude Include="EnumRPC.h" />
     <ClInclude Include="EnumSMB.h" />
     <ClInclude Include="EnumSMTP.h" />
     <ClInclude Include="Exploit.h" />
@@ -213,6 +216,7 @@
     <ClInclude Include="PortFingerPrint.h" />
     <ClInclude Include="portList.h" />
     <ClInclude Include="PortScan.h" />
+    <ClInclude Include="PrintNightmare.h" />
     <ClInclude Include="tcpIpModuel.h" />
     <ClInclude Include="ToolsHTTP.h" />
     <ClInclude Include="wordlist.h" />

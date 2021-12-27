@@ -12,6 +12,7 @@
 #define PORT_DNS				53
 #define PORT_HTTP				80
 #define PORT_KERBEROS			88
+#define PORT_RPC				135
 #define PORT_NETBIOS_SSN		139
 #define PORT_LDAP				389
 #define PORT_HTTPS				443
@@ -49,7 +50,7 @@
 //
 ////////////////// UDP //////////////////
 
-#define NB_TAB_PORT_TCP		28
+#define NB_TAB_PORT_TCP		29
 #define NB_TAB_PORT_UDP		6
 
 

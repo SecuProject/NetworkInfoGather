@@ -8,6 +8,7 @@ const int portTcp[] = {
 	PORT_DNS,
 	PORT_HTTP,
 	PORT_KERBEROS,
+	PORT_RPC,
 	PORT_NETBIOS_SSN,
 	PORT_LDAP,
 	PORT_HTTPS,

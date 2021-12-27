@@ -51,6 +51,7 @@ typedef struct {
 typedef struct {
     char* username;
     char* password;
+    char* domain;
 } StructCredentials;
 
 typedef enum {
@@ -58,7 +59,8 @@ typedef enum {
     FTP,
     LDAP,
     HTTP_BASIC,
-    HTTPS_BASIC
+    HTTPS_BASIC,
+    RPC,
     /*
     SSH,
     RDP,
@@ -69,6 +71,8 @@ typedef enum {
 typedef struct BruteforceStruct {
     char ipAddress[16];
     UINT port;
+    char* domain;
+    char* hostname;
 
     EnumProtocol protocol;
 
@@ -92,16 +96,20 @@ typedef struct {
     WCHAR computerName[MAX_PATH];
     BOOL isOnlyCheck;
 }ExploitZeroLogon;
-
+typedef struct{
+    char ipAddress[16]; // IP_ADDRESS_LEN
+}ExploitPrintNightmare;
 
 typedef enum {
     ZERO_LOGON,
+    PRINT_NIGHTMARE
 }EnumExploit;
 
 typedef struct ExploitStruct {
     EnumExploit exploit;
     union {
         ExploitZeroLogon exploitZeroLogon;
+        ExploitPrintNightmare exploitPrintNightmare;
     };
 }ExploitStruct, * pExploitStruct;
 //
