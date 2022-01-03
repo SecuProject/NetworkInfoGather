@@ -2,30 +2,30 @@
 #include <stdio.h>
 #pragma comment(lib, "Rpcrt4.lib")
 
-BOOL CheckPrintNightmare(char* ipAddress){
+BOOL CheckPrintNightmare(char* ipAddress,BOOL is2tab){
     RPC_CSTR szStringBinding = NULL;
     RPC_BINDING_HANDLE hRpc;
     RPC_EP_INQ_HANDLE hInq;
     RPC_STATUS rpcErr;
 
-    printf("[-] Checking for print nightmare vulnerability\n");
+    printf("%s[-] Checking for print nightmare vulnerability\n",is2tab ? "\t" : "" );
 
     rpcErr = RpcStringBindingComposeA(NULL, "ncacn_ip_tcp", ipAddress, NULL, NULL, &szStringBinding);
     if (rpcErr != RPC_S_OK){
-        printf("\t[x] RpcStringBindingCompose failed: %d\n", rpcErr);
+        printf("%s\t[x] RpcStringBindingCompose failed: %d\n", is2tab ? "\t":"", rpcErr);
         return FALSE;
     }
 
     rpcErr = RpcBindingFromStringBindingA(szStringBinding, &hRpc);
     if (rpcErr != RPC_S_OK){
-        printf("\t[x] RpcBindingFromStringBinding failed: %d\n", rpcErr);
+        printf("%s\t[x] RpcBindingFromStringBinding failed: %d\n", is2tab ? "\t" : "", rpcErr);
         RpcStringFreeA(&szStringBinding);
         return FALSE;
     }
 
     rpcErr = RpcMgmtEpEltInqBegin(hRpc, RPC_C_EP_ALL_ELTS, NULL, 0, NULL, &hInq);
     if (rpcErr != RPC_S_OK){
-        printf("\t[x] RpcMgmtEpEltInqBegin failed: %d\n", rpcErr);
+        printf("%s\t[x] RpcMgmtEpEltInqBegin failed: %d\n", is2tab ? "\t" : "", rpcErr);
         RpcStringFreeA(&szStringBinding);
         RpcBindingFree(&hRpc);
         return FALSE;
@@ -48,7 +48,7 @@ BOOL CheckPrintNightmare(char* ipAddress){
                 */
                 if (strcmp(str, "12345678-1234-abcd-ef00-0123456789ab") == 0
                     || strcmp(str, "76F03F96-CDFD-44FC-A22C-64950A001209") == 0){
-                    printf("\t[i] The host %s is probably vulnerable !\n", ipAddress);
+                    printf("%s\t[i] The host %s is probably vulnerable !\n", is2tab ? "\t" : "", ipAddress);
                     RpcStringFreeA(&str);
                     RpcStringFreeA(&szStringBinding);
                     RpcBindingFree(&hRpc);

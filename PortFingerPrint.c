@@ -116,9 +116,9 @@ BOOL PortFingerPrint(NetworkPcInfo* networkPcInfo, int nbDetected, BOOL isBrutef
 					break;
 				case PORT_RPC:
 					if (networkPcInfo[i].isNetbiosInfo)
-						EnumRPC(networkPcInfo[i].NetbiosInfo->netBIOSRemoteMachineNameTab[0].Name, "", structWordList);
+						EnumRPC(ipAddress, networkPcInfo[i].NetbiosInfo->netBIOSRemoteMachineNameTab[0].Name, "", structWordList);
 					else
-						EnumRPC(networkPcInfo[i].hostname, "", structWordList);
+						EnumRPC(ipAddress, networkPcInfo[i].hostname, "", structWordList);
 					break;
 				case PORT_NETBIOS_SSN:
 					EnumNetBios(&(networkPcInfo[i]));
