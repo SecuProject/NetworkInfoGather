@@ -17,6 +17,7 @@
 #include "EnumSMB.h"
 #include "EnumRPC.h"
 #include "DetectHttpBasicAuth.h"
+#include "EnumPort.h"
 
 #pragma comment(lib, "Advapi32.lib")
 #pragma comment(lib, "iphlpapi.lib")
@@ -146,7 +147,7 @@ BOOL BruteForce(BruteforceStruct bruteforceStruct) {
 	switch (bruteforceStruct.protocol) {
 	case FTP:
 		PrintInfoBf("FTP", bruteforceStruct.ipAddress, bruteforceStruct.port, nbCreadTry);
-		result = FtpBruteForce(bruteforceStruct.ipAddress, bruteforceStruct.structWordList, NULL);
+		result = FtpBruteForce(bruteforceStruct.ipAddress, bruteforceStruct.structWordList, NULL, NULL);
 		break;
 	case HTTP_BASIC:
 		PrintInfoBf("HTTP", bruteforceStruct.ipAddress, bruteforceStruct.port, nbCreadTry);
@@ -195,8 +196,6 @@ int main(int argc, char* argv[]) {
 		return FALSE;
 	if (GetArguments(argc, argv, &listAgrument)) {
 
-		
-
 		srand((UINT)time(0));
 
 		switch (listAgrument.programMode) {
@@ -208,6 +207,9 @@ int main(int argc, char* argv[]) {
 			break;
 		case ModeExploit:
 			Exploit(listAgrument.exploitStruct);
+			break;
+		case ModeEnum:
+			EnumPort(listAgrument.enumStruct);
 			break;
 		}
 

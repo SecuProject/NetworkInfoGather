@@ -159,8 +159,10 @@
     <ClCompile Include="EnumHTTP.c" />
     <ClCompile Include="EnumLDAP.c" />
     <ClCompile Include="EnumNetBios.c" />
+    <ClCompile Include="EnumPort.c" />
     <ClCompile Include="EnumRPC.c" />
     <ClCompile Include="EnumSMB.c" />
+    <ClCompile Include="EnumSmbUser.c" />
     <ClCompile Include="EnumSMTP.c" />
     <ClCompile Include="Exploit.c" />
     <ClCompile Include="FaviconDetection.c" />
@@ -171,6 +173,7 @@
     <ClCompile Include="main.c" />
     <ClCompile Include="md5.c" />
     <ClCompile Include="MgArguments.c" />
+    <ClCompile Include="MgCredentials.c" />
     <ClCompile Include="NetDiscovery.c" />
     <ClCompile Include="Network.c" />
     <ClCompile Include="PassifPacketSniffing.c" />
@@ -195,8 +198,10 @@
     <ClInclude Include="EnumHTTP.h" />
     <ClInclude Include="EnumLDAP.h" />
     <ClInclude Include="EnumNetBios.h" />
+    <ClInclude Include="EnumPort.h" />
     <ClInclude Include="EnumRPC.h" />
     <ClInclude Include="EnumSMB.h" />
+    <ClInclude Include="EnumSmbUser.h" />
     <ClInclude Include="EnumSMTP.h" />
     <ClInclude Include="Exploit.h" />
     <ClInclude Include="FaviconDatabase.h" />
@@ -209,6 +214,7 @@
     <ClInclude Include="macDB.h" />
     <ClInclude Include="md5.h" />
     <ClInclude Include="MgArguments.h" />
+    <ClInclude Include="MgCredentials.h" />
     <ClInclude Include="NetDiscovery.h" />
     <ClInclude Include="NetLogon.h" />
     <ClInclude Include="Network.h" />

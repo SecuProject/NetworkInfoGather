@@ -5,6 +5,7 @@
 #include "Network.h"
 #include "MgArguments.h"
 #include "PrintNightmare.h"
+#include "MgCredentials.h"
 
 #pragma comment(lib, "Ntdsapi.lib")
 
@@ -57,7 +58,7 @@ BOOL RpcBind(char* DomainControllerName, char* DnsDomainName, HANDLE* phDS) {
 		RpcErrorMessage(ret);
 	return FALSE;
 }
-BOOL __RpcAuthBruteForce(char* DomainControllerName, char* domain, StructWordList structWordList, StructCredentials* structCredentials) {
+BOOL __RpcAuthBruteForce(char* DomainControllerName, char* domain, StructWordList structWordList, PStructCredentials structCredentials) {
 	HANDLE phDS;
 
 	for (UINT i = 0; i < structWordList.nbUsername; i++) {
@@ -65,26 +66,11 @@ BOOL __RpcAuthBruteForce(char* DomainControllerName, char* domain, StructWordLis
 			if (RpcAuthBind(DomainControllerName, DomainControllerName, structWordList.usernameTab[i], domain, structWordList.passwordTab[j], FALSE, &phDS)) {
 				printf("\t\t[+] Login: '%s:%s' !\n", structWordList.usernameTab[i], structWordList.passwordTab[j]);
 
-				size_t usernameSize = strlen(structWordList.usernameTab[i]) + 1;
 
-				structCredentials->username = (char*)malloc(usernameSize);
-				if (structCredentials->username != NULL) {
-					size_t passwordSize = strlen(structWordList.passwordTab[j]) + 1;
-
-					strcpy_s(structCredentials->username, usernameSize, structWordList.usernameTab[i]);
-
-					structCredentials->password = (char*)malloc(passwordSize);
-					if (structCredentials->password != NULL) {
-						strcpy_s(structCredentials->password, passwordSize, structWordList.passwordTab[j]);
-						DsUnBindA(phDS);
-						return TRUE;
-					}else{
-						printf("\t\t[x] Malloc return NULL !\n");
-						free(structCredentials->username);
-						structCredentials->username = NULL;
-					}
-				}else{
-					printf("\t\t[x] Malloc return NULL !\n");
+				structCredentials = InitCredStruct(structWordList.usernameTab[i], structWordList.passwordTab[j], NULL);
+				if (structCredentials != NULL){
+					DsUnBindA(phDS);
+					return TRUE;
 				}
 				DsUnBindA(phDS);
 			}
@@ -97,10 +83,10 @@ BOOL __RpcAuthBruteForce(char* DomainControllerName, char* domain, StructWordLis
 }
 
 
-BOOL GetDomainControllerInfo(HANDLE phDS) {
+BOOL GetDomainControllerInfo(HANDLE phDS,char* domainName) {
 	DS_DOMAIN_CONTROLLER_INFO_1A* pInfo;
 	DWORD pcOut;
-	DWORD ret = DsGetDomainControllerInfoA(phDS, "pentest.local", 1, &pcOut, &pInfo);
+	DWORD ret = DsGetDomainControllerInfoA(phDS, domainName, 1, &pcOut, &pInfo);
 	if (ret == ERROR_SUCCESS) {
 		printf("\t[RCP] Domain Controller Info:\n");
 		printf("\t\t[RCP] NetbiosName: %s\n", pInfo->NetbiosName);
@@ -133,18 +119,18 @@ int EnumRPC(char* ipAddress, char* NameDC,char* domainName, StructWordList struc
 
 	CheckPrintNightmare(ipAddress,TRUE);
 
-	if (domainName != NULL){
+	if (domainName != NULL && domainName[0] != 0x00){
 
 		printf("\t[RPC] Enumeration:\n");
 		if (RpcBind(NameDC, NameDC, &phDS)){
-			GetDomainControllerInfo(phDS);
+			GetDomainControllerInfo(phDS, domainName);
 			DsUnBindA(phDS);
 		} else{
 			if (structWordList.isBruteForce){
 				StructCredentials structCredentials;
 				if (__RpcAuthBruteForce(NameDC, domainName, structWordList, &structCredentials)){
 					if (RpcAuthBind(NameDC, NameDC, structCredentials.username, domainName, structCredentials.password, TRUE, &phDS)){
-						GetDomainControllerInfo(phDS);
+						GetDomainControllerInfo(phDS, domainName);
 						DsUnBindA(phDS);
 					}
 

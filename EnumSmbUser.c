@@ -1,0 +1,194 @@
+#ifndef UNICODE
+#define UNICODE
+#endif
+#pragma comment(lib, "netapi32.lib")
+
+#include <stdio.h>
+#include <assert.h>
+#include <windows.h> 
+#include <lm.h>
+#pragma comment(lib, "Mpr.lib") // WNetAddConnection2
+
+
+#define NB_USER_INFO_1  1
+
+// NetUserChangePassword 
+//https://docs.microsoft.com/en-us/windows/win32/api/lmaccess/nf-lmaccess-netuserchangepassword
+// NetUserAdd 
+// https://docs.microsoft.com/en-us/windows/win32/api/lmaccess/nf-lmaccess-netuseradd
+// NetGetDCName 
+// https://docs.microsoft.com/en-us/windows/win32/api/lmaccess/nf-lmaccess-netgetdcname
+
+
+// https://docs.microsoft.com/en-us/windows/win32/api/lmaccess/ns-lmaccess-user_info_1
+typedef struct _UserStructSAMR{
+    char username[UNLEN];
+    char password[PWLEN];
+    DWORD passwordAge;
+    DWORD flags;
+    char comment[256];
+    char homeDir[PATHLEN];
+    char scriptPath[PATHLEN];
+    DWORD privLevel;
+}UserStructSAMR, * PUserStructSAMR;
+
+
+// https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rap/fbd5159e-ffac-43e1-a146-4aff405d0314
+VOID UserPriv(DWORD userPriv){
+    printf("\t\t[i] User privilage: ");
+    switch (userPriv){
+    case USER_PRIV_GUEST:
+        printf("GUEST");
+        break;
+    case USER_PRIV_USER:
+        printf("USER");
+        break;
+    case USER_PRIV_ADMIN:
+        printf("ADMIN");
+        break;
+    default:
+        printf("???");
+        break;
+    }
+    printf("\n");
+}
+VOID UserFlag(DWORD flags){
+    if (flags & UF_LOCKOUT)
+        printf("\t\t[x] The account is currently locked out. \n");
+    if (flags & UF_ACCOUNTDISABLE)
+        printf("\t\t[!] The user's account is disabled.\n");
+    if (flags & UF_DONT_EXPIRE_PASSWD)
+        printf("\t\t[!] The password should never expire on the account.\n");
+    if (flags & UF_PASSWD_NOTREQD)
+        printf("\t\t[!] No password is required.\n");
+    if (flags & UF_NOT_DELEGATED)
+        printf("\t\t[!] Marks the account as \"sensitive\".\n");
+    if (flags & UF_DONT_REQUIRE_PREAUTH)
+        printf("\t\t[!] Vulnerable to AS-REP Roast Attack!\n");
+}
+
+
+DWORD GetNumberUsers(LPWSTR pszServerName){
+    LPUSER_INFO_0 pBuf = NULL;
+    DWORD dwLevel = 0;
+    DWORD dwPrefMaxLen = MAX_PREFERRED_LENGTH;
+    DWORD dwEntriesRead = 0;
+    DWORD dwTotalEntries = 0;
+    DWORD dwResumeHandle = 0;
+
+    NET_API_STATUS nStatus = NetUserEnum((LPCWSTR)pszServerName, dwLevel, FILTER_NORMAL_ACCOUNT, (LPBYTE*)&pBuf, dwPrefMaxLen, &dwEntriesRead, &dwTotalEntries, &dwResumeHandle);
+    if (!(nStatus == NERR_Success) || (nStatus == ERROR_MORE_DATA)){
+        printf("[x] A system error has occurred: %lu\n", nStatus);
+        if (pBuf != NULL)
+            NetApiBufferFree(pBuf);
+        free(pszServerName);
+        return FALSE;
+    }
+    NetApiBufferFree(pBuf);
+    return dwTotalEntries;
+}
+
+BOOL GetUserSAMR(char* targetIp, PUserStructSAMR* pTabUserFound, UINT* nbUsers){
+    LPUSER_INFO_1 pBuf = NULL;
+    LPUSER_INFO_1 pTmpBuf;
+    DWORD dwLevel = 1;
+    DWORD dwPrefMaxLen = MAX_PREFERRED_LENGTH;
+    DWORD dwEntriesRead = 0;
+    DWORD dwTotalEntries = 0;
+    DWORD dwResumeHandle = 0;
+    DWORD dwTotalCount = 0;
+    PUserStructSAMR tabUserFound;
+    NET_API_STATUS nStatus = ERROR_MORE_DATA;
+
+
+    LPWSTR pszServerName = (LPWSTR)calloc(MAX_PATH, sizeof(LPWSTR));
+    if (pszServerName == NULL)
+        return FALSE;
+
+    swprintf_s(pszServerName, MAX_PATH, L"\\\\%hs", targetIp);
+
+    dwTotalEntries = GetNumberUsers(pszServerName);
+    if (dwTotalEntries <= 0){
+        return FALSE;
+    }
+
+    tabUserFound = (PUserStructSAMR)calloc(dwTotalEntries, sizeof(UserStructSAMR));
+    if (tabUserFound == NULL){
+        printf("[x] Error: malloc failed\n");
+        return FALSE;
+    }
+
+    //printf("\nUser account on %s:\n", targetIp);
+    while (nStatus == ERROR_MORE_DATA){
+        nStatus = NetUserEnum((LPCWSTR)pszServerName, dwLevel, FILTER_NORMAL_ACCOUNT, (LPBYTE*)&pBuf, dwPrefMaxLen, &dwEntriesRead, &dwTotalEntries, &dwResumeHandle);
+
+        if ((nStatus == NERR_Success) || (nStatus == ERROR_MORE_DATA)){
+            if ((pTmpBuf = pBuf) != NULL){
+                for (DWORD i = 0; i < dwEntriesRead; i++){
+                    assert(pTmpBuf != NULL);
+                    if (pTmpBuf == NULL){
+                        printf("[x] An access violation has occurred\n");
+                        NetApiBufferFree(pBuf);
+                        free(pszServerName);
+                        return FALSE;
+                    }
+                    sprintf_s(tabUserFound[dwTotalCount].username, UNLEN, "%ws", pTmpBuf->usri1_name);
+                    sprintf_s(tabUserFound[dwTotalCount].password, PWLEN, "%ws", pTmpBuf->usri1_password);
+                    sprintf_s(tabUserFound[dwTotalCount].homeDir, PATHLEN, "%ws", pTmpBuf->usri1_home_dir);
+                    sprintf_s(tabUserFound[dwTotalCount].scriptPath, PATHLEN, "%ws", pTmpBuf->usri1_script_path);
+                    sprintf_s(tabUserFound[dwTotalCount].comment, 256, "%ws", pTmpBuf->usri1_comment);
+                    tabUserFound[dwTotalCount].passwordAge = pTmpBuf->usri1_password_age;
+                    tabUserFound[dwTotalCount].flags = pTmpBuf->usri1_flags;
+                    tabUserFound[dwTotalCount].privLevel = pTmpBuf->usri1_priv;
+                    pTmpBuf++;
+
+                    dwTotalCount++;
+                }
+            }
+        } else{
+            printf("[x] A system error has occurred: %lu\n", nStatus);
+            if (pBuf != NULL)
+                NetApiBufferFree(pBuf);
+            free(pszServerName);
+            return FALSE;
+        }
+        if (pBuf != NULL){
+            NetApiBufferFree(pBuf);
+            pBuf = NULL;
+        }
+    }while (nStatus == ERROR_MORE_DATA);
+
+
+    if (pBuf != NULL)
+        NetApiBufferFree(pBuf);
+    *pTabUserFound = tabUserFound;
+    *nbUsers = dwTotalCount;
+    free(pszServerName);
+    return TRUE;
+}
+
+BOOL UserInfo(char* targetIp){
+    PUserStructSAMR tabUsers;
+    UINT nbUsers = 0;
+
+    if (GetUserSAMR(targetIp, &tabUsers, &nbUsers)){
+        printf("[-] Users found on %s:\n", targetIp);
+        for (UINT i = 0; i < nbUsers; i++){
+            if (!(tabUsers[i].flags & UF_ACCOUNTDISABLE & UF_ACCOUNTDISABLE)){
+                printf("\t[-] Username: %s\n", tabUsers[i].username);
+                UserPriv(tabUsers[i].privLevel);
+                if (tabUsers[i].homeDir[0] != 0)
+                    printf("\t\tHome Dir: %s\n", tabUsers[i].homeDir);
+                if (tabUsers[i].comment[0] != 0)
+                    printf("\t\tComment: %s\n", tabUsers[i].comment);
+                if (strcmp(tabUsers[i].password, "(null)") != 0)
+                    printf("\t\tPassword: %s\n", tabUsers[i].password);
+                if (tabUsers[i].scriptPath[0] != 0)
+                    printf("\t\tScript Path: %s\n", tabUsers[i].scriptPath);
+                UserFlag(tabUsers[i].flags);
+            }
+        }
+        printf("[i] Total of %d entries enumerated\n", nbUsers);
+    }
+    return TRUE;
+}

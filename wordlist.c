@@ -1,5 +1,12 @@
 #pragma once
 
+// FTP
+const char* usernameAnonymous = "anonymous";
+const char* passwordAnonymous = "anonymous";
+// SMB
+const char* usernameGuest = "guest";
+const char* passwordGuest = "guest";
+
 const char* smtpUser[] = {
 	"adm",
 	"admin",

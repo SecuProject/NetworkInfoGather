@@ -4,10 +4,13 @@
 #include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <lm.h>
 
 #include "MgArguments.h"
+#include "EnumFtp.h"
 #include "wordlist.h"
 #include "Network.h"
+
 
 #pragma warning(disable:4996) 
 // InetPton(AF_INET, _T("192.168.1.1"), &RecvAddr.sin_addr.s_addr);
@@ -168,13 +171,37 @@ VOID PrintMenuScan() {
     printf("\t-o FILEPATH\tOutput into a file\n");
     return;
 }
+VOID PrintMenuEnum(){
+    printf("NetworkInfoGather.exe Enum PROTOCOL IP_ADDRESS [-u USERNAME] [-p PASSWORD]\n");
+    printf("NetworkInfoGather.exe Enum smb IP_ADDRESS [-u USERNAME] [-p PASSWORD] [-S] [-U]\n\n");
+    printf("NetworkInfoGather.exe Enum ftp IP_ADDRESS [-u USERNAME] [-p PASSWORD] [-P PORT]\n\n");
 
+    printf("PROTOCOL:\n");
+    //printf("\thttp\n");
+    //printf("\thttps\n");
+    printf("\tsmb\tShare enumeration / User enumeration\n");
+    printf("\t\t-U\tShare enumeration\n");
+    printf("\t\t-S\tUser enumeration\n");
+    printf("\tftp\tEnumerate File Transfer Server\n\n");
+    printf("\t\t-P PORT\tSet custom port (default: 21)\n");
+    //printf("\trpc\n\n");
+
+
+    printf("IP_ADDRESS:\n");
+    printf("\tTarget IP Address\n");
+
+    printf("OPTIONS:\n");
+    printf("\t-u USERNAME\t\tThe username of the targeted account\n");
+    printf("\t-p PASSWORD\t\tThe password of the targeted account\n");
+    return;
+}
 VOID PrintMenu() {
     printf("\n\nNetworkInfoGather.exe {scan,bf,exploit} [-h]\n\n");
     printf("OPTION:\n");
     printf("\tscan\tWill scan the network\n");
     printf("\tbf\tbrute force protocol\n");
     printf("\texploit\tExploit vulnerability\n");
+    printf("\tenum\tPerform enumeration\n");
     return;
 }
 
@@ -603,6 +630,89 @@ BOOL ParseExploitArg(int argc, char* argv[], pExploitStruct pExploitStruct) {
     return TRUE;
 }
 
+
+
+BOOL ParseEnumArg(int argc, char* argv[], pEnumStruct pEnumStruct){
+    if (argc < 4 || 10 < argc){
+        PrintMenuEnum();
+        return FALSE;
+    }
+
+    pEnumStruct->username = NULL;
+    pEnumStruct->password = NULL;
+
+    // FOR SMB
+    pEnumStruct->enumUser = FALSE;
+    pEnumStruct->enumShare = FALSE;
+    pEnumStruct->port = 0;
+
+
+    if (strcmp(argv[2], "smb") == 0){
+        pEnumStruct->ipAddress = argv[3];
+        pEnumStruct->protocol = SMB;
+        for (int count = 4; count < argc; count++){
+            size_t argLen = strlen(argv[count]);
+            if ((argv[count][0] == '-' || argv[count][0] == '/') && argLen == 2){
+                switch (argv[count][1]){
+                case 'u':
+                    if (argc > count + 1)
+                        pEnumStruct->username = argv[count + 1];
+                    break;
+                case 'p':
+                    if (argc > count + 1)
+                        pEnumStruct->password = argv[count + 1];
+                    break;
+                case 'U':
+                    pEnumStruct->enumUser = TRUE;
+                    break;
+                case 'S':
+                    pEnumStruct->enumShare = TRUE;
+                    break;
+                default:
+                    printf("[X] Unknown argument: '%s'\n !", argv[count]);
+                    break;
+                }
+            }
+        }
+    } else if (strcmp(argv[2], "ftp") == 0){
+        pEnumStruct->protocol = FTP;
+        pEnumStruct->ipAddress = argv[3];
+        pEnumStruct->port = INTERNET_DEFAULT_FTP_PORT;
+
+        for (int count = 4; count < argc; count++){
+            size_t argLen = strlen(argv[count]);
+            if ((argv[count][0] == '-' || argv[count][0] == '/') && argLen == 2){
+                switch (argv[count][1]){
+                case 'u':
+                    if (argc > count + 1)
+                        pEnumStruct->username = argv[count + 1];
+                    break;
+                case 'p':
+                    if (argc > count + 1)
+                        pEnumStruct->password = argv[count + 1];
+                    break;
+                case 'P':
+                    if (argc > count + 1)
+                        pEnumStruct->port = atoi(argv[count + 1]);
+                    break;
+                default:
+                    printf("[X] Unknown argument: '%s'\n !", argv[count]);
+                    break;
+                }
+            }
+        }
+    } else{
+        PrintMenuEnum();
+        return FALSE;
+    }
+
+    if (!pEnumStruct->enumUser && !pEnumStruct->enumShare){
+        pEnumStruct->enumUser = TRUE;
+        pEnumStruct->enumShare = TRUE;
+    }
+
+    return TRUE;
+}
 BOOL GetArguments(int argc, char* argv[], pArguments pListAgrument) {
     if (argc == 1) {
         PrintMenu();
@@ -616,6 +726,9 @@ BOOL GetArguments(int argc, char* argv[], pArguments pListAgrument) {
             return FALSE;
         } else if (strcmp(argv[1], "exploit") == 0) {
             PrintMenuExploit();
+            return FALSE;
+        } else if (strcmp(argv[1], "enum") == 0) {
+            PrintMenuEnum();
             return FALSE;
         } else {
             PrintMenu();
@@ -631,6 +744,9 @@ BOOL GetArguments(int argc, char* argv[], pArguments pListAgrument) {
         } else if (strcmp(argv[1], "exploit") == 0) {
             pListAgrument->programMode = ModeExploit;
             return ParseExploitArg(argc, argv, &(pListAgrument->exploitStruct));
+        } else if (strcmp(argv[1], "enum") == 0) {
+            pListAgrument->programMode = ModeEnum;
+            return ParseEnumArg(argc, argv, &(pListAgrument->enumStruct));
         } else {
             PrintMenu();
             return FALSE;

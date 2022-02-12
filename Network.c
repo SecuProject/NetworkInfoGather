@@ -122,3 +122,47 @@ BOOL initWSA(FILE* pFile) {
 	//printOut(pFile,"Initialised.\n");
 	return TRUE;
 }
+
+BOOL SizeConsole(int* columns, int* rows){
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	HANDLE stdHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+	if (stdHandle == INVALID_HANDLE_VALUE)
+		return FALSE;
+
+	if (GetConsoleScreenBufferInfo(stdHandle, &csbi)){
+		*columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+		*rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+		return TRUE;
+	}
+	return FALSE;
+}
+VOID LoadingBar(UINT i, UINT total){
+	UINT consoleColumns;
+	UINT consolerows;
+
+	if (!SizeConsole(&consoleColumns, &consolerows)){
+		consoleColumns = 120 - 16;
+		consolerows = 30;
+	} else{
+		if(consoleColumns > 50)
+			consoleColumns -= 16;
+	}
+	UINT percentDone = (UINT)(((double)i / total) * 100);
+	UINT Average = percentDone * (consoleColumns/2) / 100;
+	// 1000 / 4000 => 0.25 *100
+	printf("\r\t\t[");
+
+	for (UINT j = 0; j < Average; j++)
+		printf("#");
+	for (UINT j = 0; j < (consoleColumns / 2) - Average; j++)
+		printf(" ");
+	printf("] %u%% (%lu/%lu)\r", percentDone, i, total);
+
+
+
+	if (i >= total-1){
+		for (UINT j = 0; j < consoleColumns - 2; j++)
+			printf(" ");
+	}
+	printf("\r");
+}

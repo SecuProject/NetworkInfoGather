@@ -7,4 +7,6 @@
 
 BOOL SmbEnum(char* serverIp, BOOL isBruteForce, FILE* pFile);
 BOOL BrutForceSMB(char* sharePath, StructWordList structWordList, FILE* pFile);
+BOOL LoginSMB(const char* username, const char* password, char* share);
+
 #endif

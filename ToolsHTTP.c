@@ -449,7 +449,6 @@ VOID PrintDirFind(PHTTP_STRUC pHttpStructPage, char* ipAddress, FILE* pFile, BOO
         pHttpStructPage->contentLen);
 }
 
-
 BOOL HttpDirEnum(char* ipAddress, int port,char* httpAuthHeader, FILE* pFile, BOOL isSSL) {
 
     printf("\t[HTTP%s] %s:%i - HTTP%s Directory Enum  \n", isSSL ? "S" : "", ipAddress, port, isSSL ? "S" : "");
@@ -470,7 +469,7 @@ BOOL HttpDirEnum(char* ipAddress, int port,char* httpAuthHeader, FILE* pFile, BO
     for (UINT i = 0; i < ARRAY_SIZE_CHAR(wordListCommon); i++) {
         PHTTP_STRUC pHttpStructPage = GetHttpRequest(ipAddress, port, (char*)wordListCommon[i], "HEAD", httpAuthHeader, isSSL, pFile);
         if (pHttpStructPage != NULL) {
-            printf("\t\t[i] %u/%u\r", i+1, (UINT)ARRAY_SIZE_CHAR(wordListCommon));
+            LoadingBar(i + 1, (UINT)ARRAY_SIZE_CHAR(wordListCommon));
             switch (enulPageNotFound) {
             case BASE_CODE_ERROR_CODE:
                 if (!IS_HTTP_ERROR(pHttpStructPage->returnCode)) {

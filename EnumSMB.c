@@ -47,7 +47,7 @@ BOOL SmbPublic(LPWSTR lpszServer, FILE* pFile) {
         }
         return TRUE;
     case ACCESS_DENIED:
-        printOut(pFile, "\t[SMB] Access denied !\n");
+        //printOut(pFile, "\t[SMB] Access denied !\n");
         break;
     case ERROR_BAD_NETPATH:
         printOut(pFile, "\t[SMB] ERROR: BAD NETPATH !\n");
@@ -123,7 +123,7 @@ BOOL SmbEnum(char* serverIp, BOOL isBruteForce, FILE* pFile) {
             .isBruteForce   = isBruteForce
         };
 
-        if (LoginSMB("", "", sharePath) || LoginSMB("guest", "guest", sharePath) || 
+        if (LoginSMB("", "", sharePath) || LoginSMB(usernameGuest, passwordGuest, sharePath) ||
             (isBruteForce && BrutForceSMB(sharePath, structWordList, pFile))) {
             if (SmbPublic(lpszServer, pFile)) {
                 WNetCancelConnection2A(sharePath, 0, TRUE);
@@ -132,7 +132,7 @@ BOOL SmbEnum(char* serverIp, BOOL isBruteForce, FILE* pFile) {
                 return TRUE;
             }
         }
-        printOut(pFile,"\t\t[i] Access denied !\n");
+        //printOut(pFile,"\t\t[i] Access denied !\n");
         free(sharePath);
     }
     free(lpszServer);

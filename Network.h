@@ -34,8 +34,6 @@
 
 
 
-
-
 typedef struct {
 	char ipAddress[IP_ADDRESS_LEN + 1];
 	char macAddress[MAC_ADDRESS_LEN + 1];
@@ -59,5 +57,7 @@ DWORD SyncWaitForMultipleObjs(HANDLE* handles, DWORD count);
 
 
 void* xrealloc(void* ptr, size_t size);
+
+VOID LoadingBar(UINT i, UINT total);
 
 #endif

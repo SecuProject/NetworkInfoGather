@@ -106,10 +106,13 @@
     <Filter Include="Source Files\5. Exploit\PrintNightmare">
       <UniqueIdentifier>{d664edd7-a23a-4204-a43c-3a287d932c2b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\2. NetDiscovery\3. PortScan">
+    <Filter Include="Source Files\Tools\MgCredentials">
+      <UniqueIdentifier>{d10cd55b-3025-4d92-88f7-91ce9436b88a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\3. PortScan">
       <UniqueIdentifier>{aadcd73f-d393-4a14-95d5-6abb15d95450}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\2. NetDiscovery\3. PortScan\PortList">
+    <Filter Include="Source Files\3. PortScan\PortList">
       <UniqueIdentifier>{3cd9dd40-88a8-44a2-977f-e6787250df41}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -142,7 +145,7 @@
       <Filter>Source Files\2. NetDiscovery\PassifPacketSniffing</Filter>
     </ClCompile>
     <ClCompile Include="PortScan.c">
-      <Filter>Source Files\2. NetDiscovery\3. PortScan</Filter>
+      <Filter>Source Files\3. PortScan</Filter>
     </ClCompile>
     <ClCompile Include="MgArguments.c">
       <Filter>Source Files\Tools\MgArguments</Filter>
@@ -199,7 +202,7 @@
       <Filter>Source Files\Tools\Base64</Filter>
     </ClCompile>
     <ClCompile Include="portList.c">
-      <Filter>Source Files\2. NetDiscovery\3. PortScan\PortList</Filter>
+      <Filter>Source Files\3. PortScan\PortList</Filter>
     </ClCompile>
     <ClCompile Include="EnumLDAP.c">
       <Filter>Source Files\4. FingerPrintInfo\EnumLDAP</Filter>
@@ -215,6 +218,15 @@
     </ClCompile>
     <ClCompile Include="PrintNightmare.c">
       <Filter>Source Files\5. Exploit\PrintNightmare</Filter>
+    </ClCompile>
+    <ClCompile Include="EnumPort.c">
+      <Filter>Source Files\4. FingerPrintInfo</Filter>
+    </ClCompile>
+    <ClCompile Include="EnumSmbUser.c">
+      <Filter>Source Files\4. FingerPrintInfo\EnumSMB</Filter>
+    </ClCompile>
+    <ClCompile Include="MgCredentials.c">
+      <Filter>Source Files\Tools\MgCredentials</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -246,7 +258,7 @@
       <Filter>Source Files\2. NetDiscovery\PassifPacketSniffing</Filter>
     </ClInclude>
     <ClInclude Include="PortScan.h">
-      <Filter>Source Files\2. NetDiscovery\3. PortScan</Filter>
+      <Filter>Source Files\3. PortScan</Filter>
     </ClInclude>
     <ClInclude Include="MgArguments.h">
       <Filter>Source Files\Tools\MgArguments</Filter>
@@ -309,7 +321,7 @@
       <Filter>Source Files\Tools\Base64</Filter>
     </ClInclude>
     <ClInclude Include="portList.h">
-      <Filter>Source Files\2. NetDiscovery\3. PortScan\PortList</Filter>
+      <Filter>Source Files\3. PortScan\PortList</Filter>
     </ClInclude>
     <ClInclude Include="EnumLDAP.h">
       <Filter>Source Files\4. FingerPrintInfo\EnumLDAP</Filter>
@@ -331,6 +343,15 @@
     </ClInclude>
     <ClInclude Include="PrintNightmare.h">
       <Filter>Source Files\5. Exploit\PrintNightmare</Filter>
+    </ClInclude>
+    <ClInclude Include="EnumPort.h">
+      <Filter>Source Files\4. FingerPrintInfo</Filter>
+    </ClInclude>
+    <ClInclude Include="EnumSmbUser.h">
+      <Filter>Source Files\4. FingerPrintInfo\EnumSMB</Filter>
+    </ClInclude>
+    <ClInclude Include="MgCredentials.h">
+      <Filter>Source Files\Tools\MgCredentials</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

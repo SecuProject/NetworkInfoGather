@@ -6,6 +6,9 @@
 
 #include <Windows.h>
 #include <stdio.h>
+#include "MgCredentials.h"
+
+#define MAX_BUFFER	128
 
 ////////////////////// SCAN ///////////////////////////
 //
@@ -47,12 +50,6 @@ typedef struct {
 
     BOOL isBruteForce;
 } StructWordList;
-
-typedef struct {
-    char* username;
-    char* password;
-    char* domain;
-} StructCredentials;
 
 typedef enum {
     SMB,
@@ -115,11 +112,27 @@ typedef struct ExploitStruct {
 //
 ///////////////////// Exploit /////////////////////////
 
+///////////////////// Enumeration /////////////////////////
+//
+typedef struct pEnumStruct{
+    char* username;
+    char* password;
+    char* ipAddress;
+    UINT port;
+    BOOL enumUser;
+    BOOL enumShare;
+
+    EnumProtocol protocol;
+}EnumStruct, * pEnumStruct;
+//
+///////////////////// Enumeration /////////////////////////
+
 
 typedef enum {
     ModeScan,
     ModeBruteforce,
-    ModeExploit
+    ModeExploit,
+    ModeEnum
 }ProgramMode;
 
 typedef struct Argument {
@@ -128,6 +141,7 @@ typedef struct Argument {
         ExploitStruct exploitStruct;
         BruteforceStruct bruteforceStruct;
         ScanStruct scanStruct;
+        EnumStruct enumStruct;
     };
 }Arguments, * pArguments;
 
