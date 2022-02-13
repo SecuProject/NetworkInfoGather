@@ -8,19 +8,121 @@
 #include "wordlist.h"
 #include "Network.h"
 
-BOOL PrintfSmbShareInfo(LPTSTR lpszServer, PSHARE_INFO_502 BufPtr, DWORD er, FILE* pFile) {
+char* GetShareType(DWORD dwShareType){
+    char* shareType;
+    switch (dwShareType){
+    case STYPE_DISKTREE:
+        shareType = "Disk drive";
+        break;
+    case STYPE_PRINTQ:
+        shareType = "Print queue";
+        break;
+    case STYPE_DEVICE:
+        shareType = "Communication device";
+        break;
+    case STYPE_IPC:
+        shareType = "Interprocess communication";
+        break;
+    case STYPE_TEMPORARY:
+        shareType = "A temporary share";
+        break;
+    case STYPE_SPECIAL:
+        shareType = "Special share";
+        break;
+    default:
+        shareType = "";
+        break;
+    }
+    return shareType;
+}
+void GetShareAccess(DWORD dwAccessPerm){
+    int nbChar = 0;
+    if (dwAccessPerm == 0){
+        printf("NONE");
+        nbChar += 4;
+    }else if (dwAccessPerm & ACCESS_ALL){
+        printf("ALL");
+        nbChar += 3;
+    }else{
+        if (dwAccessPerm & ACCESS_READ){
+            printf("R");
+            nbChar++;
+        }
+        if (dwAccessPerm & ACCESS_WRITE){
+            printf("W");
+            nbChar++;
+        }
+        if (dwAccessPerm & ACCESS_EXEC){
+            printf("X");
+            nbChar++;
+        }
+        if (dwAccessPerm & ACCESS_CREATE){
+            printf("C");
+            nbChar++;
+        }
+        if (dwAccessPerm & ACCESS_DELETE){
+            printf("D");
+            nbChar++;
+        }
+        if (dwAccessPerm & ACCESS_ATRIB){
+            printf("E");
+            nbChar++;
+        }
+        if (dwAccessPerm & ACCESS_PERM){
+            printf("P");
+            nbChar++;
+        }
+    }
+    for (int i = 0; i < 9 - nbChar; i++)
+        printf(" ");
+}
+
+VOID PrintfSmbShareInfo502(LPTSTR lpszServer, PSHARE_INFO_502 BufPtr, DWORD er, FILE* pFile) {
+    printOut(pFile, "\tShare:           Local Path:                                       Access:  Descriptor:\n");
+    printOut(pFile, "\t---------------------------------------------------------------------------------------\n");
     PSHARE_INFO_502 p = BufPtr;
     for (DWORD i = 1; i <= er; i++) {
-        printOut(pFile,"\t\t%-17S%-30S%ws\n", p->shi502_netname, p->shi502_path, p->shi502_remark);
+        printOut(pFile,"\t%-17S%-50S", p->shi502_netname, p->shi502_path);
+        GetShareAccess(p->shi502_permissions);
+        printOut(pFile,"%ws\n", p->shi502_netname, p->shi502_path, p->shi502_remark);
+
+        if (p->shi502_passwd != NULL){
+            printf("Password of %ws is: %ws\n",p->shi502_netname, p->shi502_passwd);
+        }
         /*if (IsValidSecurityDescriptor(BufPtr->shi502_security_descriptor)) {
             printOut(pFile,"%d", p->shi502_permissions);
         }*/
         p++;
     }
-    return TRUE;
 }
+VOID PrintfSmbShareInfo1(LPTSTR lpszServer, PSHARE_INFO_1 BufPtr, DWORD er, FILE* pFile){
+    printOut(pFile, "\tShare:           Type:                      Descriptor:\n");
+    printOut(pFile, "\t----------------------------------------------------------\n");
+    PSHARE_INFO_1 p = BufPtr;
+    for (DWORD i = 1; i <= er; i++){
+        char* shareType = GetShareType(p->shi1_type);
+        printOut(pFile, "\t%-17S%-27s%ws\n", p->shi1_netname, shareType, p->shi1_remark);
+        p++;
+    }
+}
+/*BOOL TestSmbConnection(LPWSTR lpszServer){
+    PSHARE_INFO_0 BufPtr;
+    NET_API_STATUS res;
+    DWORD er = 0, tr = 0, resume = 0;
 
-BOOL SmbPublic(LPWSTR lpszServer, FILE* pFile) {
+    res = NetShareEnum(lpszServer, 0, (LPBYTE*)&BufPtr, MAX_PREFERRED_LENGTH, &er, &tr, &resume);
+
+    printf("%ws\n", BufPtr->shi0_netname);
+    while (res == ERROR_MORE_DATA){
+        res = NetShareEnum(lpszServer, 0, (LPBYTE*)&BufPtr, MAX_PREFERRED_LENGTH, &er, &tr, &resume);
+        printf("%ws\n", BufPtr->shi0_netname);
+    }
+
+    NetApiBufferFree(BufPtr);
+    return res == NERR_Success;
+}*/
+
+BOOL SmbPublic502(LPWSTR lpszServer, FILE* pFile) {
     PSHARE_INFO_502 BufPtr;
     NET_API_STATUS res;
     DWORD er = 0, tr = 0, resume = 0;
@@ -29,16 +131,13 @@ BOOL SmbPublic(LPWSTR lpszServer, FILE* pFile) {
 
     switch (res){
     case NERR_Success:
-        printOut(pFile, "\t\tShare:           Local Path:                   Descriptor:\n");
-        printOut(pFile, "\t\t----------------------------------------------------------\n");
-
-        PrintfSmbShareInfo(lpszServer, BufPtr, er, pFile);
+        PrintfSmbShareInfo502(lpszServer, BufPtr, er, pFile);
         NetApiBufferFree(BufPtr);
 
         while (res == ERROR_MORE_DATA) {
             res = NetShareEnum(lpszServer, 502, (LPBYTE*)&BufPtr, MAX_PREFERRED_LENGTH, &er, &tr, &resume);
             if (res == ERROR_SUCCESS || res == ERROR_MORE_DATA) {
-                PrintfSmbShareInfo(lpszServer, BufPtr, er, pFile);
+                PrintfSmbShareInfo502(lpszServer, BufPtr, er, pFile);
                 NetApiBufferFree(BufPtr);
             }
             else {
@@ -47,7 +146,7 @@ BOOL SmbPublic(LPWSTR lpszServer, FILE* pFile) {
         }
         return TRUE;
     case ACCESS_DENIED:
-        //printOut(pFile, "\t[SMB] Access denied !\n");
+        printOut(pFile, "\t[SMB] Access denied !\n");
         break;
     case ERROR_BAD_NETPATH:
         printOut(pFile, "\t[SMB] ERROR: BAD NETPATH !\n");
@@ -58,7 +157,58 @@ BOOL SmbPublic(LPWSTR lpszServer, FILE* pFile) {
     }
     return FALSE;
 }
+BOOL SmbPublic1(LPWSTR lpszServer, FILE* pFile){
+    PSHARE_INFO_1 BufPtr;
+    NET_API_STATUS res;
+    DWORD er = 0, tr = 0, resume = 0;
 
+    res = NetShareEnum(lpszServer, 1, (LPBYTE*)&BufPtr, MAX_PREFERRED_LENGTH, &er, &tr, &resume);
+
+    switch (res){
+    case NERR_Success:
+        PrintfSmbShareInfo1(lpszServer, BufPtr, er, pFile);
+        NetApiBufferFree(BufPtr);
+
+        while (res == ERROR_MORE_DATA){
+            res = NetShareEnum(lpszServer, 1, (LPBYTE*)&BufPtr, MAX_PREFERRED_LENGTH, &er, &tr, &resume);
+            if (res == ERROR_SUCCESS || res == ERROR_MORE_DATA){
+                PrintfSmbShareInfo1(lpszServer, BufPtr, er, pFile);
+                NetApiBufferFree(BufPtr);
+            } else{
+                printOut(pFile, "\t[SMB] Error: %lu\n", res);
+            }
+        }
+        return TRUE;
+    case ACCESS_DENIED:
+        printOut(pFile, "\t[SMB] Access denied !\n");
+        break;
+    case ERROR_BAD_NETPATH:
+        printOut(pFile, "\t[SMB] ERROR: BAD NETPATH !\n");
+        break;
+    default:
+        printOut(pFile, "\t[SMB] ERROR: %lu\n", res);
+        break;
+    }
+    return FALSE;
+}
+BOOL SmbPublic(LPWSTR lpszServer, FILE* pFile){
+    if (!SmbPublic502(lpszServer,pFile)){
+        return SmbPublic1(lpszServer, pFile);
+    }
+    return FALSE;
+}
+
+
+
+BOOL TestSmbConnection(LPWSTR lpszServer){
+    PSHARE_INFO_0 BufPtr;
+    NET_API_STATUS res;
+    DWORD er = 0, tr = 0, resume = 0;
+
+    res = NetShareEnum(lpszServer, 0, (LPBYTE*)&BufPtr, MAX_PREFERRED_LENGTH, &er, &tr, &resume);
+    NetApiBufferFree(BufPtr);
+    return res == NERR_Success;
+}
 BOOL LoginSMB(const char* username, const char* password, char* share) {
     NETRESOURCEA resource;
     resource.dwType = RESOURCETYPE_DISK;
@@ -99,41 +249,53 @@ BOOL SmbEnum(char* serverIp, BOOL isBruteForce, FILE* pFile) {
 
     if (lpszServer == NULL)
         return FALSE;
-
-    printOut(pFile, "\t[SMB] Try to enumerate file share\n");
-
     swprintf_s(lpszServer, serverIpSize, L"%hs", serverIp);
-
-    if (SmbPublic(lpszServer,pFile)) {
-        free(lpszServer);
-        return TRUE;
-    } else {
+    if (TestSmbConnection(lpszServer)){
+        printOut(pFile, "\t[SMB] Try to enumerate file share\n");
+        if (SmbPublic(lpszServer, pFile)){
+            free(lpszServer);
+            return TRUE;
+        }
+    } else{
         char* sharePath = (char*)calloc(serverIpSize + 4, sizeof(char*));
         if (sharePath == NULL){
             free(lpszServer);
             return FALSE;
         }
 
-        sprintf_s(sharePath, serverIpSize + 4 , "\\\\%s", serverIp);
-        StructWordList structWordList = { 
-            .usernameTab    = (char**)usernameList ,
-            .nbUsername     = ARRAY_SIZE_CHAR(usernameList),
-            .passwordTab    = (char**)passwordList,
-            .nbPassword     = ARRAY_SIZE_CHAR(passwordList),
-            .isBruteForce   = isBruteForce
-        };
+        sprintf_s(sharePath, serverIpSize + 4, "\\\\%s", serverIp);
 
-        if (LoginSMB("", "", sharePath) || LoginSMB(usernameGuest, passwordGuest, sharePath) ||
-            (isBruteForce && BrutForceSMB(sharePath, structWordList, pFile))) {
-            if (SmbPublic(lpszServer, pFile)) {
+
+        if (LoginSMB("", "", sharePath) || LoginSMB(usernameGuest, passwordGuest, sharePath)){
+            printOut(pFile, "\t[SMB] Try to enumerate file share\n");
+            if (SmbPublic(lpszServer, pFile)){
                 WNetCancelConnection2A(sharePath, 0, TRUE);
                 free(sharePath);
                 free(lpszServer);
                 return TRUE;
             }
+
+        } else{
+            StructWordList structWordList = {
+                .usernameTab = (char**)usernameList ,
+                .nbUsername = ARRAY_SIZE_CHAR(usernameList),
+                .passwordTab = (char**)passwordList,
+                .nbPassword = ARRAY_SIZE_CHAR(passwordList),
+                .isBruteForce = isBruteForce
+            };
+            if(isBruteForce && BrutForceSMB(sharePath, structWordList, pFile)){
+                printOut(pFile, "\t[SMB] Try to enumerate file share\n");
+                if (SmbPublic(lpszServer, pFile)){
+                    WNetCancelConnection2A(sharePath, 0, TRUE);
+                    free(sharePath);
+                    free(lpszServer);
+                    return TRUE;
+                }
+            }
         }
-        //printOut(pFile,"\t\t[i] Access denied !\n");
+
         free(sharePath);
+        
     }
     free(lpszServer);
     return FALSE;
