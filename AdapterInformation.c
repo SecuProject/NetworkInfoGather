@@ -57,7 +57,7 @@ INT32 IPToUInt(char* ip) {
 	INT32 addr = 0;
 	int a, b, c, d;
 
-	if (sscanf(ip, "%d.%d.%d.%d", &a, &b, &c, &d) != 4)
+	if (sscanf_s(ip, "%d.%d.%d.%d", &a, &b, &c, &d) != 4)
 		return 0;
 	addr = a << 24;
 	addr |= b << OCTE_SIZE * 2;

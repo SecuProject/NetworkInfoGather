@@ -161,7 +161,7 @@ VOID PrintMenuScan() {
     printf("Select option:\n");
     printf("\t-h\t\tPrint help menu\n");
     printf("\t-t IP_ADDRESS\tTarget IP Address or range. Allowed formats:\n");
-    printf("\t\t\t\te.g. '192.168.1.1' or '192.168.1.1-5'\n");
+    printf("\t\t\t\te.g. '192.168.1.1' or '192.168.1.1-5' or '192.168.1.0/24'\n");
     printf("\t-ps\t\tEnable port scan\n");
     printf("\t-p [PORT_NB]\tUse custom port list port scan (If not set will use default list)\n");
     printf("\t\t\t\te.g. -p 80,443,8080\n");
@@ -287,7 +287,7 @@ BOOL ParseScanArg(int argc, char* argv[], pScanStruct pScanStruct) {
                             return FALSE;
                     }
                 } else if (argLen == 3) {
-                    if (argv[count][1] == 's' && strlen(argv[count]) == 3){
+                    if (argv[count][1] == 's'){
                         switch (argv[count][2]) {
                         case 'D':
                             pScanStruct->typeOfScan = Disable_Scan;

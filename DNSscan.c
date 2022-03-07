@@ -196,37 +196,40 @@ BOOL DNSdiscoveryMultiThread(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo, 
 	}
 
 	for (int i = 0; i < maskSizeInt; i++) {
-		pDataArray[i] = (PTHREAD_STRUCT_DATA_DNS)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(THREAD_STRUCT_DATA_DNS));
-		if (pDataArray[i] == NULL) {
-			printf("\t[x] Unable to allocate memory\n");
-			free(serverDnsIp);
-			free(hThreadArray);
-			free(dwThreadIdArray);
-			free(pDataArray);
-			free(networkPcInfo);
-			return FALSE;
-		}
-		pDataArray[i]->pFile = NULL;
-		pDataArray[i]->serverDnsIp = serverDnsIp;
-
-
 		INT32 ipAddress = ipAddressBc + i;
-		sprintf_s(pDataArray[i]->ipAddress, IP_ADDRESS_LEN, "%i.%i.%i.%i",
-			(ipAddress >> 24) & OCTE_MAX, //  << 24; // (OCTE_SIZE * 4)
-			(ipAddress >> OCTE_SIZE * 2) & OCTE_MAX,
-			(ipAddress >> OCTE_SIZE) & OCTE_MAX,
-			ipAddress & OCTE_MAX);
-		hThreadArray[i] = CreateThread(NULL, 0, ThreadDnsQueryHost, pDataArray[i], 0, &dwThreadIdArray[i]);
-		if (hThreadArray[i] == NULL) {
-			printf("\t[x] Unable to Create Thread\n");
-			free(serverDnsIp);
-			free(hThreadArray);
-			free(dwThreadIdArray);
-			free(pDataArray);
-			free(networkPcInfo);
-			return FALSE;
+		if ((ipAddress & OCTE_MAX) > 0 && (ipAddress & OCTE_MAX) < 255){
+			pDataArray[i] = (PTHREAD_STRUCT_DATA_DNS)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(THREAD_STRUCT_DATA_DNS));
+			if (pDataArray[i] == NULL) {
+				printf("\t[x] Unable to allocate memory\n");
+				free(serverDnsIp);
+				free(hThreadArray);
+				free(dwThreadIdArray);
+				free(pDataArray);
+				free(networkPcInfo);
+				return FALSE;
+			}
+			pDataArray[i]->pFile = NULL;
+			pDataArray[i]->serverDnsIp = serverDnsIp;
+
+
+		
+			sprintf_s(pDataArray[i]->ipAddress, IP_ADDRESS_LEN, "%i.%i.%i.%i",
+				(ipAddress >> 24) & OCTE_MAX, //  << 24; // (OCTE_SIZE * 4)
+				(ipAddress >> OCTE_SIZE * 2) & OCTE_MAX,
+				(ipAddress >> OCTE_SIZE) & OCTE_MAX,
+				ipAddress & OCTE_MAX);
+			hThreadArray[i] = CreateThread(NULL, 0, ThreadDnsQueryHost, pDataArray[i], 0, &dwThreadIdArray[i]);
+			if (hThreadArray[i] == NULL) {
+				printf("\t[x] Unable to Create Thread\n");
+				free(serverDnsIp);
+				free(hThreadArray);
+				free(dwThreadIdArray);
+				free(pDataArray);
+				free(networkPcInfo);
+				return FALSE;
+			}
+			Sleep(20);
 		}
-		Sleep(20);
 	}
 	SyncWaitForMultipleObjs(hThreadArray, maskSizeInt);
 	free(serverDnsIp);

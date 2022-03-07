@@ -19,7 +19,7 @@
   - [x] FTP
   - [ ] LDAP
 - [ ] Exploit
-  - [ ] Zerologon
+  - [x] Zerologon
   - [ ] vsFTPd 2.3.4
   - [ ] ...
 - [ ] Port scan

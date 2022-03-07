@@ -52,23 +52,25 @@ BOOL ARPdiscoveryThread(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo, INT32
 
 					for (int i = 0; i < maskSizeInt; i++) {
 						INT32 ipAddress = ipAddressBc + i;
-						sprintf_s(arpStructData[i].ipAddress, IP_ADDRESS_LEN + 1, "%i.%i.%i.%i",
-							(ipAddress >> 24) & OCTE_MAX, //  << 24; // (OCTE_SIZE * 4)
-							(ipAddress >> OCTE_SIZE * 2) & OCTE_MAX,
-							(ipAddress >> OCTE_SIZE) & OCTE_MAX,
-							ipAddress & OCTE_MAX);
+						if ((ipAddress & OCTE_MAX) > 0 && (ipAddress & OCTE_MAX) < 255){
+							sprintf_s(arpStructData[i].ipAddress, IP_ADDRESS_LEN + 1, "%i.%i.%i.%i",
+								(ipAddress >> 24) & OCTE_MAX, //  << 24; // (OCTE_SIZE * 4)
+								(ipAddress >> OCTE_SIZE * 2) & OCTE_MAX,
+								(ipAddress >> OCTE_SIZE) & OCTE_MAX,
+								ipAddress & OCTE_MAX);
 
 
-						hThreadArray[i] = CreateThread(NULL, 0, ThreadArpHost, &(arpStructData[i]), 0, &dwThreadIdArray[i]);
-						if (hThreadArray[i] == NULL) {
-							printOut(pFile, "\t[x] Unable to Create Thread\n");
-							free(hThreadArray);
-							free(dwThreadIdArray);
-							free(arpStructData);
-							free(networkPcInfo);
-							return FALSE;
+							hThreadArray[i] = CreateThread(NULL, 0, ThreadArpHost, &(arpStructData[i]), 0, &dwThreadIdArray[i]);
+							if (hThreadArray[i] == NULL) {
+								printOut(pFile, "\t[x] Unable to Create Thread\n");
+								free(hThreadArray);
+								free(dwThreadIdArray);
+								free(arpStructData);
+								free(networkPcInfo);
+								return FALSE;
+							}
+							Sleep(20);
 						}
-						Sleep(20);
 					}
 					SyncWaitForMultipleObjs(hThreadArray, maskSizeInt);
 
@@ -91,7 +93,6 @@ BOOL ARPdiscoveryThread(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo, INT32
 							//
 							///// Copy To main struct -> networkPcInfo
 							
-
 							nbDetected++;
 						}
 					}

@@ -67,40 +67,49 @@ VOID ScanBanner(TypeOfScan typeOfScan, FILE* pFile) {
 }
 
 INT32 AddIPRange(ScanStruct scanStruct, int* maskSizeInt) {
-	int nbDetected = 0;
 	NetworkPcInfo* pNetworkPcInfo = NULL;
 	int nbHostTest = 0;
 	int a, b, c, d, ipRange;
+	char* pToken;
 
 	if (scanStruct.typeOfScan == Passif_Packet_Sniffing) {
 		printf("\t[!] Passif Packet Sniffing with arg '-t' is not supported !\n");
-		printf("\t[!] All the ip address will be seen has up !\n");
+		printf("\t[!] All the IP addresses will be seen has up !\n");
 	}
-
-	int nbData = sscanf_s(scanStruct.ipAddress, "%i.%i.%i.%i-%i", &a, &b, &c, &d, &ipRange);
-	switch (nbData) {
-	case 4:
-		// Single host
-		nbHostTest = 1;
-		break;
-	case 5:
+	pToken = strchr(scanStruct.ipAddress, '/');
+	if (pToken != NULL){
 		// Multiple hosts
-		if (ipRange <= 0) {
+		int nbData = sscanf_s(scanStruct.ipAddress, "%i.%i.%i.%i/%i", &a, &b, &c, &d, &ipRange);
+		if (nbData != 5 || ipRange <= 0 || ipRange > 32){
 			printf("[x] Invalid IP address format !\n");
 			return FALSE;
 		}
-		nbHostTest = ipRange - d + 1;
-		break;
-	default:
-		printf("[x] Invalid IP address format !\n");
-		return FALSE;
+		nbHostTest = (0xFFFFFFFF >> ipRange) + 1;
+	} else{
+		pToken = strchr(scanStruct.ipAddress, '-');
+		if (pToken != NULL){
+			// Multiple hosts
+			int nbData = sscanf_s(scanStruct.ipAddress, "%i.%i.%i.%i-%i", &a, &b, &c, &d, &ipRange);
+			if (ipRange <= 0 || nbData != 5){
+				printf("[x] Invalid IP address format !\n");
+				return FALSE;
+			}
+			nbHostTest = ipRange - d + 1;
+		} else{
+			// Single host
+			int nbData = sscanf_s(scanStruct.ipAddress, "%i.%i.%i.%i", &a, &b, &c, &d);
+			if (nbData != 4){
+				printf("[x] Invalid IP address format !\n");
+				return FALSE;
+			}
+			nbHostTest = 1;
+		}
 	}
+
 	if (!IsIpAddressValid(a, b, c, d) && nbHostTest > 0) {
 		printf("[x] Invalid IP address format !\n");
 		return FALSE;
 	}
-
-
 	char ipAddressTemp[IP_ADDRESS_LEN + 1];
 	sprintf_s(ipAddressTemp, IP_ADDRESS_LEN + 1, "%i.%i.%i.%i", a, b, c, d);
 	*maskSizeInt = nbHostTest;
@@ -116,17 +125,18 @@ BOOL AddHostNotScan(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo, INT32 ipA
 
 	for (int i = 0; i < maskSizeInt; i++) {
 		INT32 ipAddress = ipAddressBc + i;
+		if ((ipAddress & OCTE_MAX) > 0 && (ipAddress & OCTE_MAX) < 255){
+			networkPcInfo[i].ipAddress = (char*)malloc(IP_ADDRESS_LEN + 1);
+			if (networkPcInfo[i].ipAddress == NULL)
+				return FALSE;
 
-		networkPcInfo[i].ipAddress = (char*)malloc(IP_ADDRESS_LEN + 1);
-		if (networkPcInfo[i].ipAddress == NULL)
-			return FALSE;
-
-		sprintf_s(networkPcInfo[i].ipAddress, IP_ADDRESS_LEN + 1, "%i.%i.%i.%i",
-			(ipAddress >> 24) & OCTE_MAX, //  << 24; // (OCTE_SIZE * 4)
-			(ipAddress >> OCTE_SIZE * 2) & OCTE_MAX,
-			(ipAddress >> OCTE_SIZE) & OCTE_MAX,
-			ipAddress & OCTE_MAX);
-		//printf("\t[%i] [%s]\n", i + 1, networkPcInfo[i].ipAddress);
+			sprintf_s(networkPcInfo[i].ipAddress, IP_ADDRESS_LEN + 1, "%i.%i.%i.%i",
+				(ipAddress >> 24) & OCTE_MAX, //  << 24; // (OCTE_SIZE * 4)
+				(ipAddress >> OCTE_SIZE * 2) & OCTE_MAX,
+				(ipAddress >> OCTE_SIZE) & OCTE_MAX,
+				ipAddress & OCTE_MAX);
+			//printf("\t[%i] [%s]\n", i + 1, networkPcInfo[i].ipAddress);
+		}
 	}
 	*ptrNetworkPcInfo = networkPcInfo;
 	*nbDetected = maskSizeInt;

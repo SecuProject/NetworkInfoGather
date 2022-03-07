@@ -77,8 +77,8 @@ DWORD SyncWaitForMultipleObjs(HANDLE* handles, DWORD count) {
 	DWORD res = 0;
 	while (waitingThreadsCount >= MAXIMUM_WAIT_OBJECTS) {
 		res = WaitForMultipleObjects(MAXIMUM_WAIT_OBJECTS, &handles[index], TRUE, INFINITE);
-		if (res == WAIT_TIMEOUT || res == WAIT_FAILED) {
-			printf("\t[x] SyncWaitForMultipleObjs wait Failed.\t");
+		if (res == WAIT_TIMEOUT) { // || res == WAIT_FAILED
+			printf("\t[x] SyncWaitForMultipleObjs wait Failed (%lu).\n", res);
 			return res;
 		}
 
@@ -88,8 +88,8 @@ DWORD SyncWaitForMultipleObjs(HANDLE* handles, DWORD count) {
 
 	if (waitingThreadsCount > 0) {
 		res = WaitForMultipleObjects(waitingThreadsCount, &handles[index], TRUE, INFINITE);
-		if (res == WAIT_TIMEOUT || res == WAIT_FAILED) {
-			printf("\t[x] SyncWaitForMultipleObjs wait Failed.\t");
+		if (res == WAIT_TIMEOUT){ // || res == WAIT_FAILED
+			printf("\t[x] SyncWaitForMultipleObjs wait Failed (%lu).\n", res);
 		}
 	}
 
