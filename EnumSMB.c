@@ -86,8 +86,8 @@ VOID PrintfSmbShareInfo502(LPTSTR lpszServer, PSHARE_INFO_502 BufPtr, DWORD er, 
         GetShareAccess(p->shi502_permissions);
         printOut(pFile,"%ws\n", p->shi502_netname, p->shi502_path, p->shi502_remark);
 
-        if (p->shi502_passwd != NULL){
-            printf("Password of %ws is: %ws\n",p->shi502_netname, p->shi502_passwd);
+        if (p->shi502_passwd[0] != 0x00){
+            printf("\t[!] Password of %ws is: %ws\n",p->shi502_netname, p->shi502_passwd);
         }
         /*if (IsValidSecurityDescriptor(BufPtr->shi502_security_descriptor)) {
             printOut(pFile,"%d", p->shi502_permissions);

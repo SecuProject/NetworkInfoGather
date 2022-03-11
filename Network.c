@@ -21,6 +21,50 @@ void* xrealloc(void* ptr, size_t size) {
 	}
 	return newptr;
 }
+void* xcalloc(size_t _Count, size_t _Size){
+	if (_Count == 0 || _Size == 0)
+		return FALSE;
+	char* newptr = calloc(_Count, _Size);
+	if (newptr == NULL){
+		printf("[x] Memory allocation failed. (%lu)\n", GetLastError());
+		return NULL;
+	}
+	return newptr;
+}
+
+BOOL InitNetworkPcInfo(NetworkPcInfo** pNetworkPcInfo, PTHREAD_STRUCT_DATA* pThreadStructData, DWORD** pDwThreadIdArray, HANDLE** pThreadArray, int maskSizeInt){
+	NetworkPcInfo* networkPcInfo = (NetworkPcInfo*)xcalloc(maskSizeInt, sizeof(NetworkPcInfo));
+	if (networkPcInfo != NULL){
+		PTHREAD_STRUCT_DATA threadStructData = (PTHREAD_STRUCT_DATA)xcalloc(maskSizeInt, sizeof(THREAD_STRUCT_DATA));
+		if (threadStructData != NULL){
+			DWORD* dwThreadIdArray = (DWORD*)xcalloc(maskSizeInt, sizeof(DWORD));
+			if (dwThreadIdArray != NULL){
+				HANDLE* hThreadArray = (HANDLE*)xcalloc(maskSizeInt, sizeof(HANDLE));
+				if (hThreadArray != NULL){
+					*pNetworkPcInfo = networkPcInfo;
+					*pThreadStructData = threadStructData;
+					*pDwThreadIdArray = dwThreadIdArray;
+					*pThreadArray = hThreadArray;
+					return TRUE;
+				}
+				free(dwThreadIdArray);
+			}
+			free(threadStructData);
+		}
+		free(networkPcInfo);
+	}
+	return FALSE;
+}
+VOID FreeNetworkPcInfo(PTHREAD_STRUCT_DATA threadStructData, DWORD* dwThreadIdArray, HANDLE threadArray){
+	if (threadArray != NULL)
+		free(threadArray);
+	if (dwThreadIdArray != NULL)
+		free(dwThreadIdArray);
+	if (threadStructData != NULL)
+		free(threadStructData);
+}
+
+
 
 BOOL IsIpAddressValid(int a, int b, int c, int d) {
 	return !(a < 0 || a>255 || b < 0 || b>255 || c < 0 || c>255 || d < 0 || d>255);

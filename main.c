@@ -38,16 +38,11 @@ void FreeStrcutNetPcInfo(NetworkPcInfo* networkPcInfo, int nbDetected) {
 	for (int i = nbDetected - 1; i ; i--) {
 		if (networkPcInfo[i].smtpData != NULL)
 			free(networkPcInfo[i].smtpData);
-		if (networkPcInfo[i].ipAddress != NULL)
-			free(networkPcInfo[i].ipAddress);
 		if (networkPcInfo[i].vendorName != NULL)
 			free(networkPcInfo[i].vendorName);
 	}
 	free(networkPcInfo);
 }
-
-
-
 
 BOOL Scan(ScanStruct scanStruct) {
 	ADAPTER_INFO* adapterInfo;

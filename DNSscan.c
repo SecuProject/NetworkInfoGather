@@ -9,10 +9,6 @@
 
 #pragma warning(disable:4996)
 
-
-#define MALLOC(x) HeapAlloc(GetProcessHeap(), 0, (x))
-#define FREE(x) HeapFree(GetProcessHeap(), 0, (x))
-
 void ReverseIP(char* pIP, UINT bufferSize) {
 	char seps[] = ".";
 	char* token;
@@ -72,7 +68,7 @@ BOOL GetDnsServer(char* serverDnsIp, UINT bufferSize) {
 	//IP_ADDR_STRING* pIPAddr;
 	BOOL result = FALSE;
 
-	pFixedInfo = (FIXED_INFO*)MALLOC(sizeof(FIXED_INFO));
+	pFixedInfo = (FIXED_INFO*)malloc(sizeof(FIXED_INFO));
 	if (pFixedInfo == NULL) {
 		printf("Error allocating memory needed to call GetNetworkParams\n");
 		return FALSE;
@@ -80,8 +76,8 @@ BOOL GetDnsServer(char* serverDnsIp, UINT bufferSize) {
 	ulOutBufLen = sizeof(FIXED_INFO);
 
 	if (GetNetworkParams(pFixedInfo, &ulOutBufLen) == ERROR_BUFFER_OVERFLOW) {
-		FREE(pFixedInfo);
-		pFixedInfo = (FIXED_INFO*)MALLOC(ulOutBufLen);
+		free(pFixedInfo);
+		pFixedInfo = (FIXED_INFO*)malloc(ulOutBufLen);
 		if (pFixedInfo == NULL) {
 			printf("Error allocating memory needed to call GetNetworkParams\n");
 			return FALSE;
@@ -107,13 +103,10 @@ BOOL GetDnsServer(char* serverDnsIp, UINT bufferSize) {
 	}
 
 	if (pFixedInfo)
-		FREE(pFixedInfo);
+		free(pFixedInfo);
 	return result;
 }
 
-
-
-//BOOL startPinging(char* ipAddress, int* computerTTL, FILE* pFile) {
 BOOL StartDnsRequest(char* ipAddress,char* serverDnsIp, char** hostname, FILE* pFile) {
 	BOOL detected = FALSE;
 	WORD wType = DNS_TYPE_PTR;
@@ -130,152 +123,85 @@ BOOL StartDnsRequest(char* ipAddress,char* serverDnsIp, char** hostname, FILE* p
 	return detected;
 }
 
-typedef struct {
-	char ipAddress[IP_ADDRESS_LEN + 1];
-	//char macAddress[MAC_ADDRESS_LEN + 1];
-	char* hostname;
-	char* serverDnsIp;
-	//int computerTTL;
-	FILE* pFile;
-	BOOL isHostUp;
-} THREAD_STRUCT_DATA_DNS, * PTHREAD_STRUCT_DATA_DNS;
-
-
 DWORD WINAPI ThreadDnsQueryHost(LPVOID lpParam) {
-	PTHREAD_STRUCT_DATA_DNS dnsStructData = (PTHREAD_STRUCT_DATA_DNS)lpParam;
+	PTHREAD_STRUCT_DATA dnsStructData = (PTHREAD_STRUCT_DATA)lpParam;
 	dnsStructData->isHostUp = StartDnsRequest(dnsStructData->ipAddress, dnsStructData->serverDnsIp, &(dnsStructData->hostname), dnsStructData->pFile);
 	return dnsStructData->isHostUp;
 }
 
-BOOL DNSdiscoveryMultiThread(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo, INT32 ipAddressBc, int* nbDetected, FILE* pFile) {
-	NetworkPcInfo* networkPcInfo = (NetworkPcInfo*)calloc(maskSizeInt, sizeof(NetworkPcInfo));
+BOOL DNSdiscoveryMultiThread(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo, INT32 ipAddressBc, int* pNbDetected, FILE* pFile) {
+	NetworkPcInfo* networkPcInfo;
+	PTHREAD_STRUCT_DATA dnsStructData;
+	DWORD* dwThreadIdArray;
+	HANDLE* hThreadArray;
+	if (InitNetworkPcInfo(&networkPcInfo, &dnsStructData, &dwThreadIdArray, &hThreadArray, maskSizeInt)){
+		char* serverDnsIp = (char*)malloc(IP_ADDRESS_LEN);
+		if (serverDnsIp != NULL){
+			if (GetDnsServer(serverDnsIp, IP_ADDRESS_LEN)){
+				int nbDetected = 0;
 
-	if (networkPcInfo == NULL) {
-		printOut(pFile, "\t[x] Unable to allocate memory\n");
-		return FALSE;
-	}
-	PTHREAD_STRUCT_DATA_DNS* pDataArray = (PTHREAD_STRUCT_DATA_DNS*)calloc(maskSizeInt, sizeof(PTHREAD_STRUCT_DATA_DNS));
-	if (pDataArray == NULL) {
-		printOut(pFile, "\t[x] Unable to allocate memory\n");
-		free(networkPcInfo);
-		return FALSE;
-	}
-	DWORD* dwThreadIdArray = (DWORD*)calloc(maskSizeInt, sizeof(DWORD));
-	if (dwThreadIdArray == NULL) {
-		printOut(pFile, "\t[x] Unable to allocate memory\n");
-		free(pDataArray);
-		free(networkPcInfo);
-		return FALSE;
-	}
-	HANDLE* hThreadArray = (HANDLE*)calloc(maskSizeInt, sizeof(HANDLE));
-	if (hThreadArray == NULL) {
-		printOut(pFile, "\t[x] Unable to allocate memory\n");
-		free(dwThreadIdArray);
-		free(pDataArray);
-		free(networkPcInfo);
-		return FALSE;
-	}
+				for (int i = 1; i < maskSizeInt; i++){
+					INT32 ipAddress = ipAddressBc + i;
 
-	char* serverDnsIp = (char*)malloc(IP_ADDRESS_LEN);
-	if (serverDnsIp == NULL) {
-		printOut(pFile, "\t[x] Unable to allocate memory\n");
-		free(hThreadArray);
-		free(dwThreadIdArray);
-		free(pDataArray);
-		free(networkPcInfo);
-		return FALSE;
-	}
-
-	if (!GetDnsServer(serverDnsIp, IP_ADDRESS_LEN)) {
-		printf("\t[x] Server DNS IP address is public !\n");
-		free(hThreadArray);
-		free(dwThreadIdArray);
-		free(pDataArray);
-		free(networkPcInfo);
-		return FALSE;
-	}
-
-	for (int i = 0; i < maskSizeInt; i++) {
-		INT32 ipAddress = ipAddressBc + i;
-		if ((ipAddress & OCTE_MAX) > 0 && (ipAddress & OCTE_MAX) < 255){
-			pDataArray[i] = (PTHREAD_STRUCT_DATA_DNS)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(THREAD_STRUCT_DATA_DNS));
-			if (pDataArray[i] == NULL) {
-				printf("\t[x] Unable to allocate memory\n");
+					dnsStructData[i].pFile = NULL;
+					dnsStructData[i].serverDnsIp = serverDnsIp;
+					sprintf_s(dnsStructData[i].ipAddress, IP_ADDRESS_LEN, "%i.%i.%i.%i",
+						(ipAddress >> 24) & OCTE_MAX, //  << 24; // (OCTE_SIZE * 4)
+						(ipAddress >> OCTE_SIZE * 2) & OCTE_MAX,
+						(ipAddress >> OCTE_SIZE) & OCTE_MAX,
+						ipAddress & OCTE_MAX);
+					hThreadArray[i] = CreateThread(NULL, 0, ThreadDnsQueryHost, &(dnsStructData[i]), 0, &dwThreadIdArray[i]);
+					if (hThreadArray[i] == NULL){
+						printf("\t[x] Unable to Create Thread\n");
+						free(serverDnsIp);
+						FreeNetworkPcInfo(dnsStructData, dwThreadIdArray, hThreadArray);
+						free(networkPcInfo);
+						return FALSE;
+					}
+					Sleep(20);
+				}
+				SyncWaitForMultipleObjs(hThreadArray, maskSizeInt);
 				free(serverDnsIp);
-				free(hThreadArray);
-				free(dwThreadIdArray);
-				free(pDataArray);
-				free(networkPcInfo);
-				return FALSE;
-			}
-			pDataArray[i]->pFile = NULL;
-			pDataArray[i]->serverDnsIp = serverDnsIp;
 
+				for (int i = 0; i < maskSizeInt; i++){
+					if (hThreadArray[i] != NULL)
+						CloseHandle(hThreadArray[i]);
+					if (dnsStructData[i].isHostUp){
+						strcpy_s(networkPcInfo[nbDetected].ipAddress, IP_ADDRESS_LEN, dnsStructData[i].ipAddress);
 
+						if (dnsStructData[i].hostname != NULL){
+							size_t hostnameSize = strlen(dnsStructData[i].hostname) + 1;
+							networkPcInfo[nbDetected].hostname = (char*)malloc(hostnameSize);
+							if (networkPcInfo[nbDetected].hostname == NULL)
+								return FALSE;
+							strcpy_s(networkPcInfo[nbDetected].hostname, hostnameSize, dnsStructData[i].hostname);
+							free(dnsStructData[i].hostname);
+						}
+						nbDetected++;
+					}
+
+				}
+
+				FreeNetworkPcInfo(dnsStructData, dwThreadIdArray, hThreadArray);
+				networkPcInfo = (NetworkPcInfo*)xrealloc(networkPcInfo, (nbDetected + 1) * sizeof(NetworkPcInfo));
+				if (networkPcInfo == NULL)
+					return FALSE;
+
+				*pNbDetected = nbDetected;
+				*ptrNetworkPcInfo = networkPcInfo;
+				return TRUE;
+
+			} else
+				printf("\t[x] Server DNS IP address is public !\n");
+			free(serverDnsIp);
+		} else
+			printOut(pFile, "\t[x] Unable to allocate memory\n");
 		
-			sprintf_s(pDataArray[i]->ipAddress, IP_ADDRESS_LEN, "%i.%i.%i.%i",
-				(ipAddress >> 24) & OCTE_MAX, //  << 24; // (OCTE_SIZE * 4)
-				(ipAddress >> OCTE_SIZE * 2) & OCTE_MAX,
-				(ipAddress >> OCTE_SIZE) & OCTE_MAX,
-				ipAddress & OCTE_MAX);
-			hThreadArray[i] = CreateThread(NULL, 0, ThreadDnsQueryHost, pDataArray[i], 0, &dwThreadIdArray[i]);
-			if (hThreadArray[i] == NULL) {
-				printf("\t[x] Unable to Create Thread\n");
-				free(serverDnsIp);
-				free(hThreadArray);
-				free(dwThreadIdArray);
-				free(pDataArray);
-				free(networkPcInfo);
-				return FALSE;
-			}
-			Sleep(20);
-		}
+
+		FreeNetworkPcInfo(dnsStructData, dwThreadIdArray, hThreadArray);
+		free(networkPcInfo);
 	}
-	SyncWaitForMultipleObjs(hThreadArray, maskSizeInt);
-	free(serverDnsIp);
-
-
-	int nbHostUp = 0;
-	//printf("[*] List of hosts:\n");
-	for (int i = 0; i < maskSizeInt; i++) {
-		if (hThreadArray[i] == NULL)
-			CloseHandle(hThreadArray[i]);
-		if (pDataArray[i] != NULL) {
-			if (pDataArray[i]->isHostUp) {
-				networkPcInfo[nbHostUp].ipAddress = (char*)malloc(IP_ADDRESS_LEN);
-				if (networkPcInfo[nbHostUp].ipAddress == NULL)
-					return FALSE;
-				strcpy_s(networkPcInfo[nbHostUp].ipAddress, IP_ADDRESS_LEN, pDataArray[i]->ipAddress);
-
-
-
-				size_t hostnameSize = strlen(pDataArray[i]->hostname) + 1;
-				networkPcInfo[nbHostUp].hostname = (char*)malloc(hostnameSize);
-				if (networkPcInfo[nbHostUp].hostname == NULL)
-					return FALSE;
-				strcpy_s(networkPcInfo[nbHostUp].hostname, hostnameSize, pDataArray[i]->hostname);
-
-
-				//printf("The hostname of %s is %s\n", networkPcInfo[nbHostUp].ipAddress, networkPcInfo[nbHostUp].hostname);
-
-				free(pDataArray[i]->hostname);
-				nbHostUp++;
-			}
-			HeapFree(GetProcessHeap(), 0, pDataArray[i]); // ???? -> FREE 
-			pDataArray[i] = NULL;    // Ensure address is not reused.
-		}
-
-	}
-
-	free(hThreadArray);
-	free(dwThreadIdArray);
-	free(pDataArray);
-
-	networkPcInfo = (NetworkPcInfo*)xrealloc(networkPcInfo, (nbHostUp + 1) * sizeof(NetworkPcInfo));
-	if (networkPcInfo == NULL)
-		return FALSE;
-
-	*nbDetected = nbHostUp;
-	*ptrNetworkPcInfo = networkPcInfo;
-	return TRUE;
+	*pNbDetected = 0;
+	*ptrNetworkPcInfo = NULL;
+	return FALSE;
 }

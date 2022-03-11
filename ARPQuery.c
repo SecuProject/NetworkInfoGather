@@ -40,89 +40,58 @@ DWORD WINAPI ThreadArpHost(LPVOID lpParam) {
 }
 
 BOOL ARPdiscoveryThread(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo, INT32 ipAddressBc, int* pNbDetected, FILE* pFile) {
-	NetworkPcInfo* networkPcInfo = (NetworkPcInfo*)calloc(maskSizeInt, sizeof(NetworkPcInfo));
-	if (networkPcInfo != NULL) {
-		PTHREAD_STRUCT_DATA arpStructData = (PTHREAD_STRUCT_DATA)calloc(maskSizeInt, sizeof(THREAD_STRUCT_DATA));
-		if (arpStructData != NULL) {
-			DWORD* dwThreadIdArray = (DWORD*)calloc(maskSizeInt, sizeof(DWORD));
-			if (dwThreadIdArray != NULL) {
-				HANDLE* hThreadArray = (HANDLE*)calloc(maskSizeInt, sizeof(HANDLE));
-				if (hThreadArray != NULL) {
-					int nbDetected = 0;
+	NetworkPcInfo* networkPcInfo;
+	PTHREAD_STRUCT_DATA arpStructData;
+	DWORD* dwThreadIdArray;
+	HANDLE* hThreadArray;
+	if (InitNetworkPcInfo(&networkPcInfo,&arpStructData, &dwThreadIdArray,&hThreadArray, maskSizeInt)){
+		int nbDetected = 0;
 
-					for (int i = 0; i < maskSizeInt; i++) {
-						INT32 ipAddress = ipAddressBc + i;
-						if ((ipAddress & OCTE_MAX) > 0 && (ipAddress & OCTE_MAX) < 255){
-							sprintf_s(arpStructData[i].ipAddress, IP_ADDRESS_LEN + 1, "%i.%i.%i.%i",
-								(ipAddress >> 24) & OCTE_MAX, //  << 24; // (OCTE_SIZE * 4)
-								(ipAddress >> OCTE_SIZE * 2) & OCTE_MAX,
-								(ipAddress >> OCTE_SIZE) & OCTE_MAX,
-								ipAddress & OCTE_MAX);
+		for (int i = 0; i < maskSizeInt; i++){
+			INT32 ipAddress = ipAddressBc + i;
+			sprintf_s(arpStructData[i].ipAddress, IP_ADDRESS_LEN + 1, "%i.%i.%i.%i",
+				(ipAddress >> 24) & OCTE_MAX, //  << 24; // (OCTE_SIZE * 4)
+				(ipAddress >> OCTE_SIZE * 2) & OCTE_MAX,
+				(ipAddress >> OCTE_SIZE) & OCTE_MAX,
+				ipAddress & OCTE_MAX);
 
+			hThreadArray[i] = CreateThread(NULL, 0, ThreadArpHost, &(arpStructData[i]), 0, &dwThreadIdArray[i]);
+			if (hThreadArray[i] == NULL){
+				printOut(pFile, "\t[x] Unable to Create Thread\n");
+				FreeNetworkPcInfo(arpStructData, dwThreadIdArray, hThreadArray);
+				free(networkPcInfo);
+				return FALSE;
+			}
+			Sleep(20);
+		}
+		SyncWaitForMultipleObjs(hThreadArray, maskSizeInt);
 
-							hThreadArray[i] = CreateThread(NULL, 0, ThreadArpHost, &(arpStructData[i]), 0, &dwThreadIdArray[i]);
-							if (hThreadArray[i] == NULL) {
-								printOut(pFile, "\t[x] Unable to Create Thread\n");
-								free(hThreadArray);
-								free(dwThreadIdArray);
-								free(arpStructData);
-								free(networkPcInfo);
-								return FALSE;
-							}
-							Sleep(20);
-						}
-					}
-					SyncWaitForMultipleObjs(hThreadArray, maskSizeInt);
+		for (int i = 0; i < maskSizeInt; i++){
+			if (hThreadArray[i] != NULL)
+				CloseHandle(hThreadArray[i]);
 
-					for (int i = 0; i < maskSizeInt; i++) {
-						CloseHandle(hThreadArray[i]);
+			if (arpStructData[i].isHostUp){
+				strcpy_s(networkPcInfo[nbDetected].ipAddress, IP_ADDRESS_LEN, arpStructData[i].ipAddress);
+				strcpy_s(networkPcInfo[nbDetected].macAddress, MAC_ADDRESS_LEN, arpStructData[i].macAddress);
+				nbDetected++;
+			}
+		}
+		FreeNetworkPcInfo(arpStructData, dwThreadIdArray, hThreadArray);
 
-						if (arpStructData[i].isHostUp) {
+		networkPcInfo = (NetworkPcInfo*)xrealloc(networkPcInfo, (nbDetected + 1) * sizeof(NetworkPcInfo));
+		if (networkPcInfo == NULL)
+			return FALSE;
 
-							///// Copy To main struct -> networkPcInfo
-							//
-							networkPcInfo[nbDetected].ipAddress = (char*)malloc(IP_ADDRESS_LEN);
-							if (networkPcInfo[nbDetected].ipAddress == NULL)
-								return FALSE;
-							strcpy_s(networkPcInfo[nbDetected].ipAddress, IP_ADDRESS_LEN, arpStructData[i].ipAddress);
+		*pNbDetected = nbDetected;
+		*ptrNetworkPcInfo = networkPcInfo;
 
-							networkPcInfo[nbDetected].macAddress = (char*)malloc(MAC_ADDRESS_LEN);
-							if (networkPcInfo[nbDetected].macAddress == NULL)
-								return FALSE;
-							strcpy_s(networkPcInfo[nbDetected].macAddress, MAC_ADDRESS_LEN, arpStructData[i].macAddress);
-							//
-							///// Copy To main struct -> networkPcInfo
-							
-							nbDetected++;
-						}
-					}
-
-					free(hThreadArray);
-					free(dwThreadIdArray);
-					free(arpStructData);
-
-					networkPcInfo = (NetworkPcInfo*)xrealloc(networkPcInfo, (nbDetected + 1) * sizeof(NetworkPcInfo));
-					if (networkPcInfo == NULL)
-						return FALSE;
-
-
-					*pNbDetected = nbDetected;
-					*ptrNetworkPcInfo = networkPcInfo;
-
-					return TRUE;
-				}else
-					printOut(pFile, "[x] Unable to allocate memory\n");
-				free(dwThreadIdArray);
-			} else
-				printOut(pFile, "[x] Unable to allocate memory\n");
-			free(arpStructData);
-		} else
-			printOut(pFile, "[x] Unable to allocate memory\n");
-		free(networkPcInfo);
-	} else
-		printOut(pFile, "[x] Unable to allocate memory\n");
+		return TRUE;
+	}
 
 	*pNbDetected = 0;
 	*ptrNetworkPcInfo = NULL;
 	return FALSE;
 }
+
+
+

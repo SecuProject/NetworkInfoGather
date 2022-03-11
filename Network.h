@@ -33,11 +33,17 @@
 										|| strncmp(IP_ADDRESS, "10.", 3) == 0)
 
 
-
 typedef struct {
 	char ipAddress[IP_ADDRESS_LEN + 1];
 	char macAddress[MAC_ADDRESS_LEN + 1];
+
+	// For DNS reuqest
+	char* hostname;
+	char* serverDnsIp;
+
+	//For Ping
 	int computerTTL;
+
 	FILE* pFile;
 	BOOL isHostUp;
 } THREAD_STRUCT_DATA, * PTHREAD_STRUCT_DATA;
@@ -55,8 +61,11 @@ BOOL printOut(FILE* pFile, const char* format, ...);
 DWORD SyncWaitForMultipleObjs(HANDLE* handles, DWORD count);
 
 
+BOOL InitNetworkPcInfo(NetworkPcInfo** pNetworkPcInfo, PTHREAD_STRUCT_DATA* pThreadStructData, DWORD** pDwThreadIdArray, HANDLE** pThreadArray, int maskSizeInt);
+VOID FreeNetworkPcInfo(PTHREAD_STRUCT_DATA threadStructData, DWORD* dwThreadIdArray, HANDLE threadArray);
 
 void* xrealloc(void* ptr, size_t size);
+void* xcalloc(size_t _Count, size_t _Size);
 
 VOID LoadingBar(UINT i, UINT total);
 

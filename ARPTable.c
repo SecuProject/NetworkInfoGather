@@ -41,18 +41,7 @@ BOOL GetARPTable(NetworkPcInfo** ptrArpTable, int* arpTableSize, INT32 ipRangeIn
 				
 				if (!isDuplicate(arpTable, *arpTableSize, ipAddress) &&
 					GetNetworkRange(ipAddress, ipRangeInt32)) {
-					// Check Network
-					arpTable[*arpTableSize].ipAddress = (char*)calloc(IP_ADDRESS_LEN + 1, 1);
-					if (arpTable[*arpTableSize].ipAddress == NULL)
-						return FALSE;
 					strcpy_s(arpTable[*arpTableSize].ipAddress, IP_ADDRESS_LEN + 1, ipAddress);
-
-
-					arpTable[*arpTableSize].macAddress = (char*)calloc(MAC_ADDRESS_LEN_BYTE * 3 + 5 + 1, 1);
-					if (arpTable[*arpTableSize].macAddress == NULL)
-						return FALSE;
-					/*for (int j = 0; j < MAC_ADDRESS_LEN_BYTE; j++)
-						sprintf_s(arpTable[*arpTableSize].macAddress + (3 * j), MAC_ADDRESS_LEN - (3 * (int)j / 2) + 1, (j == (MAC_ADDRESS_LEN_BYTE - 1)) ? "%.2X" : "%.2X-", (int)pipTable->Table[i].PhysicalAddress[j]);*/
 					BYTE* bPhysAddr = pipTable->Table[i].PhysicalAddress;
 					sprintf_s(arpTable[*arpTableSize].macAddress, MAC_ADDRESS_LEN + 1, "%.2X%.2X%.2X%.2X%.2X%.2X",
 							bPhysAddr[0], bPhysAddr[1], bPhysAddr[2], bPhysAddr[3], bPhysAddr[4], bPhysAddr[5]);

@@ -93,101 +93,55 @@ DWORD WINAPI ThreadPingHost(LPVOID lpParam) {
 	return icmpStructData->isHostUp;
 }
 
-BOOL ICMPdiscoveryMultiThread(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo, INT32 ipAddressBc, int* nbDetected, FILE* pFile) {
-	NetworkPcInfo* networkPcInfo = (NetworkPcInfo*)calloc(maskSizeInt, sizeof(NetworkPcInfo));
+BOOL ICMPdiscoveryMultiThread(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo, INT32 ipAddressBc, int* pNbDetected, FILE* pFile) {
+	NetworkPcInfo* networkPcInfo;
+	PTHREAD_STRUCT_DATA icmpStructData;
+	DWORD* dwThreadIdArray;
+	HANDLE* hThreadArray;
+	if (InitNetworkPcInfo(&networkPcInfo, &icmpStructData, &dwThreadIdArray, &hThreadArray, maskSizeInt)){
+		int nbDetected = 0;
 
-	if (networkPcInfo == NULL) {
-		printOut(pFile, "\t[x] Unable to allocate memory\n");
-		return FALSE;
-	}
-	PTHREAD_STRUCT_DATA* pDataArray = (PTHREAD_STRUCT_DATA*)calloc(maskSizeInt, sizeof(PTHREAD_STRUCT_DATA));
-	if (pDataArray == NULL) {
-		printOut(pFile, "\t[x] Unable to allocate memory\n");
-		free(networkPcInfo);
-		return FALSE;
-	}
-	DWORD* dwThreadIdArray = (DWORD*)calloc(maskSizeInt, sizeof(DWORD));
-	if (dwThreadIdArray == NULL) {
-		printOut(pFile, "\t[x] Unable to allocate memory\n");
-		free(pDataArray);
-		free(networkPcInfo);
-		return FALSE;
-	}
-	HANDLE* hThreadArray = (HANDLE*)calloc(maskSizeInt, sizeof(HANDLE));
-	if (hThreadArray == NULL) {
-		printOut(pFile, "\t[x] Unable to allocate memory\n");
-		free(dwThreadIdArray);
-		free(pDataArray);
-		free(networkPcInfo);
-		return FALSE;
-	}
+		for (int i = 1; i < maskSizeInt; i++){
+			INT32 ipAddress = ipAddressBc + i;
 
-
-	for (int i = 0; i < maskSizeInt; i++) {
-		INT32 ipAddress = ipAddressBc + i;
-		if ((ipAddress & OCTE_MAX) > 0 && (ipAddress & OCTE_MAX) < 255){
-			pDataArray[i] = (PTHREAD_STRUCT_DATA)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(THREAD_STRUCT_DATA));
-			if (pDataArray[i] == NULL){
-				printf("\t[x] Unable to allocate memory\n");
-				free(hThreadArray);
-				free(dwThreadIdArray);
-				free(pDataArray);
-				free(networkPcInfo);
-				return FALSE;
-			}
-			pDataArray[i]->pFile = NULL;
-
-			sprintf_s(pDataArray[i]->ipAddress, IP_ADDRESS_LEN, "%i.%i.%i.%i",
+			sprintf_s(icmpStructData[i].ipAddress, IP_ADDRESS_LEN, "%i.%i.%i.%i",
 				(ipAddress >> 24) & OCTE_MAX, //  << 24; // (OCTE_SIZE * 4)
 				(ipAddress >> OCTE_SIZE * 2) & OCTE_MAX,
 				(ipAddress >> OCTE_SIZE) & OCTE_MAX,
 				ipAddress & OCTE_MAX);
-			hThreadArray[i] = CreateThread(NULL, 0, ThreadPingHost, pDataArray[i], 0, &dwThreadIdArray[i]);
+			hThreadArray[i] = CreateThread(NULL, 0, ThreadPingHost, &(icmpStructData[i]), 0, &dwThreadIdArray[i]);
 			if (hThreadArray[i] == NULL){
 				printf("\t[x] Unable to Create Thread\n");
-				free(hThreadArray);
-				free(dwThreadIdArray);
-				free(pDataArray);
+				FreeNetworkPcInfo(icmpStructData, dwThreadIdArray, hThreadArray);
 				free(networkPcInfo);
 				return FALSE;
 			}
 			Sleep(20);
 		}
-	}
-	SyncWaitForMultipleObjs(hThreadArray, maskSizeInt);
+		SyncWaitForMultipleObjs(hThreadArray, maskSizeInt);
 
-	int nbHostUp = 0;
-	//printf("[*] List of hosts:\n");
-	for (int i = 0; i < maskSizeInt; i++) {
-		if(hThreadArray[i] != NULL)
-			CloseHandle(hThreadArray[i]);
-		if (pDataArray[i] != NULL) {
-			if (pDataArray[i]->isHostUp) {
-				networkPcInfo[nbHostUp].ipAddress = (char*)malloc(IP_ADDRESS_LEN);
-				if (networkPcInfo[nbHostUp].ipAddress == NULL)
-					return FALSE;
-
-				networkPcInfo[nbHostUp].osName = DetectOSBaseTTL(pDataArray[i]->computerTTL);
+		for (int i = 0; i < maskSizeInt; i++){
+			if (hThreadArray[i] != NULL)
+				CloseHandle(hThreadArray[i]);
+			if (icmpStructData[i].isHostUp){
+				networkPcInfo[nbDetected].osName = DetectOSBaseTTL(icmpStructData[i].computerTTL);
 				//printf("\t[%i] [%s]\t", nbHostUp +1, pDataArray[i]->ipAddress);
-
-				strcpy_s(networkPcInfo[nbHostUp].ipAddress, IP_ADDRESS_LEN, pDataArray[i]->ipAddress);
-				nbHostUp++;
+				strcpy_s(networkPcInfo[nbDetected].ipAddress, IP_ADDRESS_LEN, icmpStructData[i].ipAddress);
+				nbDetected++;
 			}
-			HeapFree(GetProcessHeap(), 0, pDataArray[i]); // ???? -> FREE 
-			pDataArray[i] = NULL;    // Ensure address is not reused.
 		}
+		FreeNetworkPcInfo(icmpStructData, dwThreadIdArray, hThreadArray);
 
+		networkPcInfo = (NetworkPcInfo*)xrealloc(networkPcInfo, (nbDetected + 1) * sizeof(NetworkPcInfo));
+		if (networkPcInfo == NULL)
+			return FALSE;
+
+		*pNbDetected = nbDetected;
+		*ptrNetworkPcInfo = networkPcInfo;
+		return TRUE;
 	}
 
-	free(hThreadArray);
-	free(dwThreadIdArray);
-	free(pDataArray);
-
-	networkPcInfo = (NetworkPcInfo*)xrealloc(networkPcInfo,(nbHostUp + 1) * sizeof(NetworkPcInfo));
-	if (networkPcInfo == NULL)
-		return FALSE;
-
-	*nbDetected = nbHostUp;
-	*ptrNetworkPcInfo = networkPcInfo;
-	return TRUE;
+	*pNbDetected = 0;
+	*ptrNetworkPcInfo = NULL;
+	return FALSE;
 }

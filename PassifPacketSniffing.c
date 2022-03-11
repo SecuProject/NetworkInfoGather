@@ -41,12 +41,9 @@ BOOL ProcessPacket(char* Buffer, int Size, NetworkPcInfo** ppNetworkPcInfo, int*
 		int iSrc;
 		for (iSrc = 0; iSrc < *nbPcInfo && strcmp(pNetworkPcInfo[iSrc].ipAddress, ipAddressSrc) != 0; iSrc++);
 		if (iSrc == *nbPcInfo) {
-			pNetworkPcInfo[*nbPcInfo].ipAddress = (char*)calloc(IP_ADDRESS_LEN + 1, 1);
-			if (pNetworkPcInfo[*nbPcInfo].ipAddress == NULL)
-				return FALSE;
 			strcpy_s(pNetworkPcInfo[*nbPcInfo].ipAddress, IP_ADDRESS_LEN, ipAddressSrc);
 			
-			pNetworkPcInfo[*nbPcInfo].macAddress = NULL;
+			pNetworkPcInfo[*nbPcInfo].macAddress[0] = 0x00;
 			//printOut(pFile,"\tSource IP:\t %s\t", ipAddressSrc);
 			//printOut(pFile,"\t[%i] - [%s]\t", (*nbPcInfo) +1, ipAddressSrc);
 			pNetworkPcInfo[*nbPcInfo].osName = DetectOSBaseTTL(iphdr->ip_ttl);
@@ -60,13 +57,10 @@ BOOL ProcessPacket(char* Buffer, int Size, NetworkPcInfo** ppNetworkPcInfo, int*
 		int iDst;
 		for (iDst = 0; iDst < *nbPcInfo && strcmp(pNetworkPcInfo[iDst].ipAddress, ipAddressDst) != 0; iDst++);
 		if (iDst == *nbPcInfo) {
-			pNetworkPcInfo[*nbPcInfo].ipAddress = (char*)calloc(IP_ADDRESS_LEN + 1, 1);
-			if (pNetworkPcInfo[*nbPcInfo].ipAddress == NULL)
-				return FALSE;
 			strcpy_s(pNetworkPcInfo[*nbPcInfo].ipAddress, IP_ADDRESS_LEN, ipAddressDst);
 			//pNetworkPcInfo[*nbPcInfo].osName = DetectOSBaseTTL(iphdr->ip_ttl);
 			pNetworkPcInfo[*nbPcInfo].osName = OsUnknown;
-			pNetworkPcInfo[*nbPcInfo].macAddress = NULL;
+			pNetworkPcInfo[*nbPcInfo].macAddress[0] = 0x00;
 			//printOut(pFile,"\tDestination IP:\t %s\n", ipAddressDst);
 			//printOut(pFile, "\t[%i] - [%s]\n", (*nbPcInfo) + 1, ipAddressDst);
 			pNetworkPcInfo[*nbPcInfo].osName = DetectOSBaseTTL(iphdr->ip_ttl);

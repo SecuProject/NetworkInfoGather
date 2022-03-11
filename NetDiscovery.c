@@ -15,11 +15,11 @@
 
 
 EnumOS DetectOSBaseTTL(UINT computerTTL) {
-	if (computerTTL < 64)
+	if (computerTTL <= 64)
 		return OsLinux;
-	else if (computerTTL < 128)
+	else if (computerTTL <= 128)
 		return OsWindows;
-	else if (computerTTL < 256)
+	else if (computerTTL <= 256)
 		return OsCisco;
 	else
 		return OsUnknown;
@@ -45,7 +45,7 @@ break;
 VOID ScanBanner(TypeOfScan typeOfScan, FILE* pFile) {
 	switch (typeOfScan) {
 	case Passif_Scan:
-		printOut(pFile, "[i] ARP discovery:\n");
+		printOut(pFile, "[i] ARP Table discovery:\n");
 		break;
 	case Passif_Packet_Sniffing:
 		printOut(pFile, "[i] Passive packet sniffing:\n");
@@ -54,7 +54,7 @@ VOID ScanBanner(TypeOfScan typeOfScan, FILE* pFile) {
 		printOut(pFile, "[i] ICMP discovery:\n");
 		break;
 	case ARP_Scan:
-		printOut(pFile, "[i] ARP Table discovery:\n");
+		printOut(pFile, "[i] ARP discovery:\n");
 		break;
 	case DNS_Scan:
 		printOut(pFile, "[i] DNS request discovery:\n");
@@ -125,18 +125,14 @@ BOOL AddHostNotScan(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo, INT32 ipA
 
 	for (int i = 0; i < maskSizeInt; i++) {
 		INT32 ipAddress = ipAddressBc + i;
-		if ((ipAddress & OCTE_MAX) > 0 && (ipAddress & OCTE_MAX) < 255){
-			networkPcInfo[i].ipAddress = (char*)malloc(IP_ADDRESS_LEN + 1);
-			if (networkPcInfo[i].ipAddress == NULL)
-				return FALSE;
-
-			sprintf_s(networkPcInfo[i].ipAddress, IP_ADDRESS_LEN + 1, "%i.%i.%i.%i",
-				(ipAddress >> 24) & OCTE_MAX, //  << 24; // (OCTE_SIZE * 4)
-				(ipAddress >> OCTE_SIZE * 2) & OCTE_MAX,
-				(ipAddress >> OCTE_SIZE) & OCTE_MAX,
-				ipAddress & OCTE_MAX);
-			//printf("\t[%i] [%s]\n", i + 1, networkPcInfo[i].ipAddress);
-		}
+		
+		sprintf_s(networkPcInfo[i].ipAddress, IP_ADDRESS_LEN + 1, "%i.%i.%i.%i",
+			(ipAddress >> 24) & OCTE_MAX, //  << 24; // (OCTE_SIZE * 4)
+			(ipAddress >> OCTE_SIZE * 2) & OCTE_MAX,
+			(ipAddress >> OCTE_SIZE) & OCTE_MAX,
+			ipAddress & OCTE_MAX);
+		//printf("\t[%i] [%s]\n", i + 1, networkPcInfo[i].ipAddress);
+		
 	}
 	*ptrNetworkPcInfo = networkPcInfo;
 	*nbDetected = maskSizeInt;

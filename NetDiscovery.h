@@ -11,6 +11,16 @@
 #define BANNER_BUFFER_SIZE	50
 #define BUFFER_SIZE			1024
 
+
+#ifndef IP_ADDRESS_LEN
+#define IP_ADDRESS_LEN	16
+#endif
+#ifndef MAC_ADDRESS_LEN
+#define MAC_ADDRESS_LEN_BYTE	6
+#define MAC_ADDRESS_LEN			MAC_ADDRESS_LEN_BYTE * 2 + 5
+#endif
+
+
 typedef enum {
 	OsUnknown = 0,
 	OsWindows = 1,
@@ -75,8 +85,8 @@ typedef struct {
 
 typedef struct {
 	// 2. NetDiscovery
-	char* ipAddress;
-	char* macAddress;
+	char ipAddress[IP_ADDRESS_LEN +1];
+	char macAddress[MAC_ADDRESS_LEN +1];
 	char* vendorName;
 	char* hostname;
 

@@ -12,9 +12,8 @@
 #include "Network.h"
 
 
-#pragma warning(disable:4996) 
 // InetPton(AF_INET, _T("192.168.1.1"), &RecvAddr.sin_addr.s_addr);
-
+#pragma warning(disable:4996) 
 
 
 /*
@@ -172,8 +171,8 @@ VOID PrintMenuScan() {
     return;
 }
 VOID PrintMenuEnum(){
-    printf("NetworkInfoGather.exe Enum PROTOCOL IP_ADDRESS [-u USERNAME] [-p PASSWORD]\n");
-    printf("NetworkInfoGather.exe Enum smb IP_ADDRESS [-u USERNAME] [-p PASSWORD] [-S] [-U]\n\n");
+    printf("NetworkInfoGather.exe Enum PROTOCOL IP_ADDRESS [-u USERNAME] [-p PASSWORD]\n\n");
+    printf("NetworkInfoGather.exe Enum smb IP_ADDRESS [-u USERNAME] [-p PASSWORD] [-S] [-U]\n");
     printf("NetworkInfoGather.exe Enum ftp IP_ADDRESS [-u USERNAME] [-p PASSWORD] [-P PORT]\n\n");
 
     printf("PROTOCOL:\n");
@@ -420,10 +419,11 @@ int HostnameToIp(char* hostname, char** ppIpAddress){
         return FALSE;
     }
     addr_list = (struct in_addr**)he->h_addr_list;
-    strcpy(*ppIpAddress, inet_ntoa(*addr_list[0]));
+    strcpy_s(*ppIpAddress, IP_ADDRESS_LEN + 1, inet_ntoa(*addr_list[0]));
     printf("[i] %s resolved to %s\n", hostname, *ppIpAddress);
     return TRUE;
 }
+
 
 
 BOOL AddStrToStruct(char* name, char* argData, char** structData){

@@ -34,24 +34,20 @@ BOOL scanPortOpenUDP(char* dest_ip, int port, FILE* pFile) {
 		server_addr.sin_port = htons(port);
 		server_addr.sin_addr.s_addr = AddrIp;
 
-		char msg[] = "Just a text\n";
+		const char msg[] = "TestUdp\n";
 
-		int send_size = sendto(udp_sock, msg, (int)strlen(msg), 0, (struct sockaddr*)&server_addr, sizeof(SOCKADDR_IN));
+		int send_size = sendto(udp_sock, msg, (int)sizeof(msg), 0, (struct sockaddr*)&server_addr, sizeof(SOCKADDR_IN));
 		if (send_size != SOCKET_ERROR) {
 			int servAddSize = sizeof(server_addr);
 			char buffer[OCTE_MAX];
 
-			if (!set_options(udp_sock)) {
+			if (set_options(udp_sock) != SOCKET_ERROR){
+				if (recvfrom(udp_sock, buffer, OCTE_MAX, 0, (struct sockaddr*)&server_addr, &servAddSize) != SOCKET_ERROR){
+					closesocket(udp_sock);
+					return TRUE;
+				}
+			}else
 				printOut(pFile, "\t[X] Error setting socket options\n");
-				closesocket(udp_sock);
-				return FALSE;
-			}
-
-			int recv_size = recvfrom(udp_sock, buffer, OCTE_MAX, 0, (struct sockaddr*)&server_addr, &servAddSize);
-			if (recv_size != SOCKET_ERROR) {
-				closesocket(udp_sock);
-				return TRUE;
-			}
 		}
 		closesocket(udp_sock);
 	}
@@ -59,24 +55,17 @@ BOOL scanPortOpenUDP(char* dest_ip, int port, FILE* pFile) {
 }
 BOOL scanPortOpenTCP(char* dest_ip, int port,FILE* pFile) {
 	SOCKET tcp_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-
-	if (tcp_sock == INVALID_SOCKET) {
-		printOut(pFile,"\t[X] socket open failed %lu\n", GetLastError());
-		closesocket(tcp_sock);
-		return FALSE;
-	} else {
+	if (tcp_sock != INVALID_SOCKET){
 		SOCKADDR_IN ssin = InitSockAddr(dest_ip, port);
-
-		if (!set_options(tcp_sock)) {
-			printOut(pFile,"\t[X] Error setting socket options\n");
-			closesocket(tcp_sock);
-			return FALSE;
-		}
-		if (connect(tcp_sock, (struct sockaddr*)&ssin, sizeof(SOCKADDR_IN)) != SOCKET_ERROR) {
-			closesocket(tcp_sock);
-			return TRUE;
-		}
-	}
+		if (set_options(tcp_sock) != SOCKET_ERROR){
+			if (connect(tcp_sock, (struct sockaddr*)&ssin, sizeof(SOCKADDR_IN)) != SOCKET_ERROR){
+				closesocket(tcp_sock);
+				return TRUE;
+			}
+		}else
+			printOut(pFile, "\t[X] Error setting socket options\n");
+	} else
+		printOut(pFile, "\t[X] socket open failed %lu\n", GetLastError());
 	closesocket(tcp_sock);
 	return FALSE;
 }
@@ -227,6 +216,7 @@ DWORD WINAPI ThreadNetworkPortScan(LPVOID lpParam) {
 			hThreadArray[iPort] = CreateThread(NULL, 0, ThreadPcPortScanTcp, &pThreadDataPort[iPort], 0, &dwThreadIdArray[iPort]);
 		else
 			hThreadArray[iPort] = CreateThread(NULL, 0, ThreadPcPortScanUdp, &pThreadDataPort[iPort], 0, &dwThreadIdArray[iPort]);
+
 		if (hThreadArray[iPort] == NULL) {
 			printf("\t[x] Unable to Create Thread\n");
 			free(pThreadDataPort);
