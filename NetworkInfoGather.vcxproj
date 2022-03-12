@@ -123,7 +123,7 @@
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -143,7 +143,7 @@
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -151,6 +151,8 @@
     <ClCompile Include="ARPQuery.c" />
     <ClCompile Include="ARPTable.c" />
     <ClCompile Include="Base64.c" />
+    <ClCompile Include="CheckDoublePulsar.c" />
+    <ClCompile Include="CheckMs17_010.c" />
     <ClCompile Include="DetectHttpBasicAuth.c" />
     <ClCompile Include="DetectWAF.c" />
     <ClCompile Include="DNSscan.c" />
@@ -190,6 +192,8 @@
     <ClInclude Include="ARPQuery.h" />
     <ClInclude Include="ARPTable.h" />
     <ClInclude Include="Base64.h" />
+    <ClInclude Include="CheckDoublePulsar.h" />
+    <ClInclude Include="CheckMs17_010.h" />
     <ClInclude Include="DetectHttpBasicAuth.h" />
     <ClInclude Include="DetectWAF.h" />
     <ClInclude Include="DNSscan.h" />

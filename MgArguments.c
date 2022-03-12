@@ -134,8 +134,12 @@ VOID PrintMenuExploit() {
     printf("\t\t-d [FQDN]\tServer FQDN [REQUIRED]\n");
     printf("\t\t-c\t\tCheck if server is vulnerable [DEFAULT]\n");
     printf("\t\t-e\t\tExploit vulnerable and set DC password to NULL\n\n");
+    printf("\tms17 IP_ADDRESS\n");
+    printf("\tNote: check for vulnerable ms17-010 (eternalblue)\n");
+    printf("\tdoublep IP_ADDRESS\n");
+    printf("\tNote: check for vulnerable Double Pulsar backdoor\n");
     printf("\tprintnightmare IP_ADDRESS\n");
-    printf("\t\tNote: check for vulnerable to CVE-2021-1675/CVE-2021-34527\n");
+    printf("\t\tNote: check for vulnerable CVE-2021-1675/CVE-2021-34527\n");
     printf("\t\tIP_ADDRESS:\n");
     printf("\t\t\te.g. '192.168.1.1'\n\n");
     return;
@@ -609,6 +613,12 @@ BOOL ParseExploitArg(int argc, char* argv[], pExploitStruct pExploitStruct) {
             PrintMenuExploit();
             return FALSE;
         }
+    } else if (strcmp(argv[2], "ms17") == 0 && argc == 4) {
+        pExploitStruct->exploit = MS17_010;
+        strcpy_s(pExploitStruct->exploitMs17_010.ipAddress, 16, argv[3]);
+    } else if (strcmp(argv[2], "doublep") == 0 && argc == 4) {
+        pExploitStruct->exploit = DOUBLE_PULSAR;
+        strcpy_s(pExploitStruct->exploitDoublePulsar.ipAddress, 16, argv[3]);
     } else if (strcmp(argv[2], "printnightmare") == 0 && argc == 4) {
         pExploitStruct->exploit = PRINT_NIGHTMARE;
 

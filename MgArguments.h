@@ -96,17 +96,27 @@ typedef struct {
 typedef struct{
     char ipAddress[16]; // IP_ADDRESS_LEN
 }ExploitPrintNightmare;
+typedef struct{
+    char ipAddress[16]; // IP_ADDRESS_LEN
+}ExploitMs17_010;
+typedef struct{
+    char ipAddress[16]; // IP_ADDRESS_LEN
+}ExploitDoublePulsar;
 
 typedef enum {
     ZERO_LOGON,
-    PRINT_NIGHTMARE
+    PRINT_NIGHTMARE,
+    DOUBLE_PULSAR,
+    MS17_010
 }EnumExploit;
 
 typedef struct ExploitStruct {
     EnumExploit exploit;
     union {
-        ExploitZeroLogon exploitZeroLogon;
-        ExploitPrintNightmare exploitPrintNightmare;
+        ExploitZeroLogon        exploitZeroLogon;
+        ExploitPrintNightmare   exploitPrintNightmare;
+        ExploitMs17_010         exploitMs17_010;
+        ExploitDoublePulsar     exploitDoublePulsar;
     };
 }ExploitStruct, * pExploitStruct;
 //

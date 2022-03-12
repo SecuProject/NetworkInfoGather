@@ -178,17 +178,17 @@ BOOL UserInfo(char* targetIp){
                 printf("\t[-] Username: %s\n", tabUsers[i].username);
                 UserPriv(tabUsers[i].privLevel);
                 if (tabUsers[i].homeDir[0] != 0)
-                    printf("\t\tHome Dir: %s\n", tabUsers[i].homeDir);
+                    printf("\t\t[i] Home Dir:\t    %s\n", tabUsers[i].homeDir);
                 if (tabUsers[i].comment[0] != 0)
-                    printf("\t\tComment: %s\n", tabUsers[i].comment);
+                    printf("\t\t[i] Comment:\t    %s\n", tabUsers[i].comment);
                 if (strcmp(tabUsers[i].password, "(null)") != 0)
-                    printf("\t\tPassword: %s\n", tabUsers[i].password);
+                    printf("\t\t[i] Password:\t    %s\n", tabUsers[i].password);
                 if (tabUsers[i].scriptPath[0] != 0)
-                    printf("\t\tScript Path: %s\n", tabUsers[i].scriptPath);
+                    printf("\t\t[i] Script Path:    %s\n", tabUsers[i].scriptPath);
                 UserFlag(tabUsers[i].flags);
             }
         }
-        printf("[i] Total of %d entries enumerated\n", nbUsers);
+        printf("\t[i] Total of %d entries enumerated\n", nbUsers);
     }
     return TRUE;
 }

@@ -50,7 +50,7 @@ typedef struct {
 
 
 BOOL initWSA(FILE* pFile);
-SOCKADDR_IN InitSockAddr(char* ipAddress, int port);
+
 
 
 BOOL IsIpAddressValid(int a, int b, int c, int d);
@@ -63,6 +63,9 @@ DWORD SyncWaitForMultipleObjs(HANDLE* handles, DWORD count);
 
 BOOL InitNetworkPcInfo(NetworkPcInfo** pNetworkPcInfo, PTHREAD_STRUCT_DATA* pThreadStructData, DWORD** pDwThreadIdArray, HANDLE** pThreadArray, int maskSizeInt);
 VOID FreeNetworkPcInfo(PTHREAD_STRUCT_DATA threadStructData, DWORD* dwThreadIdArray, HANDLE threadArray);
+
+SOCKADDR_IN InitSockAddr(char* ipAddress, int port);	// Test remove !!!
+SOCKET ConnectTcpServer(char* ipAddress, int port);
 
 void* xrealloc(void* ptr, size_t size);
 void* xcalloc(size_t _Count, size_t _Size);

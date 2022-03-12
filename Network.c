@@ -1,9 +1,7 @@
 #include <winsock2.h>
-#include <iphlpapi.h>
-#include <stdio.h>
-
-#include <ws2tcpip.h>   // inet_pton
 #include <iphlpapi.h>   // IPAddr
+#include <stdio.h>
+#include <ws2tcpip.h>   // inet_pton
 
 #include "Network.h"
 #include "AdapterInformation.h"
@@ -152,6 +150,19 @@ SOCKADDR_IN InitSockAddr(char* ipAddress, int port) {
 	ssin.sin_port = htons(port);
 
 	return ssin;
+}
+SOCKET ConnectTcpServer(char* ipAddress, int port){
+	SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
+	if (sock == INVALID_SOCKET)
+		return INVALID_SOCKET;
+	SOCKADDR_IN ssin = InitSockAddr(ipAddress, port);
+
+	printf("\t[i] Connecting...\n");
+	if (connect(sock, (struct sockaddr*)&ssin, sizeof(ssin)) == -1){
+		printf("\t[x] Connection Error %lu\n", GetLastError());
+		return INVALID_SOCKET;
+	}
+	return sock;
 }
 
 

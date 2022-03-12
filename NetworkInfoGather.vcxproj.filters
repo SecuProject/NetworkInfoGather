@@ -115,6 +115,9 @@
     <Filter Include="Source Files\3. PortScan\PortList">
       <UniqueIdentifier>{3cd9dd40-88a8-44a2-977f-e6787250df41}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\5. Exploit\SMBv1">
+      <UniqueIdentifier>{b67c1a6a-51c4-42b6-8d0e-8f974e10fda0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -227,6 +230,12 @@
     </ClCompile>
     <ClCompile Include="MgCredentials.c">
       <Filter>Source Files\Tools\MgCredentials</Filter>
+    </ClCompile>
+    <ClCompile Include="CheckMs17_010.c">
+      <Filter>Source Files\5. Exploit\SMBv1</Filter>
+    </ClCompile>
+    <ClCompile Include="CheckDoublePulsar.c">
+      <Filter>Source Files\5. Exploit\SMBv1</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -352,6 +361,12 @@
     </ClInclude>
     <ClInclude Include="MgCredentials.h">
       <Filter>Source Files\Tools\MgCredentials</Filter>
+    </ClInclude>
+    <ClInclude Include="CheckMs17_010.h">
+      <Filter>Source Files\5. Exploit\SMBv1</Filter>
+    </ClInclude>
+    <ClInclude Include="CheckDoublePulsar.h">
+      <Filter>Source Files\5. Exploit\SMBv1</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
