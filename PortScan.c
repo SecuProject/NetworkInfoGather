@@ -53,10 +53,10 @@ BOOL scanPortOpenUDP(char* dest_ip, int port, FILE* pFile) {
 	}
 	return FALSE;
 }
-BOOL scanPortOpenTCP(char* dest_ip, int port,FILE* pFile) {
+BOOL scanPortOpenTCP(char* ipAddress, int port,FILE* pFile) {
 	SOCKET tcp_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (tcp_sock != INVALID_SOCKET){
-		SOCKADDR_IN ssin = InitSockAddr(dest_ip, port);
+		SOCKADDR_IN ssin = InitSockAddr(ipAddress, port);
 		if (set_options(tcp_sock) != SOCKET_ERROR){
 			if (connect(tcp_sock, (struct sockaddr*)&ssin, sizeof(SOCKADDR_IN)) != SOCKET_ERROR){
 				closesocket(tcp_sock);

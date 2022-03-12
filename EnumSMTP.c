@@ -42,20 +42,13 @@ VOID FreeSmtpData(SMTP_DATA* smtpData) {
 }
 
 BOOL ConnectToSmtp(NETSOCK_DATA* netSockData,FILE* pFile) {
-	SOCKET SocketFD;
-	SOCKADDR_IN ssin = InitSockAddr(netSockData->ipAddress, netSockData->port);
-
-	SocketFD = socket(AF_INET, SOCK_STREAM, 0);
-	if (SocketFD == INVALID_SOCKET)
+	SOCKET SocketFD = ConnectTcpServer(netSockData->ipAddress, netSockData->port);
+	if (SocketFD == INVALID_SOCKET){
+		printOut(pFile, "\t[SMTP] Fail to connect to server !\n");
 		return FALSE;
-	
-	if (connect(SocketFD, (LPSOCKADDR)&ssin, sizeof(ssin)) != SOCKET_ERROR) {
-		netSockData->SocketFD = SocketFD;
-		return TRUE;
 	}
-	printOut(pFile, "\t[SMTP] Fail to connect to server !\n");
-	closesocket(SocketFD);
-	return FALSE;
+	netSockData->SocketFD = SocketFD;
+	return TRUE;
 }
 int recvSmpt(NETSOCK_DATA* netSockData, char* recvBuffer, int bufferSize, FILE* pFile) {
 	int sizeRecv = recv(netSockData->SocketFD, recvBuffer, bufferSize, 0);

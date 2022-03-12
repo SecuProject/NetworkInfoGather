@@ -135,13 +135,13 @@ VOID PrintMenuExploit() {
     printf("\t\t-c\t\tCheck if server is vulnerable [DEFAULT]\n");
     printf("\t\t-e\t\tExploit vulnerable and set DC password to NULL\n\n");
     printf("\tms17 IP_ADDRESS\n");
-    printf("\tNote: check for vulnerable ms17-010 (eternalblue)\n");
+    printf("\t\tNote: check for vulnerable ms17-010 (eternalblue)\n");
     printf("\tdoublep IP_ADDRESS\n");
-    printf("\tNote: check for vulnerable Double Pulsar backdoor\n");
+    printf("\t\tNote: check for vulnerable Double Pulsar backdoor\n");
     printf("\tprintnightmare IP_ADDRESS\n");
-    printf("\t\tNote: check for vulnerable CVE-2021-1675/CVE-2021-34527\n");
-    printf("\t\tIP_ADDRESS:\n");
-    printf("\t\t\te.g. '192.168.1.1'\n\n");
+    printf("\t\tNote: check for vulnerable CVE-2021-1675/CVE-2021-34527\n\n");
+    printf("IP_ADDRESS:\n");
+    printf("\te.g. '192.168.1.1'\n\n");
     return;
 }
 VOID PrintMenuScan() {

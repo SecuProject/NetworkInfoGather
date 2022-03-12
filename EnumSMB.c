@@ -7,6 +7,7 @@
 
 #include "wordlist.h"
 #include "Network.h"
+#include "CheckSMBv1.h"
 
 char* GetShareType(DWORD dwShareType){
     char* shareType;
@@ -86,7 +87,7 @@ VOID PrintfSmbShareInfo502(LPTSTR lpszServer, PSHARE_INFO_502 BufPtr, DWORD er, 
         GetShareAccess(p->shi502_permissions);
         printOut(pFile,"%ws\n", p->shi502_netname, p->shi502_path, p->shi502_remark);
 
-        if (p->shi502_passwd[0] != 0x00){
+        if (p->shi502_passwd != NULL && p->shi502_passwd[0] != 0x00){
             printf("\t[!] Password of %ws is: %ws\n",p->shi502_netname, p->shi502_passwd);
         }
         /*if (IsValidSecurityDescriptor(BufPtr->shi502_security_descriptor)) {
@@ -246,6 +247,9 @@ BOOL BrutForceSMB(char* sharePath, StructWordList structWordList, FILE* pFile) {
 BOOL SmbEnum(char* serverIp, BOOL isBruteForce, FILE* pFile) {
     size_t serverIpSize = strlen(serverIp) + 1;
     LPWSTR lpszServer = (LPWSTR)calloc(serverIpSize, sizeof(LPWSTR));
+
+    if (CheckSMBv1(serverIp, PORT_SMB))
+        printOut(pFile, "\t[SMB] SMBv1 is enable !\n");
 
     if (lpszServer == NULL)
         return FALSE;

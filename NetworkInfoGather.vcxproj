@@ -153,6 +153,7 @@
     <ClCompile Include="Base64.c" />
     <ClCompile Include="CheckDoublePulsar.c" />
     <ClCompile Include="CheckMs17_010.c" />
+    <ClCompile Include="CheckSMBv1.c" />
     <ClCompile Include="DetectHttpBasicAuth.c" />
     <ClCompile Include="DetectWAF.c" />
     <ClCompile Include="DNSscan.c" />
@@ -194,6 +195,7 @@
     <ClInclude Include="Base64.h" />
     <ClInclude Include="CheckDoublePulsar.h" />
     <ClInclude Include="CheckMs17_010.h" />
+    <ClInclude Include="CheckSMBv1.h" />
     <ClInclude Include="DetectHttpBasicAuth.h" />
     <ClInclude Include="DetectWAF.h" />
     <ClInclude Include="DNSscan.h" />

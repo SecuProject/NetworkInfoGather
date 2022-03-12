@@ -102,31 +102,15 @@ UINT RecvResponce(SOCKET Socket, char** pServerResponce, FILE* pFile) {
 
 
 UINT GetHttpServer(char* ipAddress, int port, char* requestType, char* resourcePath, char* userAgent, char** pServerResponce, char* customHeader, FILE* pFile) {
-    SOCKET Socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-
-    if (Socket != INVALID_SOCKET) {
-        SOCKADDR_IN SockAddr;
-        IPAddr DestIp;
-
-        inet_pton(AF_INET, ipAddress, &DestIp);
-
-        SockAddr.sin_port = htons(port);
-        SockAddr.sin_family = AF_INET;
-        SockAddr.sin_addr.s_addr = DestIp;
-
-        if (connect(Socket, (SOCKADDR*)(&SockAddr), sizeof(SockAddr)) != SOCKET_ERROR) {
-
-            // set time out 
-            //SetSocketTimout(Socket);
-            if (SendRequest(Socket, ipAddress, requestType, resourcePath, userAgent, customHeader, pFile)) {
-                int nDataLength = RecvResponce(Socket, pServerResponce, pFile);
-                closesocket(Socket);
-                return nDataLength;
-            }
-        } else 
-            printOut(pFile, "\t\t[X] Could not connect to the web server.\n");
+    SOCKET Socket = ConnectTcpServer(ipAddress, port);
+    if (Socket != INVALID_SOCKET){
+        if (SendRequest(Socket, ipAddress, requestType, resourcePath, userAgent, customHeader, pFile)){
+            int nDataLength = RecvResponce(Socket, pServerResponce, pFile);
+            closesocket(Socket);
+            return nDataLength;
+        }
         closesocket(Socket);
-    }else
+    } else
         printOut(pFile, "\t\t[X] socket open failed %lu\n", GetLastError());
     return FALSE;
 }

@@ -40,21 +40,18 @@ VOID AddEndLine(char* banner,int bannerSize) {
 }
 
 BOOL GrabBanner(char* protocalName, char* ipAddress, unsigned int port, char* buffer, int bufferSize, int offset, FILE* pFile) {
-	SOCKET SocketFD = socket(AF_INET, SOCK_STREAM, 0);
-	if (SocketFD  == INVALID_SOCKET)
-		return FALSE;
-	SOCKADDR_IN ssin = InitSockAddr(ipAddress, port);
+	SOCKET SocketFD = ConnectTcpServer(ipAddress, port);
 
-	if (connect(SocketFD, (LPSOCKADDR)&ssin, sizeof(ssin)) != SOCKET_ERROR) {
+	if (SocketFD != INVALID_SOCKET){
 		int sizeRecv = recv(SocketFD, buffer, bufferSize, 0);
-		if (sizeRecv > 0) {
-			printOut(pFile,"\t[%s] Banner %.*s", protocalName,sizeRecv, buffer + offset); // Add sizeRecv to be tested !!!
+		if (sizeRecv > 0){
+			printOut(pFile, "\t[%s] Banner %.*s", protocalName, sizeRecv, buffer + offset); // Add sizeRecv to be tested !!!
 			AddEndLine(buffer + offset, sizeRecv);
 			closesocket(SocketFD);
 			return TRUE;
 		}
+		closesocket(SocketFD);
 	}
-	closesocket(SocketFD);
 	return FALSE;
 }
 

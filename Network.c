@@ -152,14 +152,15 @@ SOCKADDR_IN InitSockAddr(char* ipAddress, int port) {
 	return ssin;
 }
 SOCKET ConnectTcpServer(char* ipAddress, int port){
-	SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
+	SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (sock == INVALID_SOCKET)
 		return INVALID_SOCKET;
 	SOCKADDR_IN ssin = InitSockAddr(ipAddress, port);
 
-	printf("\t[i] Connecting...\n");
-	if (connect(sock, (struct sockaddr*)&ssin, sizeof(ssin)) == -1){
+	//printf("\t[i] Connecting...\n");
+	if (connect(sock, (struct sockaddr*)&ssin, sizeof(ssin)) == SOCKET_ERROR){
 		printf("\t[x] Connection Error %lu\n", GetLastError());
+		closesocket(sock);
 		return INVALID_SOCKET;
 	}
 	return sock;

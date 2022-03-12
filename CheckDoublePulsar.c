@@ -1,7 +1,5 @@
 #include <winsock2.h>
-#include <iphlpapi.h>   // IPAddr
 #include <stdio.h>
-#include <ws2tcpip.h>   // inet_pton
 
 #include "Network.h"
 

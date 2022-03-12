@@ -237,6 +237,9 @@
     <ClCompile Include="CheckDoublePulsar.c">
       <Filter>Source Files\5. Exploit\SMBv1</Filter>
     </ClCompile>
+    <ClCompile Include="CheckSMBv1.c">
+      <Filter>Source Files\4. FingerPrintInfo\EnumSMB</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AdapterInformation.h">
@@ -367,6 +370,9 @@
     </ClInclude>
     <ClInclude Include="CheckDoublePulsar.h">
       <Filter>Source Files\5. Exploit\SMBv1</Filter>
+    </ClInclude>
+    <ClInclude Include="CheckSMBv1.h">
+      <Filter>Source Files\4. FingerPrintInfo\EnumSMB</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
