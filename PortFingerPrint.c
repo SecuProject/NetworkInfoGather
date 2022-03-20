@@ -10,11 +10,12 @@
 #include "EnumFTP.h"
 #include "EnumHTTP.h"
 #include "EnumSMB.h"
+#include "CheckSMBv1.h"
 #include "EnumNetBios.h"
 #include "EnumSMTP.h"
 #include "EnumLDAP.h"
 #include "EnumRPC.h"
-
+#include "XorRoutine.h"
 
 
 //Temp
@@ -66,6 +67,9 @@ BOOL PortFingerPrint(NetworkPcInfo* networkPcInfo, int nbDetected, BOOL isBrutef
 
 	structWordList.passwordTab = (char**)passwordList;
 	structWordList.nbPassword = sizeof(passwordList) / sizeof(char*);
+
+
+	XorRoutine(SmbNegociateSMB1Xor, sizeof(SmbNegociateSMB1Xor), "1337");
 
 	for (int i = 0; i < nbDetected; i++) {
 		char* ipAddress = networkPcInfo[i].ipAddress;

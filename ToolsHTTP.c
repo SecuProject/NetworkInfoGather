@@ -139,6 +139,25 @@ BOOL GetHttpHeaderPowerby(PHTTP_STRUC httpStruct, UINT responceSize) {
     httpStruct->poweredBy = NULL;
     return FALSE;
 }
+
+BOOL GetHttpHeaderRedirectby(PHTTP_STRUC httpStruct, UINT responceSize){
+    UINT serverVersionSize = responceSize + 1;
+    httpStruct->redirectBy = (char*)malloc(responceSize + 1);
+    if (httpStruct->redirectBy != NULL){
+        const char delim1[] = "	X-Redirect-By:";
+        if (GetHttpHeaderStr(delim1, sizeof(delim1), httpStruct->rawData, httpStruct->redirectBy, &serverVersionSize)){
+            httpStruct->redirectBy = (char*)xrealloc(httpStruct->redirectBy, serverVersionSize + 1);
+            if (httpStruct->redirectBy == NULL)
+                return FALSE;
+            return TRUE;
+        }
+        free(httpStruct->redirectBy);
+    }
+    httpStruct->redirectBy = NULL;
+    return FALSE;
+}
+
+
 BOOL GetHttpHeaderContentType(PHTTP_STRUC httpStruct, UINT responceSize) {
     UINT serverVersionSize = responceSize + 1;
     httpStruct->contentType = (char*)malloc(responceSize + 1);
@@ -195,6 +214,7 @@ BOOL GetHttpRequestInfo(PHTTP_STRUC httpStruct) {
 
     GetHttpHeaderServerVersion(httpStruct, httpStruct->responseLen);
     GetHttpHeaderPowerby(httpStruct, httpStruct->responseLen);
+    GetHttpHeaderRedirectby(httpStruct, httpStruct->responseLen);
     GetHttpHeaderContentType(httpStruct, httpStruct->responseLen);
 
 
@@ -309,28 +329,111 @@ PHTTP_STRUC GetHttpRequest(char* ipAddress, int port, char* path, char* requestT
     }
     return httpStruct;
 }*/
-BOOL TestAllHttpsRedirect(PHTTP_STRUC* pHttpStructInvalide,char* ipAddress, int port,FILE* pFile) {
-    // ipAddress, port, (char*)invalideUrlPath[i]
+
+BOOL ExtractStr(char* str, int matchStr, char* buffer, int bufferLen){
+    char* ptr = strchr(str, matchStr);
+    int strLen = (int)(ptr - str);
+    if (ptr != NULL && strLen < bufferLen && strLen > 0){
+        strncpy_s(buffer, bufferLen, str, strLen);
+        return strLen;
+    }
+    return FALSE;
+}
+
+typedef struct{
+    char protocol[5 + 1];
+    char ipAddress[15 + 1];
+    int port;
+    char urlPath[128];
+} URL_STRUCT, * PURL_STRUCT;
+
+
+VOID InitStructUrl(PURL_STRUCT urlStrcut){
+    urlStrcut->protocol[0] = 0x00;
+    urlStrcut->ipAddress[0] = 0x00;
+    urlStrcut->port = 0x00;
+    urlStrcut->urlPath[0] = 0x00;
+}
+
+BOOL ParseUrl(char* url, PURL_STRUCT urlStrcut){
+    InitStructUrl(urlStrcut);
+
+    int ptr = ExtractStr(url, ':', urlStrcut->protocol, sizeof(urlStrcut->protocol));
+    if (ptr > 0){
+        char portTmp[5 + 1] = "\0";
+        int tmpPtr;
+
+        // Check if format OK
+        if (url[ptr] != ':' || url[ptr + 1] != '/' || url[ptr + 2] != '/')
+            return FALSE;
+        ptr += 3;
+
+        if (strchr(url + ptr, ':')){
+            tmpPtr = ExtractStr(url + ptr, ':', urlStrcut->ipAddress, sizeof(urlStrcut->ipAddress));
+            if (tmpPtr){
+                ptr += tmpPtr + 1;
+            }
+            if (strchr(url + ptr, '/')){
+                tmpPtr = ExtractStr(url + ptr, '/', portTmp, sizeof(portTmp));
+                urlStrcut->port = atoi(portTmp);
+                if (tmpPtr){
+                    ptr += tmpPtr;
+
+                    tmpPtr = ExtractStr(url + ptr, '\0', urlStrcut->urlPath, sizeof(urlStrcut->urlPath));
+                    if (tmpPtr){
+                        ptr += tmpPtr + 1;
+                    }
+                }
+            } else{
+                tmpPtr = ExtractStr(url + ptr, '\0', portTmp, sizeof(portTmp));
+                urlStrcut->port = atoi(portTmp);
+                if (tmpPtr){
+                    ptr += tmpPtr + 1;
+                }
+            }
+        } else{
+            if (strchr(url + ptr, '/')){
+                tmpPtr = ExtractStr(url + ptr, '/', urlStrcut->ipAddress, sizeof(urlStrcut->ipAddress));
+                if (tmpPtr){
+                    ptr += tmpPtr;
+
+                    tmpPtr = ExtractStr(url + ptr, '\0', urlStrcut->urlPath, sizeof(urlStrcut->urlPath));
+                    if (tmpPtr){
+                        ptr += tmpPtr + 1;
+                    }
+                }
+            } else{
+                tmpPtr = ExtractStr(url + ptr, '\0', urlStrcut->ipAddress, sizeof(urlStrcut->ipAddress));
+                if (tmpPtr){
+                    ptr += tmpPtr + 1;
+                }
+            }
+        }
+        return TRUE;
+    }
+    return FALSE;
+}
+BOOL TestAllHttpsRedirect(PHTTP_STRUC* pHttpStructInvalide, FILE* pFile){
     int match = 0;
-    char* tmpPath = (char*)malloc(MAX_PATH);
-    if (tmpPath == NULL)
+    URL_STRUCT* urlStrcutInvalide = (URL_STRUCT*)malloc(sizeof(URL_STRUCT));
+    if (urlStrcutInvalide == NULL)
         return TRUE;
 
-    for (int i = 0; i < ARRAY_SIZE_CHAR(invalideUrlPath); i++) {
-        sprintf_s(tmpPath, MAX_PATH, "https://%s%s", ipAddress, invalideUrlPath[i]);
-        if (strcmp(tmpPath, pHttpStructInvalide[i]->redirectionPath) == 0)
+    for (int i = 0; i < ARRAY_SIZE_CHAR(invalideUrlPath); i++){
+        if (!ParseUrl((char*)pHttpStructInvalide[i]->redirectionPath, urlStrcutInvalide))
+            return TRUE;
+        if (strcmp(urlStrcutInvalide->urlPath, invalideUrlPath[i]) == 0)
             match++;
-        else {
-            sprintf_s(tmpPath, MAX_PATH, "https://%s:443%s", ipAddress, invalideUrlPath[i]);
-            if (strcmp(tmpPath, pHttpStructInvalide[i]->redirectionPath) == 0)
-                match++;
-        }
+    }
+    if (match == ARRAY_SIZE_CHAR(invalideUrlPath)){
+        if (urlStrcutInvalide->port != 0)
+            printf("\t\tAll requests return %s://%s:%i/[PAGE_NAME]\n", urlStrcutInvalide->protocol, urlStrcutInvalide->ipAddress, urlStrcutInvalide->port);
+        else
+            printf("\t\tAll requests return %s://%s/[PAGE_NAME]\n", urlStrcutInvalide->protocol, urlStrcutInvalide->ipAddress); // PORT !!!
     }
 
-    free(tmpPath);
-    if (match == 2)
-        printOut(pFile, "\t\tAll requests return https://%s/[PAGE_NAME]\n", ipAddress);
-    return match == 2;
+    free(urlStrcutInvalide);
+    return match == ARRAY_SIZE_CHAR(invalideUrlPath);
 
 
     // http://192.168.59.45/.bash_history       301 -  0     -> https://192.168.59.45/.bash_history
@@ -402,7 +505,7 @@ ENUM_PAGE_NOT_FOUND SetPageNotFound(PHTTP_STRUC pHttpStruct, char* ipAddress, in
         
 
     if (IS_HTTP_REDIRECTS(pHttpStructInvalide[0]->returnCode)) {
-        if (TestAllHttpsRedirect(pHttpStructInvalide, ipAddress, port, pFile))
+        if (TestAllHttpsRedirect(pHttpStructInvalide, pFile))
             return BASE_NOT_FOUND;
 
         if (pHttpStructInvalide[0]->redirectionPath != NULL)
@@ -540,6 +643,10 @@ BOOL GetHttpServerInfo(char* ipAddress, int port, char* httpAuthHeader, FILE* pF
 
     if (pHttpStructPage->ServerName != NULL)
         printf("\t\t[Server] %s\n", pHttpStructPage->ServerName);
+    if (pHttpStructPage->poweredBy != NULL)
+        printf("\t\t[X-Powered-By] %s\n", pHttpStructPage->poweredBy);
+    if (pHttpStructPage->redirectBy != NULL)
+        printf("\t\t[X-Redirect-By] %s\n", pHttpStructPage->redirectBy);
 
     if (pHttpStructPage->returnCode < 400) {
         if (pHttpStructPage->returnCode >= 300) {

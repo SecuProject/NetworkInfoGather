@@ -5,4 +5,6 @@
 
 BOOL CheckSMBv1(char* ipAddress, int port);
 
+extern unsigned char SmbNegociateSMB1Xor[138];
+
 #endif

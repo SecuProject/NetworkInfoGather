@@ -50,7 +50,7 @@ typedef struct {
 
 
 BOOL initWSA(FILE* pFile);
-
+int set_options(SOCKET fd);
 
 
 BOOL IsIpAddressValid(int a, int b, int c, int d);

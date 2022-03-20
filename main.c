@@ -207,7 +207,6 @@ int main(int argc, char* argv[]) {
 			EnumPort(listAgrument.enumStruct);
 			break;
 		}
-
 		WSACleanup();
 	}
 	return FALSE;

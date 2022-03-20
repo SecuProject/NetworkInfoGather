@@ -10,14 +10,6 @@
 //#include "EnumHTTP.h"
 
 
-int set_options(SOCKET fd) {
-	struct timeval timeout;
-
-	timeout.tv_sec = 2;
-	timeout.tv_usec = 0;
-	return setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(timeout)) != SOCKET_ERROR;
-}
-
 BOOL scanPortOpenUDP(char* dest_ip, int port, FILE* pFile) {
 	SOCKET udp_sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if (udp_sock == INVALID_SOCKET) {

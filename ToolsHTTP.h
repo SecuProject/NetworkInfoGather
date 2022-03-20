@@ -42,6 +42,7 @@ typedef struct {
 	UINT responseLen;
 	char* ServerName;
 	char* poweredBy;
+	char* redirectBy;
 	char* contentType;
 	char* requestPath;
 

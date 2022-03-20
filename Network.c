@@ -178,6 +178,14 @@ BOOL initWSA(FILE* pFile) {
 	//printOut(pFile,"Initialised.\n");
 	return TRUE;
 }
+int set_options(SOCKET fd){
+	struct timeval timeout;
+
+	timeout.tv_sec = 2;
+	timeout.tv_usec = 0;
+	return setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(timeout)) != SOCKET_ERROR;
+}
+
 
 BOOL SizeConsole(int* columns, int* rows){
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
