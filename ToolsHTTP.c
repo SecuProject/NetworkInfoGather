@@ -328,9 +328,9 @@ BOOL TestAllHttpsRedirect(PHTTP_STRUC* pHttpStructInvalide,char* ipAddress, int 
     }
 
     free(tmpPath);
-    if (match == 3)
+    if (match == 2)
         printOut(pFile, "\t\tAll requests return https://%s/[PAGE_NAME]\n", ipAddress);
-    return match == 3;
+    return match == 2;
 
 
     // http://192.168.59.45/.bash_history       301 -  0     -> https://192.168.59.45/.bash_history
@@ -345,7 +345,7 @@ BOOL TestAllHttpsRedirect(PHTTP_STRUC* pHttpStructInvalide,char* ipAddress, int 
     * Use returnCode
 3. if returnCode >= 300 && returnCode < 400
     if redirectionPath of all 3 to same but HTTPS
-        BASE_NOT_FOUND
+        BASE_NOT_FOUND                               ----   to test
 
     if redirectionPath the same for all 3
         * returnCode >= 300 && returnCode < 400 && default->redirectionPath = new->redirectionPath

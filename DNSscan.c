@@ -140,7 +140,7 @@ BOOL DNSdiscoveryMultiThread(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo, 
 			if (GetDnsServer(serverDnsIp, IP_ADDRESS_LEN)){
 				int nbDetected = 0;
 
-				for (int i = 1; i < maskSizeInt; i++){
+				for (int i = 0; i < maskSizeInt; i++){
 					INT32 ipAddress = ipAddressBc + i;
 
 					dnsStructData[i].pFile = NULL;

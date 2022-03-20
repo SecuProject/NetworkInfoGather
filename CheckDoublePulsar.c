@@ -2,41 +2,44 @@
 #include <stdio.h>
 
 #include "Network.h"
+#include "XorRoutine.h"
 
-unsigned char SmbNegociate[] =
-"\x00\x00\x00\x2f\xff\x53\x4d\x42\x72\x00"
-"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
-"\x00\x00\x00\x00\x88\x05\x00\x00\x00\x00\x00\x0c\x00\x02\x4e\x54"
-"\x20\x4c\x4d\x20\x30\x2e\x31\x32\x00";
 
-unsigned char Session_Setup_AndX_Request[] =
-"\x00\x00\x00\x48\xff\x53\x4d\x42\x73\x00"
-"\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
-"\x00\x00\xff\xff\x88\x05\x00\x00\x00\x00\x0d\xff\x00\x00\x00\xff"
-"\xff\x02\x00\x88\x05\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
-"\x00\x01\x00\x00\x00\x0b\x00\x00\x00\x6e\x74\x00\x70\x79\x73\x6d"
-"\x62\x00";
 
-unsigned char TreeConnect_AndX_Request[] =
-"\x00\x00\x00\x58\xff\x53\x4d\x42\x75\x00"
-"\x00\x00\x00\x18\x07\xc8\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
-"\x00\x00\x00\x00\xff\xfe\x00\x08\x00\x03\x04\xff\x00\x58\x00\x08"
-"\x00\x01\x00\x2d\x00\x00\x5c\x00\x5c\x00\x31\x00\x37\x00\x32\x00"
-"\x2e\x00\x32\x00\x32\x00\x2e\x00\x35\x00\x2e\x00\x34\x00\x36\x00"
-"\x5c\x00\x49\x00\x50\x00\x43\x00\x24\x00\x00\x00\x3f\x3f\x3f\x3f"
-"\x3f\x00";
-
-unsigned char trans2_session_setup[] =
-"\x00\x00\x00\x4E\xFF\x53\x4D\x42\x32\x00\x00\x00\x00\x18\x07\xC0"
-"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\xFF\xFE"
-"\x00\x08\x41\x00\x0F\x0C\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00"
-"\x00\xA6\xD9\xA4\x00\x00\x00\x0C\x00\x42\x00\x00\x00\x4E\x00\x01"
-"\x00\x0E\x00\x0D\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
-"\x00\x00";
+unsigned char SmbNegociateXor[] = {
+        0x33,0x33,0x18,0xce,0x60,0x7e,0x75,0x43,0x33,0x33,0x37,0x31,0x33,0x33,0x37,0x31,
+        0x33,0x33,0x37,0x31,0x33,0x33,0x37,0x31,0x33,0x33,0x37,0x31,0x33,0xbb,0x32,0x31,
+        0x33,0x33,0x37,0x31,0x3f,0x33,0x35,0x7f,0x67,0x13,0x7b,0x7c,0x13,0x03,0x19,0x00,
+        0x01,0x33,0x37,0x00,
+};
+unsigned char Session_Setup_AndX_RequestXor[] = {
+        0x33,0x33,0x7f,0xce,0x60,0x7e,0x75,0x42,0x33,0x33,0x37,0x31,0x3b,0x33,0x37,0x31,
+        0x33,0x33,0x37,0x31,0x33,0x33,0x37,0x31,0x33,0x33,0x37,0xce,0xcc,0xbb,0x32,0x31,
+        0x33,0x33,0x37,0x3c,0xcc,0x33,0x37,0x31,0xcc,0xcc,0x35,0x31,0xbb,0x36,0x37,0x31,
+        0x33,0x33,0x37,0x31,0x33,0x33,0x37,0x31,0x33,0x33,0x36,0x31,0x33,0x33,0x3c,0x31,
+        0x33,0x33,0x59,0x45,0x33,0x43,0x4e,0x42,0x5e,0x51,0x37,0x31,0x00,
+};
+unsigned char TreeConnect_AndX_RequestXor[] = {
+        0x33,0x33,0x6f,0xce,0x60,0x7e,0x75,0x44,0x33,0x33,0x37,0x31,0x2b,0x34,0xff,0x31,
+        0x33,0x33,0x37,0x31,0x33,0x33,0x37,0x31,0x33,0x33,0x37,0x31,0x33,0xcc,0xc9,0x31,
+        0x3b,0x33,0x34,0x35,0xcc,0x33,0x6f,0x31,0x3b,0x33,0x36,0x31,0x1e,0x33,0x37,0x6d,
+        0x33,0x6f,0x37,0x00,0x33,0x04,0x37,0x03,0x33,0x1d,0x37,0x03,0x33,0x01,0x37,0x1f,
+        0x33,0x06,0x37,0x1f,0x33,0x07,0x37,0x07,0x33,0x6f,0x37,0x78,0x33,0x63,0x37,0x72,
+        0x33,0x17,0x37,0x31,0x33,0x0c,0x08,0x0e,0x0c,0x0c,0x37,0x31,0x00,
+};
+unsigned char trans2_session_setupXor[] = {
+        0x33,0x33,0x79,0xce,0x60,0x7e,0x75,0x03,0x33,0x33,0x37,0x31,0x2b,0x34,0xf7,0x31,
+        0x33,0x33,0x37,0x31,0x33,0x33,0x37,0x31,0x33,0x33,0x37,0x31,0x3b,0xcc,0xc9,0x31,
+        0x3b,0x72,0x37,0x3e,0x3f,0x33,0x37,0x31,0x32,0x33,0x37,0x31,0x33,0x33,0x37,0x31,
+        0x95,0xea,0x93,0x31,0x33,0x33,0x3b,0x31,0x71,0x33,0x37,0x31,0x7d,0x33,0x36,0x31,
+        0x3d,0x33,0x3a,0x31,0x33,0x33,0x37,0x31,0x33,0x33,0x37,0x31,0x33,0x33,0x37,0x31,
+        0x33,0x33,0x00,
+};
 
 BOOL CheckDoublePulsar(char* ipAddress, int port){
     unsigned char recvbuff[2048];
     unsigned char uninstall_response[2048];
+    const char key[] = "1337";
 
     DWORD    ret;
     WORD    userid, treeid;
@@ -47,7 +50,8 @@ BOOL CheckDoublePulsar(char* ipAddress, int port){
         return FALSE;
 
     //send SMB negociate packet
-    send(sock, (char*)SmbNegociate, sizeof(SmbNegociate) - 1, 0);
+    XorRoutine(SmbNegociateXor, sizeof(SmbNegociateXor), key);
+    send(sock, (char*)SmbNegociateXor, sizeof(SmbNegociateXor) - 1, 0);
     if (recv(sock, (char*)recvbuff, sizeof(recvbuff), 0) == SOCKET_ERROR){
         printf("\t[w] SMBv1 is disable !\n");
         return FALSE;
@@ -55,7 +59,8 @@ BOOL CheckDoublePulsar(char* ipAddress, int port){
 
     //send Session Setup AndX request
     printf("\t[i] sending Session_Setup_AndX_Request!\n");
-    ret = send(sock, (char*)Session_Setup_AndX_Request, sizeof(Session_Setup_AndX_Request) - 1, 0);
+    XorRoutine(Session_Setup_AndX_RequestXor, sizeof(Session_Setup_AndX_RequestXor), key);
+    ret = send(sock, (char*)Session_Setup_AndX_RequestXor, sizeof(Session_Setup_AndX_RequestXor) - 1, 0);
     if (ret <= 0){
         printf("send Session_Setup_AndX_Request error!\n");
         return FALSE;
@@ -64,11 +69,12 @@ BOOL CheckDoublePulsar(char* ipAddress, int port){
 
     //copy our returned userID value from the previous packet to the TreeConnect request packet
     userid = *(WORD*)(recvbuff + 0x20);       //get userid
-    memcpy(TreeConnect_AndX_Request + 0x20, (char*)&userid, 2); //update userid
+    XorRoutine(TreeConnect_AndX_RequestXor, sizeof(TreeConnect_AndX_RequestXor), key);
+    memcpy(TreeConnect_AndX_RequestXor + 0x20, (char*)&userid, 2); //update userid
 
     //send TreeConnect request packet
     printf("\t[i] sending TreeConnect Request!\n");
-    ret = send(sock, (char*)TreeConnect_AndX_Request, sizeof(TreeConnect_AndX_Request) - 1, 0);
+    ret = send(sock, (char*)TreeConnect_AndX_RequestXor, sizeof(TreeConnect_AndX_RequestXor) - 1, 0);
     if (ret <= 0){
         printf("\t[x] send TreeConnect_AndX_Request error!\n");
         return FALSE;
@@ -78,13 +84,14 @@ BOOL CheckDoublePulsar(char* ipAddress, int port){
     //copy the treeID from the TreeConnect response
     treeid = *(WORD*)(recvbuff + 0x1c);       //get treeid
 
+    XorRoutine(trans2_session_setupXor, sizeof(trans2_session_setupXor), key);
     //Replace tree ID and user ID in trans2 session setup packet
-    memcpy(trans2_session_setup + 0x20, (char*)&userid, 2);  //update userid
-    memcpy(trans2_session_setup + 0x1c, (char*)&treeid, 2);  //update treeid
+    memcpy(trans2_session_setupXor + 0x20, (char*)&userid, 2);  //update userid
+    memcpy(trans2_session_setupXor + 0x1c, (char*)&treeid, 2);  //update treeid
 
     //send modified trans2 session request
     printf("\t[i] sending modified trans2 sessionsetup!\n");
-    ret = send(sock, (char*)trans2_session_setup, sizeof(trans2_session_setup) - 1, 0);
+    ret = send(sock, (char*)trans2_session_setupXor, sizeof(trans2_session_setupXor) - 1, 0);
     if (ret <= 0){
         printf("\t[x] send modified trans2 sessionsetup error!\n");
         return FALSE;
@@ -107,13 +114,13 @@ BOOL CheckDoublePulsar(char* ipAddress, int port){
         burn5 = 0;        //burn command - trans2_session_setup[52] = "\x00"
 
         //modify our trans2 session packet to include the burn command
-        memcpy(trans2_session_setup + 0x22, (char*)&burn1, 1);
-        memcpy(trans2_session_setup + 0x31, (char*)&burn2, 1);
-        memcpy(trans2_session_setup + 0x32, (char*)&burn3, 1);
-        memcpy(trans2_session_setup + 0x33, (char*)&burn4, 1);
-        memcpy(trans2_session_setup + 0x34, (char*)&burn5, 1);
+        memcpy(trans2_session_setupXor + 0x22, (char*)&burn1, 1);
+        memcpy(trans2_session_setupXor + 0x31, (char*)&burn2, 1);
+        memcpy(trans2_session_setupXor + 0x32, (char*)&burn3, 1);
+        memcpy(trans2_session_setupXor + 0x33, (char*)&burn4, 1);
+        memcpy(trans2_session_setupXor + 0x34, (char*)&burn5, 1);
 
-        send(sock, (char*)trans2_session_setup, sizeof(trans2_session_setup) - 1, 0);
+        send(sock, (char*)trans2_session_setupXor, sizeof(trans2_session_setupXor) - 1, 0);
         recv(sock, (char*)uninstall_response, 2048, 0);
         if (uninstall_response[34] == 0x52){
             printf("\t[*] DOUBLEPULSAR uninstall SUCCESSFUL!\n");

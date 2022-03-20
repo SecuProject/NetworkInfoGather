@@ -118,6 +118,9 @@
     <Filter Include="Source Files\5. Exploit\SMBv1">
       <UniqueIdentifier>{b67c1a6a-51c4-42b6-8d0e-8f974e10fda0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Tools\XorRoutine">
+      <UniqueIdentifier>{16f6374f-543b-4200-9300-c76b5ecf6f8c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -239,6 +242,9 @@
     </ClCompile>
     <ClCompile Include="CheckSMBv1.c">
       <Filter>Source Files\4. FingerPrintInfo\EnumSMB</Filter>
+    </ClCompile>
+    <ClCompile Include="XorRoutine.c">
+      <Filter>Source Files\Tools\XorRoutine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -373,6 +379,9 @@
     </ClInclude>
     <ClInclude Include="CheckSMBv1.h">
       <Filter>Source Files\4. FingerPrintInfo\EnumSMB</Filter>
+    </ClInclude>
+    <ClInclude Include="XorRoutine.h">
+      <Filter>Source Files\Tools\XorRoutine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

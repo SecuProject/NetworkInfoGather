@@ -186,6 +186,7 @@
     <ClCompile Include="PrintNightmare.c" />
     <ClCompile Include="ToolsHTTP.c" />
     <ClCompile Include="wordlist.c" />
+    <ClCompile Include="XorRoutine.c" />
     <ClCompile Include="ZeroLogon.c" />
   </ItemGroup>
   <ItemGroup>
@@ -232,6 +233,7 @@
     <ClInclude Include="tcpIpModuel.h" />
     <ClInclude Include="ToolsHTTP.h" />
     <ClInclude Include="wordlist.h" />
+    <ClInclude Include="XorRoutine.h" />
     <ClInclude Include="ZeroLogon.h" />
   </ItemGroup>
   <ItemGroup>

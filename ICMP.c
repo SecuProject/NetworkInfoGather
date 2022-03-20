@@ -101,7 +101,7 @@ BOOL ICMPdiscoveryMultiThread(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo,
 	if (InitNetworkPcInfo(&networkPcInfo, &icmpStructData, &dwThreadIdArray, &hThreadArray, maskSizeInt)){
 		int nbDetected = 0;
 
-		for (int i = 1; i < maskSizeInt; i++){
+		for (int i = 0; i < maskSizeInt; i++){
 			INT32 ipAddress = ipAddressBc + i;
 
 			sprintf_s(icmpStructData[i].ipAddress, IP_ADDRESS_LEN, "%i.%i.%i.%i",
