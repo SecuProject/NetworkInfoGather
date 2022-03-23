@@ -12,6 +12,7 @@
 #define IS_HTTP_ERROR_SERVER(StatusCode)	(StatusCode >= 500 && StatusCode < 600)
 
 
+#define STATUS_CODE_OK						200
 #define STATUS_CODE_UNAUTHORIZED			401
 #define STATUS_CODE_FORBIDDEN				403
 #define STATUS_CODE_PROXY_AUTH_REQ			407

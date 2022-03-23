@@ -677,7 +677,7 @@ BOOL CheckRequerSsl(char* ipAddress, int port, BOOL* isSSL, FILE* pFile){
         pHttpStructPage = GetHttpRequest(ipAddress, port, "/", "GET", NULL, TRUE, pFile);
         if (pHttpStructPage == NULL)
             return FALSE;
-        if (IS_HTTP_ERROR(pHttpStructPage->returnCode)){
+        if (IS_HTTP_ERROR(pHttpStructPage->returnCode) && pHttpStructPage->returnCode != STATUS_CODE_UNAUTHORIZED){
             FreePHTTP_STRUC(pHttpStructPage);
             return FALSE;
         }            
@@ -707,13 +707,14 @@ BOOL GetHttpServerInfo(char* ipAddress, int port, char* httpAuthHeader, FILE* pF
             if (pHttpStructPage->redirectionPath != NULL)
                 printf("\t\t[Redirection] %s\n", pHttpStructPage->redirectionPath);
         }
-        if (pHttpStructPage->returnCode == 200 && pHttpStructPage->pContent != NULL) {
+        if (pHttpStructPage->returnCode == STATUS_CODE_OK && pHttpStructPage->pContent != NULL) {
             PORT_INFO portInfo;
             portInfo.portNumber = port;
             portInfo.banner[0] = 0x00;
+            GetHTTPFingerprint(pHttpStructPage->pContent, &portInfo);
 
-            if (GetHTTPFingerprint(pHttpStructPage->pContent, &portInfo))
-                printOut(pFile, "\t[HTTP%s] Port %i Fingerprint %i - %i\n", isSSL ? "S" : "", portInfo.portNumber, portInfo.deviceType, portInfo.version); // portInfo.deviceType todo
+            //if (GetHTTPFingerprint(pHttpStructPage->pContent, &portInfo))
+                //printOut(pFile, "\t[HTTP%s] Port %i Fingerprint %i - %i\n", isSSL ? "S" : "", portInfo.portNumber, portInfo.deviceType, portInfo.version); // portInfo.deviceType todo
         }
     } else {
         if (IS_HTTP_AUTH(pHttpStructPage->returnCode)) {
