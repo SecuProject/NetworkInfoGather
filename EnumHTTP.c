@@ -12,6 +12,10 @@ BOOL EnumHTTP(char* ipAddress, int portNb,BOOL isWAfDetection, FILE* pFile, BOOL
 		return FALSE;
 	httpAuthHeader[0] = 0x00;
 
+	// Check if http or https 
+	if (!isSSL)
+		CheckRequerSsl(ipAddress, portNb, &isSSL, pFile);
+
 	if (GetHttpServerInfo(ipAddress, portNb, httpAuthHeader, pFile, isSSL, isBruteForce)) {
 		if (isWAfDetection)
 			IsHttpWaf(ipAddress, portNb, pFile, isSSL);

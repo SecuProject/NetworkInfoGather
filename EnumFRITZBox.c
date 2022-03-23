@@ -7,26 +7,14 @@
 
 
 BOOL FRITZBoxVersionDetection(StrucStrDev deviceType, PORT_INFO* portInfo, char* serverResponce) {
-    char* pStart = strstr(serverResponce, deviceType.pStart);
-    if (pStart != NULL) {
-        pStart += strlen(deviceType.pStart);
-        char* pEnd = strstr(pStart, deviceType.pStop);
-        if (pEnd != NULL) {
-            char* pEnd2 = strstr(pStart, " ");
-            if (pEnd2 != NULL)
-                pEnd = pEnd2;
+    char* buffer;
+    int bufferLen=0;
 
-            int dataSize = (int)(pEnd - pStart);
-            if (dataSize < BANNER_BUFFER_SIZE) {
-                char* tempBuffer = (char*)malloc(BANNER_BUFFER_SIZE);
-                if (tempBuffer == NULL)
-                    return FALSE;
-                strncpy_s(tempBuffer, BANNER_BUFFER_SIZE, pStart, dataSize);
-                portInfo->version = atoi(tempBuffer);
-                free(tempBuffer);
-                return TRUE;
-            }
-        }
+    if(ExtractStrStr(serverResponce, deviceType.pStart, deviceType.pStop, &buffer, &bufferLen)){
+        sprintf_s(portInfo->banner, BANNER_BUFFER_SIZE, "FRITZBox %s", buffer);
+        portInfo->version = atoi(buffer);
+        free(buffer);
+        return TRUE;
     }
     return FALSE;
 }

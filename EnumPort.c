@@ -6,6 +6,9 @@
 #include "wordlist.h"
 #include "portList.h"
 
+#include "CheckSMBv1.h"
+#include "XorRoutine.h"
+
 
 VOID PrintEnumPortTitle(char* ipAddress,int port){
     printf("[-] Enumeration on %s port %i:\n", ipAddress, port);
@@ -30,6 +33,7 @@ BOOL EnumPort(EnumStruct enumStruct){
         }
         if (enumStruct.enumShare){
             printf("[-] SMB share:\n");
+            XorRoutine(SmbNegociateSMB1Xor, sizeof(SmbNegociateSMB1Xor), "1337");
             retValue = SmbEnum(enumStruct.ipAddress, FALSE, NULL);
         }
 

@@ -4,9 +4,10 @@
 #include "NetDiscovery.h"
 #include "Network.h"
 
-#define RECV_BUFFER_SIZE 256 * 2
+#define RECV_BUFFER_SIZE    256 * 2
 
-#define TIMEOUT_MS      500
+
+#define TIMEOUT_MS          500
 //#define TIMEOUT_MS      10000
 
 const char nbtname[] = {/* netbios name packet */
@@ -19,19 +20,22 @@ const char nbtname[] = {/* netbios name packet */
         0x00,0x01
 };
 
-int display(char* name, unsigned int number, unsigned int type, NETBIOS_Info* netbiosInfo) {
+int GetNetbiosInfo(char* hostname, unsigned int number, unsigned int type, NETBIOS_Info* netbiosInfo) {
     /* list taken from http://support.microsoft.com/default.aspx?scid=KB;EN-US;q163409& */
           /* 0x04 - UNIQUE */
           /* 0x80 - GROUP */
 
-    if (name != NULL && name[0] != 0x00 && number == 0x00) {
+    if (hostname != NULL && hostname[0] != 0x00 && number == 0x00) {
         UINT iNetbiosTab = netbiosInfo->nbNetBIOSRemoteMachineNameTab;
         for (UINT i = 0; i < iNetbiosTab; i++) {
-            if (strcmp(netbiosInfo->netBIOSRemoteMachineNameTab[i].Name, name) == 0)
+            if (strcmp(netbiosInfo->netBIOSRemoteMachineNameTab[i].Name, hostname) == 0)
                 return TRUE;
         }
 
-        netbiosInfo->netBIOSRemoteMachineNameTab = (NETBIOS_R_M_N_TAB*)xrealloc(netbiosInfo->netBIOSRemoteMachineNameTab, (iNetbiosTab + 1) * sizeof(NETBIOS_R_M_N_TAB));
+        if (netbiosInfo->netBIOSRemoteMachineNameTab == NULL)
+            netbiosInfo->netBIOSRemoteMachineNameTab = (NETBIOS_R_M_N_TAB*)malloc(sizeof(NETBIOS_R_M_N_TAB));
+        else
+            netbiosInfo->netBIOSRemoteMachineNameTab = (NETBIOS_R_M_N_TAB*)xrealloc(netbiosInfo->netBIOSRemoteMachineNameTab, (iNetbiosTab + 1) * sizeof(NETBIOS_R_M_N_TAB));
         if (netbiosInfo->netBIOSRemoteMachineNameTab == NULL) {
             return FALSE;
         }
@@ -43,13 +47,11 @@ int display(char* name, unsigned int number, unsigned int type, NETBIOS_Info* ne
 
 
         
-        for (size_t i = 0; i < strlen(name); i++) /* replaces weird chars with dots */
-            if (name[i] < 31 || name[i] > 126) name[i] = '.';
-
-        
+        for (size_t i = 0; i < strlen(hostname); i++) /* replaces weird chars with dots */
+            if (hostname[i] < 31 || hostname[i] > 126) hostname[i] = '.';
                 
         netbiosInfo->netBIOSRemoteMachineNameTab[iNetbiosTab].isGroup = (type > 0x80);
-        strcpy_s(netbiosInfo->netBIOSRemoteMachineNameTab[iNetbiosTab].Name,33 , name);
+        strcpy_s(netbiosInfo->netBIOSRemoteMachineNameTab[iNetbiosTab].Name, HOSTNAME_SIZE+1, hostname);
         netbiosInfo->nbNetBIOSRemoteMachineNameTab++;
             
         free(description);
@@ -90,7 +92,7 @@ BOOL EnumNetBios(NetworkPcInfo* networkPcInfo) {
     } else {
         unsigned char* ptr;
         int total;
-        char temp[16];
+        
         static int timeout = TIMEOUT_MS;
 
         setsockopt(pSocket, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(timeout));
@@ -119,24 +121,25 @@ BOOL EnumNetBios(NetworkPcInfo* networkPcInfo) {
         for (UINT i = 0; ptr < recv + RECV_BUFFER_SIZE; i++) {
             unsigned int nb_num;
             unsigned int nb_type;
+            char hostname[HOSTNAME_SIZE +1];
 
-            memset(temp, 0x0, sizeof(temp));
-            strncpy_s(temp, sizeof(temp), ptr, 15);   /* copies the name into temp */
+            memset(hostname, 0x0, sizeof(hostname));
+            strncpy_s(hostname, sizeof(hostname), ptr, HOSTNAME_SIZE);   /* copies the name into hostname */
 
-            ptr += 15;
+            ptr += HOSTNAME_SIZE;
             nb_num = *ptr;
             nb_type = *(ptr + 1);
             ptr += 3;
 
             if (i == total) {    /* max names reached */
                 ptr -= 19;   /* sets the pointer to the mac_addres field */
-                sprintf_s(networkPcInfo->NetbiosInfo->macAddress,40,"%02x-%02x-%02x-%02x-%02x-%02x",
+                sprintf_s(networkPcInfo->NetbiosInfo->macAddress, MAC_ADDRESS_LEN+1,"%02x-%02x-%02x-%02x-%02x-%02x",
                     *(ptr + 1), *(ptr + 2), *(ptr + 3),
                     *(ptr + 4), *(ptr + 5), *(ptr + 6));
                 break;
             }
-            if(temp[0] != 0x00)
-                display(temp, nb_num, nb_type, networkPcInfo->NetbiosInfo);
+            if(hostname[0] != 0x00)
+                GetNetbiosInfo(hostname, nb_num, nb_type, networkPcInfo->NetbiosInfo);
         }
     }
     free(recv);

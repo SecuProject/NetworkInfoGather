@@ -55,9 +55,6 @@
     <Filter Include="Source Files\4. FingerPrintInfo\EnumHTTP\DetectWAF">
       <UniqueIdentifier>{d18b0e5f-fa31-48dd-8740-57ba8c0929b3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\4. FingerPrintInfo\EnumHTTP\EnumFRITZBox">
-      <UniqueIdentifier>{b1ae890d-6619-437f-bf22-f68c035e722e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\4. FingerPrintInfo\EnumHTTP\GetHTTPserver">
       <UniqueIdentifier>{bd3cfa1b-e288-4e5f-9db9-fe7d3841878c}</UniqueIdentifier>
     </Filter>
@@ -121,6 +118,15 @@
     <Filter Include="Source Files\Tools\XorRoutine">
       <UniqueIdentifier>{16f6374f-543b-4200-9300-c76b5ecf6f8c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\4. FingerPrintInfo\EnumHTTP\Software">
+      <UniqueIdentifier>{801bc824-5d6d-4343-999d-1f7a846413fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\4. FingerPrintInfo\EnumHTTP\Software\EnumFRITZBox">
+      <UniqueIdentifier>{b1ae890d-6619-437f-bf22-f68c035e722e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\4. FingerPrintInfo\EnumHTTP\Software\EnumDeluge">
+      <UniqueIdentifier>{3d606dfa-2807-4bc0-b6ea-bd5b17dffb47}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -175,7 +181,7 @@
       <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\DetectWAF</Filter>
     </ClCompile>
     <ClCompile Include="EnumFRITZBox.c">
-      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\EnumFRITZBox</Filter>
+      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\Software\EnumFRITZBox</Filter>
     </ClCompile>
     <ClCompile Include="GetHTTPserver.c">
       <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\GetHTTPserver</Filter>
@@ -246,6 +252,9 @@
     <ClCompile Include="XorRoutine.c">
       <Filter>Source Files\Tools\XorRoutine</Filter>
     </ClCompile>
+    <ClCompile Include="EnumDeluge.c">
+      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\Software\EnumDeluge</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AdapterInformation.h">
@@ -300,7 +309,7 @@
       <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\DetectWAF</Filter>
     </ClInclude>
     <ClInclude Include="EnumFRITZBox.h">
-      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\EnumFRITZBox</Filter>
+      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\Software\EnumFRITZBox</Filter>
     </ClInclude>
     <ClInclude Include="GetHTTPserver.h">
       <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\GetHTTPserver</Filter>
@@ -382,6 +391,9 @@
     </ClInclude>
     <ClInclude Include="XorRoutine.h">
       <Filter>Source Files\Tools\XorRoutine</Filter>
+    </ClInclude>
+    <ClInclude Include="EnumDeluge.h">
+      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\Software\EnumDeluge</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

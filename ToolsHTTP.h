@@ -52,13 +52,16 @@ typedef struct {
 
 	char* AuthHeader;
 
-	UINT contentLen;
+	int contentLen;
 }HTTP_STRUC, * PHTTP_STRUC;
 
 char* StrToLower(char* s);
+BOOL ExtractStrStr(char* data, const char* delim1, const char* delim2, char** ppBuffer, int* bufferLen);
+
 UINT GetHttpReturnCode(char* serverResponce, UINT responceSize);
 BOOL HttpDirEnum(char* ipAddress, int port, char* httpAuthHeader, FILE* pFile, BOOL isSSL);
 BOOL GetHttpServerInfo(char* ipAddress, int port, char* httpAuthHeader, FILE* pFile, BOOL isSSL, BOOL isBruteForce);
 //UINT GetHttpReturnCode(char* serverResponce, UINT responceSize);
+BOOL CheckRequerSsl(char* ipAddress, int port, BOOL* isSSL, FILE* pFile);
 
 #endif

@@ -157,6 +157,7 @@
     <ClCompile Include="DetectHttpBasicAuth.c" />
     <ClCompile Include="DetectWAF.c" />
     <ClCompile Include="DNSscan.c" />
+    <ClCompile Include="EnumDeluge.c" />
     <ClCompile Include="EnumFRITZBox.c" />
     <ClCompile Include="EnumFTP.c" />
     <ClCompile Include="EnumHTTP.c" />
@@ -200,6 +201,7 @@
     <ClInclude Include="DetectHttpBasicAuth.h" />
     <ClInclude Include="DetectWAF.h" />
     <ClInclude Include="DNSscan.h" />
+    <ClInclude Include="EnumDeluge.h" />
     <ClInclude Include="EnumFRITZBox.h" />
     <ClInclude Include="EnumFTP.h" />
     <ClInclude Include="EnumHTTP.h" />

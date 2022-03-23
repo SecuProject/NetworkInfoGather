@@ -59,7 +59,8 @@ HINTERNET WinHttpOpenRequestF(HINTERNET hConnect, char* requestType, char* resou
     return NULL;
 }
 BOOL WinHttpSetOptionF(HINTERNET hRequest) {
-    DWORD secureFlags = SECURITY_FLAG_IGNORE_UNKNOWN_CA | SECURITY_FLAG_IGNORE_CERT_CN_INVALID | SECURITY_FLAG_IGNORE_CERT_WRONG_USAGE | SECURITY_FLAG_IGNORE_CERT_DATE_INVALID;
+    //DWORD secureFlags = SECURITY_FLAG_IGNORE_UNKNOWN_CA | SECURITY_FLAG_IGNORE_CERT_CN_INVALID | SECURITY_FLAG_IGNORE_CERT_WRONG_USAGE | SECURITY_FLAG_IGNORE_CERT_DATE_INVALID;
+    DWORD secureFlags = SECURITY_FLAG_IGNORE_ALL_CERT_ERRORS;
     DWORD redirectionFlags = WINHTTP_DISABLE_REDIRECTS;
 
     if (!WinHttpSetOption(hRequest, WINHTTP_OPTION_SECURITY_FLAGS, (LPVOID)&secureFlags, sizeof(DWORD)))
@@ -231,6 +232,8 @@ UINT GetHttpsServer(char* ipAddress, int port, char* requestType, char* resource
                 if (WinHttpSetOptionF(hRequest)) {
                     WinHttpSetCustomHeader(hRequest, customHeader, pFile);
                     
+
+                    // ERROR_WINHTTP_SECURE_FAILURE -> WinHttpSendRequest:Error 12175 has occurred.
                     if (WinHttpSendRequest(hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
                         if (WinHttpReceiveResponse(hRequest, NULL)) {
 
@@ -248,7 +251,7 @@ UINT GetHttpsServer(char* ipAddress, int port, char* requestType, char* resource
                             WinHttpCloseHandle(hConnect);
                             WinHttpCloseHandle(hSession);
                             return srvResponseSize;
-                        } else
+                        } else 
                             printOut(pFile, "\t[X] WinHttpReceiveResponse:Error %lu has occurred.\n", GetLastError());
                     } else {
                         printOut(pFile, "\t[X] WinHttpSendRequest:Error %lu has occurred.\n", GetLastError());

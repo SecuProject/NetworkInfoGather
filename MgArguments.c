@@ -161,16 +161,16 @@ VOID PrintMenuScan() {
     printf("\t\t\t\t-tt TIME   Define the time to sniff packets (default: 5s).\n");
     printf("\t-sT\t\tSelect passif mode (Will grab the list of host from the ARP table of the system).\n\n");
 
-    printf("Select option:\n");
+    printf("Select option(s):\n");
     printf("\t-h\t\tPrint help menu\n");
     printf("\t-t IP_ADDRESS\tTarget IP Address or range. Allowed formats:\n");
     printf("\t\t\t\te.g. '192.168.1.1' or '192.168.1.1-5' or '192.168.1.0/24'\n");
     printf("\t-ps\t\tEnable port scan\n");
     printf("\t-p [PORT_NB]\tUse custom port list port scan (If not set will use default list)\n");
     printf("\t\t\t\te.g. -p 80,443,8080\n");
+    printf("\t-sV\t\tScan for service version\n");
     printf("\t-b\t\tEnable brute force enable\n");
     printf("\t-A\t\tAggressive scan (grab banner and brute force enable)\n");
-    printf("\t-sV\t\tScan for service version\n");
     printf("\t-o FILEPATH\tOutput into a file\n");
     return;
 }
@@ -199,7 +199,7 @@ VOID PrintMenuEnum(){
     return;
 }
 VOID PrintMenu() {
-    printf("\n\nNetworkInfoGather.exe {scan,bf,exploit} [-h]\n\n");
+    printf("\n\nNetworkInfoGather.exe {scan,bf,exploit,enum} [-h]\n\n");
     printf("OPTION:\n");
     printf("\tscan\tWill scan the network\n");
     printf("\tbf\tbrute force protocol\n");

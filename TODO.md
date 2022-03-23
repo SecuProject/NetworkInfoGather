@@ -35,7 +35,7 @@
     - DNS  -> HOSTNAME
     - ARP  -> MAC ADDRESS
   - [ ] Add multi-threading
-    - For port scan:
+    - For port scan:0
       - [x] ping 
       - [X] ARP
     - [x] AddIPRangeMultiThread
@@ -45,7 +45,7 @@
     - [ ] Timeout
   - [ ] Read packet for more info (ARP/ICMP)
 - [ ] HTTP/HTTPS
-  - [ ] Certificate
+  - [x] Certificate
   - [ ] Find email address
   - [ ] DOMAIN NAME
 

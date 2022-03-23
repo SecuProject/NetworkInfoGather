@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #ifndef NET_DISCOVERY_HEADER_H
 #define NET_DISCOVERY_HEADER_H
 
@@ -20,6 +18,7 @@
 #define MAC_ADDRESS_LEN			MAC_ADDRESS_LEN_BYTE * 2 + 5
 #endif
 
+#define HOSTNAME_SIZE       15
 
 typedef enum {
 	OsUnknown = 0,
@@ -33,7 +32,8 @@ typedef enum {
 typedef enum {
 	UnknownType,
 	FRITZBox,
-	TrueNAS
+	TrueNAS,
+	Deluge
 }DeviceType;
 
 // 3. PortScan
@@ -50,7 +50,7 @@ typedef struct {
 
 
 typedef struct {
-	char Name[33];
+	char Name[HOSTNAME_SIZE +1];
 	BOOL isGroup;
 }NETBIOS_R_M_N_TAB;
 
@@ -58,7 +58,7 @@ typedef struct {
 typedef struct {
 	NETBIOS_R_M_N_TAB* netBIOSRemoteMachineNameTab;
 	int nbNetBIOSRemoteMachineNameTab;
-	char macAddress[40];				// SIZE WTF !!!
+	char macAddress[MAC_ADDRESS_LEN];
 }NETBIOS_Info;
 
 
