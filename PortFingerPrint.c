@@ -17,6 +17,7 @@
 #include "EnumRPC.h"
 #include "XorRoutine.h"
 
+#include "GetMacVendor.h"
 
 //Temp
 #include "wordlist.h"
@@ -122,8 +123,8 @@ BOOL PortFingerPrint(NetworkPcInfo* networkPcInfo, int nbDetected, BOOL isBrutef
 						EnumRPC(ipAddress, networkPcInfo[i].hostname, "", structWordList);
 					break;
 				case PORT_NETBIOS_SSN:
-					EnumNetBios(&(networkPcInfo[i]));
-					// update mac if not 00-00-00-00-00-00
+					if (EnumNetBios(&(networkPcInfo[i])))
+						GetNetBiosMacVendor(&(networkPcInfo[i]));
 					break;
 				case PORT_LDAP:
 					EnumLDAP(ipAddress, portNb, structWordList, pFile);// TODO

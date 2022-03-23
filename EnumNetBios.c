@@ -136,6 +136,10 @@ BOOL EnumNetBios(NetworkPcInfo* networkPcInfo) {
                 sprintf_s(networkPcInfo->NetbiosInfo->macAddress, MAC_ADDRESS_LEN+1,"%02x-%02x-%02x-%02x-%02x-%02x",
                     *(ptr + 1), *(ptr + 2), *(ptr + 3),
                     *(ptr + 4), *(ptr + 5), *(ptr + 6));
+                if(networkPcInfo->macAddress[0] == 0x00)
+                    sprintf_s(networkPcInfo->macAddress, MAC_ADDRESS_LEN + 1, "%02X%02X%02X%02X%02X%02X",
+                        *(ptr + 1), *(ptr + 2), *(ptr + 3),
+                        *(ptr + 4), *(ptr + 5), *(ptr + 6));
                 break;
             }
             if(hostname[0] != 0x00)
