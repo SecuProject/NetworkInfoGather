@@ -10,18 +10,24 @@ BOOL getVendorFormMac(NetworkPcInfo* networkPcInfo) {
 	const char vendorName[] = "UNKNOW";
 	int j;
 
-	if (networkPcInfo->macAddress[0] == 0x00){
-		networkPcInfo->vendorName = (char*)vendorName;
-		return FALSE;
+	if (networkPcInfo->macAddress[0] != 0x00){
+		for (j = 0; j < sizeof(macDataBase) / sizeof(MacDbStruct) && (strncmp(networkPcInfo->macAddress, macDataBase[j].macAddress, strlen(macDataBase[j].macAddress)) != 0); j++);
+
+		if (j < sizeof(macDataBase) / sizeof(MacDbStruct) && (strncmp(networkPcInfo->macAddress, macDataBase[j].macAddress, strlen(macDataBase[j].macAddress)) == 0)){
+			int strLen = (int)strlen(macDataBase[j].VendorName);
+			networkPcInfo->vendorName = (char*)malloc(strLen + 1);
+			if (networkPcInfo->vendorName == NULL)
+				return FALSE;
+			strcpy_s(networkPcInfo->vendorName, strLen + 1, macDataBase[j].VendorName);
+			return TRUE;
+		}
 	}
 	
-	for (j = 0; j < sizeof(macDataBase) / sizeof(MacDbStruct) && (strncmp(networkPcInfo->macAddress, macDataBase[j].macAddress, strlen(macDataBase[j].macAddress)) != 0); j++);
-
-	if (j < sizeof(macDataBase) / sizeof(MacDbStruct) && (strncmp(networkPcInfo->macAddress, macDataBase[j].macAddress, strlen(macDataBase[j].macAddress)) == 0)) {
-		networkPcInfo->vendorName = macDataBase[j].VendorName;
-	} else
-		networkPcInfo->vendorName = (char*)vendorName;
-	return TRUE;
+	networkPcInfo->vendorName = (char*)malloc(sizeof(vendorName) + 1);
+	if (networkPcInfo->vendorName == NULL)
+		return FALSE;
+	strcpy_s(networkPcInfo->vendorName, sizeof(vendorName) + 1, vendorName);
+	return FALSE;
 }
 
 
@@ -38,6 +44,6 @@ BOOL getMacVendor(NetworkPcInfo* networkPcInfo,int nbDetected) {
 BOOL GetNetBiosMacVendor(NetworkPcInfo* networkPcInfo){
 	BOOL returnValue = getVendorFormMac(networkPcInfo);
 	if (returnValue)
-		printf("\t\t[i] Mac Vendor: %s\n", networkPcInfo->vendorName);
+		printf("\t\t[i] Mac Vendor:  %s\n", networkPcInfo->vendorName);
 	return returnValue;
 }

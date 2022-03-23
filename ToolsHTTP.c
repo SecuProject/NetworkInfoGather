@@ -32,7 +32,8 @@ const char* invalideUrlPath[] = {
 #define REDIRECTION_PATH_SIZE  100
 
 const StrucStrDev structStrDev[] = {
-    {"\"bluBarTitle\":\"FRITZ!Box ","\"",FRITZBox} ,
+    //{"\"bluBarTitle\":\"FRITZ!Box ","\"",FRITZBox} ,
+    {"\"bluBarTitle\":\"FRITZ!","\"",FRITZBox} ,
     {"product.trim() === 'TrueNAS'",NULL,TrueNAS} ,
     {"author: 'Deluge Team',",NULL,Deluge} ,
     {"test","Cable",UnknownType} ,
@@ -643,7 +644,7 @@ BOOL GetHTTPFingerprint(char* serverResponce, PORT_INFO* portInfo) {
             switch (structStrDev[i].deviceType) {
             case FRITZBox:
                 if (FRITZBoxVersionDetection(structStrDev[i], portInfo, serverResponce)) {
-                    printf("\t\t[SOFTWARE] FRITZBox %i\n", portInfo->version);
+                    printf("\t\t[SOFTWARE] %s\n", portInfo->banner);
                     return FRITZBoxUserEnum(serverResponce);
                 }
                 printf("\t\t[SOFTWARE] FRITZBox\n");

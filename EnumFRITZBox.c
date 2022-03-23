@@ -11,10 +11,19 @@ BOOL FRITZBoxVersionDetection(StrucStrDev deviceType, PORT_INFO* portInfo, char*
     int bufferLen=0;
 
     if(ExtractStrStr(serverResponce, deviceType.pStart, deviceType.pStop, &buffer, &bufferLen)){
-        sprintf_s(portInfo->banner, BANNER_BUFFER_SIZE, "FRITZBox %s", buffer);
-        portInfo->version = atoi(buffer);
+        char* diviceType = (char*)malloc(100);
+        if (diviceType == NULL)
+            return FALSE;
+
+        int nbData = sscanf_s(buffer, "%s %i", diviceType, 100, &portInfo->version);
+        if (nbData == 2){
+            sprintf_s(portInfo->banner, BANNER_BUFFER_SIZE, "FRITZ!%s %i", diviceType, portInfo->version);
+            free(diviceType);
+            free(buffer);
+            return TRUE;
+        }
+        free(diviceType);
         free(buffer);
-        return TRUE;
     }
     return FALSE;
 }
