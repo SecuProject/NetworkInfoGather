@@ -140,20 +140,18 @@ BOOL SmbPublic502(LPWSTR lpszServer, FILE* pFile) {
             if (res == ERROR_SUCCESS || res == ERROR_MORE_DATA) {
                 PrintfSmbShareInfo502(lpszServer, BufPtr, er, pFile);
                 NetApiBufferFree(BufPtr);
-            }
-            else {
-                printOut(pFile, "\t[SMB] Error: %lu\n", res);
-            }
+            }else
+                printOut(pFile, "\t[SMB] Public502 - ERROR: %lu\n", res);
         }
         return TRUE;
     case ACCESS_DENIED:
-        printOut(pFile, "\t[SMB] Access denied !\n");
+        printOut(pFile, "\t[SMB] Public502 - ERROR: Access denied !\n");
         break;
     case ERROR_BAD_NETPATH:
-        printOut(pFile, "\t[SMB] ERROR: BAD NETPATH !\n");
+        printOut(pFile, "\t[SMB] Public502 - ERROR: BAD NETPATH !\n");
         break;
     default:
-        printOut(pFile, "\t[SMB] ERROR: %lu\n", res);
+        printOut(pFile, "\t[SMB] Public502 - ERROR: %lu\n", res);
         break;
     }
     return FALSE;
@@ -175,19 +173,18 @@ BOOL SmbPublic1(LPWSTR lpszServer, FILE* pFile){
             if (res == ERROR_SUCCESS || res == ERROR_MORE_DATA){
                 PrintfSmbShareInfo1(lpszServer, BufPtr, er, pFile);
                 NetApiBufferFree(BufPtr);
-            } else{
-                printOut(pFile, "\t[SMB] Error: %lu\n", res);
-            }
+            } else
+                printOut(pFile, "\t[SMB] Public1   - ERROR: %lu\n", res);
         }
         return TRUE;
     case ACCESS_DENIED:
-        printOut(pFile, "\t[SMB] Access denied !\n");
+        printOut(pFile, "\t[SMB] Public1   - ERROR: Access denied !\n");
         break;
     case ERROR_BAD_NETPATH:
-        printOut(pFile, "\t[SMB] ERROR: BAD NETPATH !\n");
+        printOut(pFile, "\t[SMB] Public1   - ERROR: BAD NETPATH !\n");
         break;
     default:
-        printOut(pFile, "\t[SMB] ERROR: %lu\n", res);
+        printOut(pFile, "\t[SMB] Public1   - ERROR: %lu\n", res);
         break;
     }
     return FALSE;
@@ -246,11 +243,13 @@ BOOL BrutForceSMB(char* sharePath, StructWordList structWordList, FILE* pFile) {
 
 BOOL SmbEnum(char* serverIp, BOOL isBruteForce, FILE* pFile) {
     size_t serverIpSize = strlen(serverIp) + 1;
-    LPWSTR lpszServer = (LPWSTR)calloc(serverIpSize, sizeof(LPWSTR));
+    LPWSTR lpszServer;
 
     if (CheckSMBv1(serverIp, PORT_SMB))
         printOut(pFile, "\t[SMB] SMBv1 is enable !\n");
 
+
+    lpszServer = (LPWSTR)calloc(serverIpSize, sizeof(LPWSTR));
     if (lpszServer == NULL)
         return FALSE;
     swprintf_s(lpszServer, serverIpSize, L"%hs", serverIp);
@@ -268,8 +267,6 @@ BOOL SmbEnum(char* serverIp, BOOL isBruteForce, FILE* pFile) {
         }
 
         sprintf_s(sharePath, serverIpSize + 4, "\\\\%s", serverIp);
-
-
         if (LoginSMB("", "", sharePath) || LoginSMB(usernameGuest, passwordGuest, sharePath)){
             printOut(pFile, "\t[SMB] Try to enumerate file share\n");
             if (SmbPublic(lpszServer, pFile)){

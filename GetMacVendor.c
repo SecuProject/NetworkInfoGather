@@ -8,9 +8,9 @@
 
 BOOL getVendorFormMac(NetworkPcInfo* networkPcInfo) {
 	const char vendorName[] = "UNKNOW";
-	int j;
-
+	
 	if (networkPcInfo->macAddress[0] != 0x00){
+		int j;
 		for (j = 0; j < sizeof(macDataBase) / sizeof(MacDbStruct) && (strncmp(networkPcInfo->macAddress, macDataBase[j].macAddress, strlen(macDataBase[j].macAddress)) != 0); j++);
 
 		if (j < sizeof(macDataBase) / sizeof(MacDbStruct) && (strncmp(networkPcInfo->macAddress, macDataBase[j].macAddress, strlen(macDataBase[j].macAddress)) == 0)){

@@ -1,6 +1,7 @@
 #include <Windows.h>
 #include <stdio.h>
 
+#include "Network.h"
 #include "MgCredentials.h"
 
 PStructCredentials InitCredStruct(char* username, char* password, char* domain){
@@ -14,44 +15,39 @@ PStructCredentials InitCredStruct(char* username, char* password, char* domain){
     pStructCredentials->domain = NULL;
 
 
-    if (username != NULL){
+    if (username != NULL && password != NULL){
         size_t strLen = strlen(username) + 1;
-        pStructCredentials->username = (char*)malloc(strLen);
-        if (pStructCredentials->username == NULL){
-            printf("[-] Error: malloc failed\n");
-            return NULL;
-        }
-        strcpy_s(pStructCredentials->username, strLen, username);
-    } else{
-        free(pStructCredentials);
-        return NULL;
-    }
-    if (password != NULL){
-        size_t strLen = strlen(password) + 1;
-        pStructCredentials->password = (char*)malloc(strLen);
-        if (pStructCredentials->password == NULL){
-            printf("[-] Error: malloc failed\n");
-            return NULL;
-        }
-        strcpy_s(pStructCredentials->password, strLen, password);
-    } else{
-        free(pStructCredentials->username);
-        free(pStructCredentials);
-        return NULL;
-    }
-    if (domain != NULL){
-        size_t strLen = strlen(domain) + 1;
-        pStructCredentials->domain = (char*)malloc(strLen);
-        if (pStructCredentials->domain == NULL){
-            printf("[-] Error: malloc failed\n");
-            return NULL;
-        }
-        strcpy_s(pStructCredentials->domain, strLen, domain);
-    } else
-        pStructCredentials->domain = NULL;
-    pStructCredentials->isFound = TRUE;
-    return pStructCredentials;
+        pStructCredentials->username = (char*)xmalloc(strLen);
+        if (pStructCredentials->username != NULL){
+            strcpy_s(pStructCredentials->username, strLen, username);
 
+            strLen = strlen(password) + 1;
+            pStructCredentials->password = (char*)xmalloc(strLen);
+            if (pStructCredentials->password == NULL){
+                free(pStructCredentials->username);
+                free(pStructCredentials);
+                return NULL;
+            }
+            strcpy_s(pStructCredentials->password, strLen, password);
+
+            if (domain != NULL){
+                strLen = strlen(domain) + 1;
+                pStructCredentials->domain = (char*)xmalloc(strLen);
+                if (pStructCredentials->domain == NULL){
+                    free(pStructCredentials->password);
+                    free(pStructCredentials->username);
+                    free(pStructCredentials);
+                    return NULL;
+                }
+                strcpy_s(pStructCredentials->domain, strLen, domain);
+            } else
+                pStructCredentials->domain = NULL;
+            pStructCredentials->isFound = TRUE;
+            return pStructCredentials;
+        }
+    }
+    free(pStructCredentials);
+    return NULL;
 }
 BOOL ClearCredStruct(PStructCredentials pStructCredentials){
     if (pStructCredentials == NULL)

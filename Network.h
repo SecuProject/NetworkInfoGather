@@ -69,6 +69,7 @@ SOCKET ConnectTcpServer(char* ipAddress, int port);
 
 void* xrealloc(void* ptr, size_t size);
 void* xcalloc(size_t _Count, size_t _Size);
+void* xmalloc(size_t _Size);
 
 VOID LoadingBar(UINT i, UINT total);
 

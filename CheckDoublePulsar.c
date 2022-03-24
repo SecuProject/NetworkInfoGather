@@ -37,10 +37,7 @@ unsigned char trans2_session_setupXor[] = {
 
 BOOL CheckDoublePulsar(char* ipAddress, int port){
     unsigned char recvbuff[2048];
-    unsigned char uninstall_response[2048];
     const char key[] = "1337";
-
-    DWORD    ret;
     WORD    userid, treeid;
 
 
@@ -53,18 +50,23 @@ BOOL CheckDoublePulsar(char* ipAddress, int port){
     send(sock, (char*)SmbNegociateXor, sizeof(SmbNegociateXor) - 1, 0);
     if (recv(sock, (char*)recvbuff, sizeof(recvbuff), 0) == SOCKET_ERROR){
         printf("\t[w] SMBv1 is disable !\n");
+        closesocket(sock);
         return FALSE;
     }
 
     //send Session Setup AndX request
     printf("\t[i] sending Session_Setup_AndX_Request!\n");
     XorRoutine(Session_Setup_AndX_RequestXor, sizeof(Session_Setup_AndX_RequestXor), key);
-    ret = send(sock, (char*)Session_Setup_AndX_RequestXor, sizeof(Session_Setup_AndX_RequestXor) - 1, 0);
-    if (ret <= 0){
+    if (send(sock, (char*)Session_Setup_AndX_RequestXor, sizeof(Session_Setup_AndX_RequestXor) - 1, 0)  == SOCKET_ERROR){
         printf("send Session_Setup_AndX_Request error!\n");
+        closesocket(sock);
         return FALSE;
     }
-    recv(sock, (char*)recvbuff, sizeof(recvbuff), 0);
+    if (recv(sock, (char*)recvbuff, sizeof(recvbuff), 0) == SOCKET_ERROR){
+        printf("\t[x] Recv Session_Setup_AndX_Request error !\n");
+        closesocket(sock);
+        return FALSE;
+    }
 
     //copy our returned userID value from the previous packet to the TreeConnect request packet
     userid = *(WORD*)(recvbuff + 0x20);       //get userid
@@ -73,12 +75,16 @@ BOOL CheckDoublePulsar(char* ipAddress, int port){
 
     //send TreeConnect request packet
     printf("\t[i] sending TreeConnect Request!\n");
-    ret = send(sock, (char*)TreeConnect_AndX_RequestXor, sizeof(TreeConnect_AndX_RequestXor) - 1, 0);
-    if (ret <= 0){
+    if (send(sock, (char*)TreeConnect_AndX_RequestXor, sizeof(TreeConnect_AndX_RequestXor) - 1, 0) == SOCKET_ERROR){
         printf("\t[x] send TreeConnect_AndX_Request error!\n");
+        closesocket(sock);
         return FALSE;
     }
-    recv(sock, (char*)recvbuff, sizeof(recvbuff), 0);
+    if (recv(sock, (char*)recvbuff, sizeof(recvbuff), 0) == SOCKET_ERROR){
+        printf("\t[x] Recv TreeConnect_AndX_Request error !\n");
+        closesocket(sock);
+        return FALSE;
+    }
 
     //copy the treeID from the TreeConnect response
     treeid = *(WORD*)(recvbuff + 0x1c);       //get treeid
@@ -90,16 +96,29 @@ BOOL CheckDoublePulsar(char* ipAddress, int port){
 
     //send modified trans2 session request
     printf("\t[i] sending modified trans2 sessionsetup!\n");
-    ret = send(sock, (char*)trans2_session_setupXor, sizeof(trans2_session_setupXor) - 1, 0);
-    if (ret <= 0){
+    if (send(sock, (char*)trans2_session_setupXor, sizeof(trans2_session_setupXor) - 1, 0) == SOCKET_ERROR){
         printf("\t[x] send modified trans2 sessionsetup error!\n");
+        closesocket(sock);
         return FALSE;
     }
-    recv(sock, (char*)recvbuff, sizeof(recvbuff), 0);
+    if (recv(sock, (char*)recvbuff, sizeof(recvbuff), 0) == SOCKET_ERROR){
+        printf("\t[x] Recv modified trans2 sessionsetup error !\n");
+        closesocket(sock);
+        return FALSE;
+    }
 
     //if multiplex id = x51 or 81 then DoublePulsar is present
     if (recvbuff[34] == 0x51){
         printf("\t[i] Received data that DoublePulsar is installed!\n");
+
+        BOOL bRemoveDP = FALSE;
+        printf("[?] Do you want to remove DoublePulsar? (y/N)");
+        scanf_s("%d", &bRemoveDP);
+        if (bRemoveDP != 'y' && bRemoveDP != 'Y'){
+            closesocket(sock);
+            return TRUE;
+        }
+
         printf("\t[i] Burning DoublePulsar...\n");
         WORD burn1, burn2, burn3, burn4, burn5;
         //burn1 = multiplex ID of 66 in decimal or x42 in hex
@@ -119,9 +138,19 @@ BOOL CheckDoublePulsar(char* ipAddress, int port){
         memcpy(trans2_session_setupXor + 0x33, (char*)&burn4, 1);
         memcpy(trans2_session_setupXor + 0x34, (char*)&burn5, 1);
 
-        send(sock, (char*)trans2_session_setupXor, sizeof(trans2_session_setupXor) - 1, 0);
-        recv(sock, (char*)uninstall_response, 2048, 0);
-        if (uninstall_response[34] == 0x52){
+
+        if (send(sock, (char*)trans2_session_setupXor, sizeof(trans2_session_setupXor) - 1, 0) == SOCKET_ERROR){
+            printf("\t[x] send modified trans2 sessionsetup error!\n");
+            closesocket(sock);
+            return FALSE;
+        }
+        if (recv(sock, (char*)recvbuff, sizeof(recvbuff), 0) == SOCKET_ERROR){
+            printf("\t[x] Recv modified trans2 sessionsetup error !\n");
+            closesocket(sock);
+            return FALSE;
+        }
+
+        if (recvbuff[34] == 0x52){
             printf("\t[*] DOUBLEPULSAR uninstall SUCCESSFUL!\n");
             closesocket(sock);
             return TRUE;

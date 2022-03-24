@@ -48,29 +48,35 @@ BOOL CheckMS17_010(char* ipAddress, int port){
     const char key[] = "1337";
     
     unsigned char recvbuff[2048];
-    DWORD    ret;
     SOCKET sock = ConnectTcpServer(ipAddress, port);
     if (sock == INVALID_SOCKET)
         return FALSE;
 
     //send SMB negociate packet
     XorRoutine(SmbNegociateMS17, sizeof(SmbNegociateMS17), key);
-    send(sock, (char*)SmbNegociateMS17, sizeof(SmbNegociateMS17) - 1, 0);
+    if (send(sock, (char*)SmbNegociateMS17, sizeof(SmbNegociateMS17) - 1, 0) == SOCKET_ERROR){
+        printf("\t[x] Send SmbNegociateMS17 error!\n");
+        closesocket(sock);
+        return FALSE;
+    }
+
     if (recv(sock, (char*)recvbuff, sizeof(recvbuff), 0) == SOCKET_ERROR){
         printf("\t[w] SMBv1 is disable !\n");
+        closesocket(sock);
         return FALSE;
     }
 
     //send Session Setup AndX request
     printf("\t[i] sending Session_Setup_AndX_Request!\n");
     XorRoutine(Session_Setup_AndX_RequestMS17, sizeof(Session_Setup_AndX_RequestMS17), key);
-    ret = send(sock, (char*)Session_Setup_AndX_RequestMS17, sizeof(Session_Setup_AndX_RequestMS17) - 1, 0);
-    if (ret <= 0){
+    if (send(sock, (char*)Session_Setup_AndX_RequestMS17, sizeof(Session_Setup_AndX_RequestMS17) - 1, 0) == SOCKET_ERROR){
         printf("\t[x] send Session_Setup_AndX_Request error!\n");
-        return 0;
+        closesocket(sock);
+        return FALSE;
     }
     if (recv(sock, (char*)recvbuff, sizeof(recvbuff), 0) == SOCKET_ERROR){
         printf("\t[w] Fail to recv data !\n");
+        closesocket(sock);
         return FALSE;
     }
 
@@ -87,13 +93,14 @@ BOOL CheckMS17_010(char* ipAddress, int port){
 
     //send TreeConnect request
     printf("\t[i] sending TreeConnect Request!\n");
-    ret = send(sock, (char*)treeConnectRequestMS17, sizeof(treeConnectRequestMS17) - 1, 0);
-    if (ret <= 0){
+    if (send(sock, (char*)treeConnectRequestMS17, sizeof(treeConnectRequestMS17) - 1, 0) == SOCKET_ERROR){
         printf("\t[x] send TreeConnect_AndX_Request error!\n");
-        return 0;
+        closesocket(sock);
+        return FALSE;
     }
     if (recv(sock, (char*)recvbuff, sizeof(recvbuff), 0) == SOCKET_ERROR){
         printf("\t[w] Fail to recv data !\n");
+        closesocket(sock);
         return FALSE;
     }
 
@@ -109,13 +116,14 @@ BOOL CheckMS17_010(char* ipAddress, int port){
 
     //send transNamedPipe request
     printf("\t[i] sending transNamedPipeRequest!\n");
-    ret = send(sock, (char*)transNamedPipeRequestMS17, sizeof(transNamedPipeRequestMS17) - 1, 0);
-    if (ret <= 0){
+    if (send(sock, (char*)transNamedPipeRequestMS17, sizeof(transNamedPipeRequestMS17) - 1, 0) == SOCKET_ERROR){
         printf("\t[x] send modified transNamedPipeRequest error!\n");
-        return 0;
+        closesocket(sock);
+        return FALSE;
     }
     if (recv(sock, (char*)recvbuff, sizeof(recvbuff), 0) == SOCKET_ERROR){
         printf("\t[w] Fail to recv data !\n");
+        closesocket(sock);
         return FALSE;
     }
 

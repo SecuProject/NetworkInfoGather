@@ -84,18 +84,17 @@ INT HandleFtpMsg(BOOL isVerbose){
 
 INT TestPasswordFTP(char* IpAddress, const char* username, const char* password, INTERNET_PORT port, BOOL isVerbose) {
     const char* userAgent = "Microsoft Internet Explorer";
-    INT returnCode;
     HINTERNET hInternet = InternetOpenA(userAgent, INTERNET_OPEN_TYPE_DIRECT, NULL, NULL, INTERNET_FLAG_ASYNC);
     if (hInternet == NULL) {
         return FALSE;
     }
     HINTERNET hFtpSession = InternetConnectA(hInternet, IpAddress, port, username, password, INTERNET_SERVICE_FTP, INTERNET_FLAG_PASSIVE, 0);
     if (hFtpSession == NULL) {
-        returnCode = HandleFtpMsg(isVerbose);
+        INT returnCode = HandleFtpMsg(isVerbose);
         InternetCloseHandle(hInternet);
         return returnCode;
     }
-    returnCode = HandleFtpMsg(isVerbose);
+    HandleFtpMsg(isVerbose); // returnCode = 
 
     InternetCloseHandle(hFtpSession);
     InternetCloseHandle(hInternet);

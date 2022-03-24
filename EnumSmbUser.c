@@ -9,6 +9,7 @@
 #include <lm.h>
 #pragma comment(lib, "Mpr.lib") // WNetAddConnection2
 
+#include "Network.h"
 
 #define NB_USER_INFO_1  1
 
@@ -78,7 +79,10 @@ DWORD GetNumberUsers(LPWSTR pszServerName){
 
     NET_API_STATUS nStatus = NetUserEnum((LPCWSTR)pszServerName, dwLevel, FILTER_NORMAL_ACCOUNT, (LPBYTE*)&pBuf, dwPrefMaxLen, &dwEntriesRead, &dwTotalEntries, &dwResumeHandle);
     if (!(nStatus == NERR_Success) || (nStatus == ERROR_MORE_DATA)){
-        printf("[x] A system error has occurred: %lu\n", nStatus);
+        if(nStatus == ACCESS_DENIED)
+            printf("[x] A system error has occurred: ACCESS_DENIED\n");
+        else
+            printf("[x] A system error has occurred: %lu\n", nStatus);
         if (pBuf != NULL)
             NetApiBufferFree(pBuf);
         free(pszServerName);
@@ -101,20 +105,19 @@ BOOL GetUserSAMR(char* targetIp, PUserStructSAMR* pTabUserFound, UINT* nbUsers){
     NET_API_STATUS nStatus = ERROR_MORE_DATA;
 
 
-    LPWSTR pszServerName = (LPWSTR)calloc(MAX_PATH, sizeof(LPWSTR));
+    LPWSTR pszServerName = (LPWSTR)xcalloc(MAX_PATH, sizeof(LPWSTR));
     if (pszServerName == NULL)
         return FALSE;
 
     swprintf_s(pszServerName, MAX_PATH, L"\\\\%hs", targetIp);
 
     dwTotalEntries = GetNumberUsers(pszServerName);
-    if (dwTotalEntries <= 0){
+    if (dwTotalEntries == 0){
         return FALSE;
     }
 
-    tabUserFound = (PUserStructSAMR)calloc(dwTotalEntries, sizeof(UserStructSAMR));
+    tabUserFound = (PUserStructSAMR)xcalloc(dwTotalEntries, sizeof(UserStructSAMR));
     if (tabUserFound == NULL){
-        printf("[x] Error: malloc failed\n");
         return FALSE;
     }
 
@@ -146,7 +149,10 @@ BOOL GetUserSAMR(char* targetIp, PUserStructSAMR* pTabUserFound, UINT* nbUsers){
                 }
             }
         } else{
-            printf("[x] A system error has occurred: %lu\n", nStatus);
+            if(nStatus == ACCESS_DENIED)
+                printf("[x] A system error has occurred: ACCESS_DENIED\n");
+            else
+                printf("[x] A system error has occurred: %lu\n", nStatus);
             if (pBuf != NULL)
                 NetApiBufferFree(pBuf);
             free(pszServerName);
@@ -188,7 +194,7 @@ BOOL UserInfo(char* targetIp){
                 UserFlag(tabUsers[i].flags);
             }
         }
-        printf("\t[i] Total of %d entries enumerated\n", nbUsers);
+        printf("\t[i] Total of %u entries enumerated\n", nbUsers);
     }
     return TRUE;
 }

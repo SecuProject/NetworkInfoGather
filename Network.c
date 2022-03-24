@@ -29,6 +29,17 @@ void* xcalloc(size_t _Count, size_t _Size){
 	}
 	return newptr;
 }
+void* xmalloc(size_t _Size){
+	if (_Size == 0)
+		return FALSE;
+	char* newptr = malloc(_Size);
+	if (newptr == NULL){
+		printf("[x] Memory allocation failed. (%lu)\n", GetLastError());
+		return NULL;
+	}
+	return newptr;
+}
+
 
 BOOL InitNetworkPcInfo(NetworkPcInfo** pNetworkPcInfo, PTHREAD_STRUCT_DATA* pThreadStructData, DWORD** pDwThreadIdArray, HANDLE** pThreadArray, int maskSizeInt){
 	NetworkPcInfo* networkPcInfo = (NetworkPcInfo*)xcalloc(maskSizeInt, sizeof(NetworkPcInfo));

@@ -370,7 +370,6 @@ BOOL ParseUrl(char* url, PURL_STRUCT urlStrcut){
 
     int ptr = ExtractStrInt(url, ':', urlStrcut->protocol, sizeof(urlStrcut->protocol));
     if (ptr > 0){
-        char portTmp[5 + 1] = "\0";
         int tmpPtr;
 
         // Check if format OK
@@ -379,6 +378,7 @@ BOOL ParseUrl(char* url, PURL_STRUCT urlStrcut){
         ptr += 3;
 
         if (strchr(url + ptr, ':')){
+            char portTmp[5 + 1] = "\0";
             tmpPtr = ExtractStrInt(url + ptr, ':', urlStrcut->ipAddress, sizeof(urlStrcut->ipAddress));
             if (tmpPtr){
                 ptr += tmpPtr + 1;
@@ -389,17 +389,19 @@ BOOL ParseUrl(char* url, PURL_STRUCT urlStrcut){
                 if (tmpPtr){
                     ptr += tmpPtr;
 
-                    tmpPtr = ExtractStrInt(url + ptr, '\0', urlStrcut->urlPath, sizeof(urlStrcut->urlPath));
+                    ExtractStrInt(url + ptr, '\0', urlStrcut->urlPath, sizeof(urlStrcut->urlPath));
+                    /*tmpPtr = ExtractStrInt(url + ptr, '\0', urlStrcut->urlPath, sizeof(urlStrcut->urlPath));
                     if (tmpPtr){
-                        ptr += tmpPtr + 1;
-                    }
+                        //ptr += tmpPtr + 1;
+                    }*/
                 }
             } else{
-                tmpPtr = ExtractStrInt(url + ptr, '\0', portTmp, sizeof(portTmp));
+                ExtractStrInt(url + ptr, '\0', portTmp, sizeof(portTmp));
+                /*tmpPtr = ExtractStrInt(url + ptr, '\0', portTmp, sizeof(portTmp));
                 urlStrcut->port = atoi(portTmp);
                 if (tmpPtr){
-                    ptr += tmpPtr + 1;
-                }
+                    //ptr += tmpPtr + 1;
+                }*/
             }
         } else{
             if (strchr(url + ptr, '/')){
@@ -407,16 +409,18 @@ BOOL ParseUrl(char* url, PURL_STRUCT urlStrcut){
                 if (tmpPtr){
                     ptr += tmpPtr;
 
-                    tmpPtr = ExtractStrInt(url + ptr, '\0', urlStrcut->urlPath, sizeof(urlStrcut->urlPath));
+                    ExtractStrInt(url + ptr, '\0', urlStrcut->urlPath, sizeof(urlStrcut->urlPath));
+                    /*tmpPtr = ExtractStrInt(url + ptr, '\0', urlStrcut->urlPath, sizeof(urlStrcut->urlPath));
                     if (tmpPtr){
-                        ptr += tmpPtr + 1;
-                    }
+                        //ptr += tmpPtr + 1;
+                    }*/
                 }
             } else{
-                tmpPtr = ExtractStrInt(url + ptr, '\0', urlStrcut->ipAddress, sizeof(urlStrcut->ipAddress));
+                ExtractStrInt(url + ptr, '\0', urlStrcut->ipAddress, sizeof(urlStrcut->ipAddress));
+                /*tmpPtr = ExtractStrInt(url + ptr, '\0', urlStrcut->ipAddress, sizeof(urlStrcut->ipAddress));
                 if (tmpPtr){
-                    ptr += tmpPtr + 1;
-                }
+                    //ptr += tmpPtr + 1;
+                }*/
             }
         }
         return TRUE;
