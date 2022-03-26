@@ -18,7 +18,7 @@ typedef struct {
 } NETSOCK_DATA;
 
 SMTP_DATA* InitSmtpData() {
-	SMTP_DATA* smtpData = (SMTP_DATA*)malloc(sizeof(SMTP_DATA));
+	SMTP_DATA* smtpData = (SMTP_DATA*)xmalloc(sizeof(SMTP_DATA));
 	if (smtpData == NULL)
 		return NULL;
 
@@ -50,7 +50,7 @@ BOOL ConnectToSmtp(NETSOCK_DATA* netSockData,FILE* pFile) {
 	netSockData->SocketFD = SocketFD;
 	return TRUE;
 }
-int recvSmpt(NETSOCK_DATA* netSockData, char* recvBuffer, int bufferSize, FILE* pFile) {
+int recvSmtp(NETSOCK_DATA* netSockData, char* recvBuffer, int bufferSize, FILE* pFile) {
 	int sizeRecv = recv(netSockData->SocketFD, recvBuffer, bufferSize, 0);
 	if (sizeRecv == SOCKET_ERROR) {
 		//printOut(pFile, "\t[SMTP] Fail to recv data !\n");
@@ -64,13 +64,26 @@ int recvSmpt(NETSOCK_DATA* netSockData, char* recvBuffer, int bufferSize, FILE* 
 	}
 	return sizeRecv; // OK ??
 }
+int sendSmtp(SOCKET socket,char* data, int dataLen, FILE* pFile){
+	const char endLine[] = "\r\n";
+	int sizeRecv = send(socket, data, dataLen, 0);
+	if (sizeRecv == SOCKET_ERROR){
+		printOut(pFile, "\t[SMTP] Fail to send data !\n");
+		return SOCKET_ERROR;
+	}
+	if (send(socket, endLine, sizeof(endLine)-1, 0) == SOCKET_ERROR){
+		printOut(pFile, "\t[SMTP] Fail to send data !\n");
+		return SOCKET_ERROR;
+	}
+	return sizeRecv;
+}
 
 
 BOOL UserEnumRcptFrom(NETSOCK_DATA netSockData, char* recvBuffer, FILE* pFile) {
-	const char strMailFrom[] = "\r\nMAIL FROM:test@test.org\r\n";
+	const char strMailFrom[] = "\r\nMAIL FROM:test@test.org";
 
-	send(netSockData.SocketFD, strMailFrom, sizeof(strMailFrom), 0);
-	return recvSmpt(&netSockData, recvBuffer, BUFFER_SIZE, pFile) > 0 && (strstr(recvBuffer, "2.1.0 Ok") != NULL);
+	sendSmtp(netSockData.SocketFD, (char*)strMailFrom, sizeof(strMailFrom)-1, pFile);
+	return recvSmtp(&netSockData, recvBuffer, BUFFER_SIZE, pFile) > 0 && (strstr(recvBuffer, "2.1.0 Ok") != NULL);
 }
 
 BOOL UserEnumRCPT(NETSOCK_DATA netSockData, SMTP_DATA* smtpData, FILE* pFile) {
@@ -78,22 +91,22 @@ BOOL UserEnumRCPT(NETSOCK_DATA netSockData, SMTP_DATA* smtpData, FILE* pFile) {
 	if (smtpData->listUser == NULL)
 		return FALSE;
 
-	char* recvBuffer = (char*)malloc(BUFFER_SIZE);
+	char* recvBuffer = (char*)xmalloc(BUFFER_SIZE);
 	if (recvBuffer != NULL) {
-		char* sendBuffer = (char*)malloc(BUFFER_SIZE);
+		char* sendBuffer = (char*)xmalloc(BUFFER_SIZE);
 		if (sendBuffer != NULL) {
 			if (UserEnumRcptFrom(netSockData, recvBuffer,pFile)) {
 				int nbUser = 0;
 
 				for (UINT i = 0; i < sizeof(smtpUser) / sizeof(char*); i++) {
-					int sizeSend = sprintf_s(sendBuffer, BUFFER_SIZE, "RCPT TO:%s\r\n", smtpUser[i]);
-					send(netSockData.SocketFD, sendBuffer, sizeSend, 0);
-					int sizeRecv = recvSmpt(&netSockData, recvBuffer, BUFFER_SIZE,pFile);
+					int sizeSend = sprintf_s(sendBuffer, BUFFER_SIZE, "RCPT TO:%s", smtpUser[i]);
+					sendSmtp(netSockData.SocketFD, sendBuffer, sizeSend, pFile);
+					int sizeRecv = recvSmtp(&netSockData, recvBuffer, BUFFER_SIZE,pFile);
 					if (sizeRecv > 0) {
 						if (strstr(recvBuffer, "250 2.1.5") != NULL) {
 							size_t userLen = strlen(smtpUser[i]) + 1;
 
-							smtpData->listUser[nbUser] = (char*)malloc(userLen);
+							smtpData->listUser[nbUser] = (char*)xmalloc(userLen);
 							if (smtpData->listUser[nbUser] == NULL) {
 								free(sendBuffer);
 								free(recvBuffer);
@@ -134,21 +147,21 @@ BOOL UserEnumVRFY(NETSOCK_DATA netSockData, SMTP_DATA* smtpData, FILE* pFile) {
 	if (smtpData->listUser == NULL)
 		return FALSE;
 
-	char* recvBuffer = (char*)malloc(BUFFER_SIZE);
+	char* recvBuffer = (char*)xmalloc(BUFFER_SIZE);
 	if (recvBuffer != NULL) {
-		char* sendBuffer = (char*)malloc(BUFFER_SIZE);
+		char* sendBuffer = (char*)xmalloc(BUFFER_SIZE);
 		if (sendBuffer != NULL) {
 			int nbUser = 0;
 
 
 			for (UINT i = 0; i < sizeof(smtpUser) / sizeof(char*); i++) {
-				int sizeSend = sprintf_s(sendBuffer, BUFFER_SIZE, "VRFY %s\r\n", smtpUser[i]);
-				send(netSockData.SocketFD, sendBuffer, sizeSend, 0);
-				int sizeRecv = recvSmpt(&netSockData, recvBuffer, BUFFER_SIZE,pFile);
+				int sizeSend = sprintf_s(sendBuffer, BUFFER_SIZE, "VRFY %s", smtpUser[i]);
+				sendSmtp(netSockData.SocketFD, sendBuffer, sizeSend, pFile);
+				int sizeRecv = recvSmtp(&netSockData, recvBuffer, BUFFER_SIZE,pFile);
 				if (sizeRecv > 0 && strstr(recvBuffer, "252 2.0.0") != NULL) {
 					size_t userLen = strlen(smtpUser[i]) + 1;
 					//printf("\t[SMTP] VRFY %s %.*s", smtpUser[i], sizeRecv, recvBuffer);
-					smtpData->listUser[nbUser] = (char*)malloc(userLen);
+					smtpData->listUser[nbUser] = (char*)xmalloc(userLen);
 					if (smtpData->listUser[nbUser] == NULL) {
 						free(sendBuffer);
 						free(recvBuffer);
@@ -178,37 +191,37 @@ BOOL UserEnumVRFY(NETSOCK_DATA netSockData, SMTP_DATA* smtpData, FILE* pFile) {
 }
 BOOL NtlmAuth(NETSOCK_DATA netSockData, SMTP_DATA* smtpData, FILE* pFile) {
 	smtpData->ntlmData = NULL;
-	char* recvBuffer = (char*)malloc(BUFFER_SIZE);
+	char* recvBuffer = (char*)xmalloc(BUFFER_SIZE);
 	if (recvBuffer == NULL) {
 		return FALSE;
 	}
-	char* sendBuffer = (char*)malloc(BUFFER_SIZE);
+	char* sendBuffer = (char*)xmalloc(BUFFER_SIZE);
 	if (sendBuffer == NULL) {
 		free(recvBuffer);
 		return FALSE;
 	}
 
-	int sizeSend = sprintf_s(sendBuffer, BUFFER_SIZE, "AUTH NTLM 334\r\n");
-	send(netSockData.SocketFD, sendBuffer, sizeSend, 0);
+	int sizeSend = sprintf_s(sendBuffer, BUFFER_SIZE, "AUTH NTLM 334");
+	sendSmtp(netSockData.SocketFD, sendBuffer, sizeSend, pFile);
 	free(sendBuffer);
 
 
-	int sizeRecv = recvSmpt(&netSockData, recvBuffer, BUFFER_SIZE,pFile);
+	int sizeRecv = recvSmtp(&netSockData, recvBuffer, BUFFER_SIZE,pFile);
 	if (sizeRecv > 0) {
 		if (strstr(recvBuffer, "NTLM supported") != NULL) {
 			printOut(pFile, "\t\t[NTLM] AUTH NTLM 334");
 
 			// send anonymous (null) credentials
-			const char ntlmAnonymous[] = "TlRMTVNTUAABAAAAB4IIAAAAAAAAAAAAAAAAAAAAAAA=\r\n";
+			const char ntlmAnonymous[] = "TlRMTVNTUAABAAAAB4IIAAAAAAAAAAAAAAAAAAAAAAA=";
 
-			send(netSockData.SocketFD, ntlmAnonymous, sizeof(ntlmAnonymous), 0);
-			sizeRecv = recvSmpt(&netSockData, recvBuffer, BUFFER_SIZE,pFile);
+			sendSmtp(netSockData.SocketFD, (char*)ntlmAnonymous, sizeof(ntlmAnonymous)-1, pFile);
+			sizeRecv = recvSmtp(&netSockData, recvBuffer, BUFFER_SIZE,pFile);
 			if (sizeRecv > 0) {
 				if (strstr(recvBuffer, "334") != NULL) {
-					smtpData->ntlmData = (char*)malloc(sizeRecv + 1);
+					smtpData->ntlmData = (char*)xmalloc(sizeRecv + 1);
 					if (smtpData->ntlmData != NULL) {
 						strncpy_s(smtpData->ntlmData, sizeRecv + 1, recvBuffer, sizeRecv);
-						printOut(pFile, "\t[ntlm] %.*s\n", sizeRecv, recvBuffer);
+						printOut(pFile, "\t[NTLM] %.*s\n", sizeRecv, recvBuffer);
 						return TRUE;
 					}
 				}
@@ -222,12 +235,12 @@ BOOL SmtpUserEnum(NETSOCK_DATA netSockData, SMTP_DATA* smtpData, FILE* pFile) {
 	BOOL bResult = FALSE;
 
 	// Detect if VRFY or RCPT is supported
-	const char strExtendedHello[] = "EHLO localhost\r\n";
-	char* recvBuffer = (char*)malloc(BUFFER_SIZE);
+	const char strExtendedHello[] = "EHLO localhost";
+	char* recvBuffer = (char*)xmalloc(BUFFER_SIZE);
 	if (recvBuffer != NULL) {
 		int sizeRecv;
 
-		send(netSockData.SocketFD, strExtendedHello, sizeof(strExtendedHello), 0);
+		sendSmtp(netSockData.SocketFD, (char*)strExtendedHello, sizeof(strExtendedHello) - 1, pFile);
 		sizeRecv = recv(netSockData.SocketFD, recvBuffer, BUFFER_SIZE, 0);
 		if (sizeRecv > 0) {
 			if (strstr(recvBuffer, "250-VRFY") != NULL) {
@@ -258,7 +271,7 @@ BOOL SmtpEnum(NETSOCK_DATA netSockData, SMTP_DATA* smtpData, FILE* pFile) {
 	if (ConnectToSmtp(&netSockData,pFile)) {
 		int sizeRecv = recv(netSockData.SocketFD, smtpData->banner, BUFFER_SIZE, 0);
 		if (sizeRecv > 0 && sizeRecv < BUFFER_SIZE) {
-			const char smtpQuit[] = "QUIT\r\n";
+			const char smtpQuit[] = "QUIT";
 			BOOL result = FALSE;
 
 			smtpData->banner[sizeRecv] = 0x00;
@@ -276,8 +289,7 @@ BOOL SmtpEnum(NETSOCK_DATA netSockData, SMTP_DATA* smtpData, FILE* pFile) {
 				printOut(pFile, "\t[SMTP] Connection fail !\n");
 				memset(smtpData->banner, 0x00, sizeRecv);
 			}
-			send(netSockData.SocketFD, smtpQuit, sizeof(smtpQuit), 0);
-			
+			sendSmtp(netSockData.SocketFD, (char*)smtpQuit, sizeof(smtpQuit) - 1, pFile);
 			closesocket(netSockData.SocketFD);
 			return result;
 		}
@@ -300,7 +312,7 @@ BOOL EnumSMTP(NetworkPcInfo* networkPcInfo, int port, FILE* pFile) {
 	if (networkPcInfo->smtpData == NULL)
 		return FALSE;
 
-	if (SmtpEnum(netSockData, networkPcInfo->smtpData,pFile)) {
+	if (SmtpEnum(netSockData, networkPcInfo->smtpData,pFile) && networkPcInfo->smtpData->numUser > 0) {
 		printOut(pFile, "\t[SMTP] User list:\n");
 		for (UINT i = 0; i < networkPcInfo->smtpData->numUser; i++)
 			printOut(pFile, "\t\t- %s\n", networkPcInfo->smtpData->listUser[i]);

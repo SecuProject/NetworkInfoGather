@@ -249,7 +249,7 @@ BOOL SmbEnum(char* serverIp, BOOL isBruteForce, FILE* pFile) {
         printOut(pFile, "\t[SMB] SMBv1 is enable !\n");
 
 
-    lpszServer = (LPWSTR)calloc(serverIpSize, sizeof(LPWSTR));
+    lpszServer = (LPWSTR)xcalloc(serverIpSize, sizeof(LPWSTR));
     if (lpszServer == NULL)
         return FALSE;
     swprintf_s(lpszServer, serverIpSize, L"%hs", serverIp);
@@ -260,7 +260,7 @@ BOOL SmbEnum(char* serverIp, BOOL isBruteForce, FILE* pFile) {
             return TRUE;
         }
     } else{
-        char* sharePath = (char*)calloc(serverIpSize + 4, sizeof(char*));
+        char* sharePath = (char*)xcalloc(serverIpSize + 4, sizeof(char*));
         if (sharePath == NULL){
             free(lpszServer);
             return FALSE;
