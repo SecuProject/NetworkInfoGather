@@ -133,6 +133,9 @@
     <Filter Include="Resource Files\wordlist\wordlistCustom">
       <UniqueIdentifier>{c08ba104-0e12-465d-8e38-929e4f86fac4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\4. FingerPrintInfo\EnumDNS">
+      <UniqueIdentifier>{0d135bbc-615b-4267-9579-7b152d13220e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -263,6 +266,9 @@
     </ClCompile>
     <ClCompile Include="CheckCVE.c">
       <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\CheckCVE</Filter>
+    </ClCompile>
+    <ClCompile Include="EnumDNS.c">
+      <Filter>Source Files\4. FingerPrintInfo\EnumDNS</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -415,6 +421,9 @@
     </ClInclude>
     <ClInclude Include="apacheTomcatWordList.h">
       <Filter>Resource Files\wordlist\wordlistCustom</Filter>
+    </ClInclude>
+    <ClInclude Include="EnumDNS.h">
+      <Filter>Source Files\4. FingerPrintInfo\EnumDNS</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

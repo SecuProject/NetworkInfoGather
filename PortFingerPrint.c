@@ -15,6 +15,7 @@
 #include "EnumSMTP.h"
 #include "EnumLDAP.h"
 #include "EnumRPC.h"
+#include "EnumDNS.h"
 #include "XorRoutine.h"
 
 #include "GetMacVendor.h"
@@ -99,8 +100,10 @@ BOOL PortFingerPrint(NetworkPcInfo* networkPcInfo, int nbDetected, BOOL isBrutef
 					EnumSMTP(&(networkPcInfo[i]), PORT_SMTP, pFile);
 					break;
 				case PORT_DNS:
+					EnumDnsServer(ipAddress, PORT_DNS, pFile);
+					break;
 				case PORT_DNS_ALT:
-					// TODO
+					EnumDnsServer(ipAddress, PORT_DNS_ALT, pFile);
 					break;
 				case PORT_HTTP:
 				case PORT_HTTP_GRAFANA:
