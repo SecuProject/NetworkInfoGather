@@ -14,7 +14,22 @@
 #include "HttpWordlist.h"
 #include "ToolsHTTP.h"
 #include "DetectHttpBasicAuth.h"
+#include "CheckCVE.h"
 //#include "wordListCommon.h"
+#include "apacheWordList.h"
+#include "apacheTomcatWordList.h"
+#include "IisWordList.h"
+
+const char* sereverTypeStr[] = {
+    "nginx",
+    "tomcat",
+    "apache",
+    "iis",
+    "litespeed",
+    "nodejs",
+    "lighttpd",
+    "jigsaw"
+};
 
 const char* userAgentList[] = {
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36",
@@ -23,10 +38,15 @@ const char* userAgentList[] = {
     "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:66.0) Gecko/20100101 Firefox/66.0"
 };
-const char* invalideUrlPath[] = {
-    "/frjguoijefezhof.php",             // Add rand Str
-    "/fezfez-fee-feeeee-vfdfd.txt",     // Add rand Str
-    "/testaaaFkefezf.html",             // Add rand Str
+const char* invalideUrlFilePath[] = {
+    "/wnhQ7QgxDu3u6rL22Gq.php",     // Add rand Str
+    "/G938Ei7F6QGZc9j47apZ.txt",    // Add rand Str
+    "/gy788zk7nC472jha6NnmL.html",  // Add rand Str
+};
+const char* invalideUrlDirecotryPath[] = {
+    "/FaTx3UshB75u498Cn",           // Add rand Str
+    "/B24L4U8R9KJesa",              // Add rand Str
+    "/SWU4v7887VSthS3BAXs",         // Add rand Str
 };
 
 #define REDIRECTION_PATH_SIZE  100
@@ -49,19 +69,19 @@ char* StrToLower(char* s) {
 BOOL ExtractStrStr(char* data, const char* delim1, const char* delim2, char** ppBuffer, int* bufferLen){
     char* ptr1 = strstr(data, delim1);
     if (ptr1 != NULL){
-        int strLen;
+        size_t strLen;
         char* ptr2;
 
         ptr1 = ptr1 + strlen(delim1);
         ptr2 = strstr(ptr1, delim2);
-        strLen = (int)(ptr2 - ptr1);
+        strLen = (size_t)(ptr2 - ptr1);
         if (ptr2 != NULL && strLen > 0){
-            char* buffer = (char*)malloc(strLen + 1);
+            char* buffer = (char*)malloc(strLen + (size_t)1);
             if (buffer == NULL)
                 return FALSE;
-            strncpy_s(buffer, strLen + 1, ptr1, strLen);
+            strncpy_s(buffer, strLen + (size_t)1, ptr1, strLen);
             *ppBuffer = buffer;
-            *bufferLen = strLen;
+            *bufferLen = (int)strLen;
             return TRUE;
         }
     }
@@ -114,6 +134,17 @@ int GetHttpContentLen(char* serverResponce, UINT responceSize) {
         contentLen = atoi(buffer);
         free(buffer);
         return contentLen;
+    } else {
+        //printf("[d] Header 'Content-Length' Not found !\n");
+        const char delim2[] = "\r\n\r\n";
+        char* ptr = strstr(serverResponce, delim2);
+        if (ptr != NULL) {
+            ptr += strlen(delim2);
+            if (responceSize - (ptr - serverResponce) == 0) {
+                //printf("[d] The body is empty !\n");
+                return 0;
+            }
+        }
     }
     return -1;
 }
@@ -134,11 +165,11 @@ BOOL GetHttpHeaderStr(const char* delim1, int sizeDelim1, char* serverResponce, 
 
 BOOL GetHttpHeaderServerVersion(PHTTP_STRUC httpStruct, UINT responceSize) {
     UINT serverVersionSize = responceSize + 1;
-    httpStruct->ServerName = (char*)malloc(responceSize + 1);
+    httpStruct->ServerName = (char*)malloc(serverVersionSize);
     if (httpStruct->ServerName != NULL) {
         const char delim1[] = "Server:";
         if (GetHttpHeaderStr(delim1, sizeof(delim1), httpStruct->rawData, httpStruct->ServerName, &serverVersionSize)) {
-            httpStruct->ServerName = (char*)xrealloc(httpStruct->ServerName, serverVersionSize + 1);
+            httpStruct->ServerName = (char*)xrealloc(httpStruct->ServerName, serverVersionSize + (UINT)1);
             if (httpStruct->ServerName == NULL)
                 return FALSE;
             return TRUE;
@@ -150,11 +181,11 @@ BOOL GetHttpHeaderServerVersion(PHTTP_STRUC httpStruct, UINT responceSize) {
 }
 BOOL GetHttpHeaderPowerby(PHTTP_STRUC httpStruct, UINT responceSize) {
     UINT serverVersionSize = responceSize + 1;
-    httpStruct->poweredBy = (char*)malloc(responceSize + 1);
+    httpStruct->poweredBy = (char*)malloc(serverVersionSize);
     if (httpStruct->poweredBy != NULL) {
         const char delim1[] = "X-Powered-By:";
         if (GetHttpHeaderStr(delim1, sizeof(delim1), httpStruct->rawData, httpStruct->poweredBy, &serverVersionSize)) {
-            httpStruct->poweredBy = (char*)xrealloc(httpStruct->poweredBy, serverVersionSize + 1);
+            httpStruct->poweredBy = (char*)xrealloc(httpStruct->poweredBy, serverVersionSize + (UINT)1);
             if (httpStruct->poweredBy == NULL)
                 return FALSE;
             return TRUE;
@@ -167,11 +198,11 @@ BOOL GetHttpHeaderPowerby(PHTTP_STRUC httpStruct, UINT responceSize) {
 
 BOOL GetHttpHeaderRedirectby(PHTTP_STRUC httpStruct, UINT responceSize){
     UINT serverVersionSize = responceSize + 1;
-    httpStruct->redirectBy = (char*)malloc(responceSize + 1);
+    httpStruct->redirectBy = (char*)malloc(serverVersionSize);
     if (httpStruct->redirectBy != NULL){
         const char delim1[] = "	X-Redirect-By:";
         if (GetHttpHeaderStr(delim1, sizeof(delim1), httpStruct->rawData, httpStruct->redirectBy, &serverVersionSize)){
-            httpStruct->redirectBy = (char*)xrealloc(httpStruct->redirectBy, serverVersionSize + 1);
+            httpStruct->redirectBy = (char*)xrealloc(httpStruct->redirectBy, serverVersionSize + (UINT)1);
             if (httpStruct->redirectBy == NULL)
                 return FALSE;
             return TRUE;
@@ -201,7 +232,7 @@ BOOL GetHttpHeaderContentType(PHTTP_STRUC httpStruct, UINT responceSize) {
 }
 BOOL GetHttpHeaderRedirection(PHTTP_STRUC httpStruct, UINT responceSize) {
     UINT serverVersionSize = responceSize +1;
-    httpStruct->redirectionPath = (char*)malloc(responceSize + 1);
+    httpStruct->redirectionPath = (char*)malloc(serverVersionSize);
     if (httpStruct->redirectionPath != NULL) {
         const char delim1[] = "Location:";
         if (GetHttpHeaderStr(delim1, sizeof(delim1), httpStruct->rawData, httpStruct->redirectionPath, &serverVersionSize)) {
@@ -229,26 +260,25 @@ BOOL GetHttpBody(PHTTP_STRUC httpStruct) {
 BOOL GetHttpRequestInfo(PHTTP_STRUC httpStruct) {
     if (httpStruct->responseLen == 0) {
         printf("[d] Test response size: %u !!!\n", httpStruct->contentLen);
-        system("pause");
         return FALSE;
     }
 
     httpStruct->returnCode = GetHttpReturnCode(httpStruct->rawData, httpStruct->responseLen);
     httpStruct->contentLen = GetHttpContentLen(httpStruct->rawData, httpStruct->responseLen);
+    if (httpStruct->contentLen > 0)
+        GetHttpBody(httpStruct);
+    else if (httpStruct->contentLen == -1)
+        httpStruct->pContent = NULL;
 
     GetHttpHeaderServerVersion(httpStruct, httpStruct->responseLen);
     GetHttpHeaderPowerby(httpStruct, httpStruct->responseLen);
     GetHttpHeaderRedirectby(httpStruct, httpStruct->responseLen);
     GetHttpHeaderContentType(httpStruct, httpStruct->responseLen);
 
-    if (httpStruct->contentLen != 0)
-        GetHttpBody(httpStruct);
-    else
-        httpStruct->pContent = NULL;    
+    if (IS_HTTP_REDIRECTS(httpStruct->returnCode)) {
 
-    if (IS_HTTP_REDIRECTS(httpStruct->returnCode))
         GetHttpHeaderRedirection(httpStruct, httpStruct->responseLen);
-    else
+    }else
         httpStruct->redirectionPath = NULL;
 
     return TRUE;
@@ -300,20 +330,20 @@ PHTTP_STRUC GetHttpRequest(char* ipAddress, int port, char* path, char* requestT
     else
         httpStruct->responseLen = GetHttpServer(ipAddress, port, requestType, path, NULL, &(httpStruct->rawData), httpAuthHeader, pFile); // GET
     if (httpStruct->responseLen == 0) {
-        printOut(pFile, "\t\t[-] Page not available !\n");
+        //printOut(pFile, "\t\t[x] Page not available !\n");
         if(httpStruct->rawData != NULL)
             free(httpStruct->rawData);
         free(httpStruct);
         return NULL;
     }
     if (httpStruct->rawData == NULL) {
-        printOut(pFile, "\t\t[-] Response data error !\n");
+        printOut(pFile, "\t\t[x] Response data error !\n");
         free(httpStruct);
         return NULL;
     }
 
     if (!GetHttpRequestInfo(httpStruct)) {
-        printOut(pFile, "\t\t[-] Fail to retrieve information form the request !\n");
+        printOut(pFile, "\t\t[x] Fail to retrieve information form the request !\n");
         free(httpStruct->rawData);
         free(httpStruct);
         return NULL;
@@ -434,7 +464,7 @@ BOOL TestAllHttpsRedirect(PHTTP_STRUC* pHttpStructInvalide, FILE* pFile){
         return TRUE;
 
     /// Redirection http[s]://domain/xxx -> http[s]://domain/    x 3
-    for (int i = 1; i < ARRAY_SIZE_CHAR(invalideUrlPath); i++){
+    for (int i = 1; i < ARRAY_SIZE_CHAR(invalideUrlFilePath); i++){
         if (strcmp(pHttpStructInvalide[0]->redirectionPath, pHttpStructInvalide[i]->redirectionPath) == 0)
             match++;
     }
@@ -446,13 +476,13 @@ BOOL TestAllHttpsRedirect(PHTTP_STRUC* pHttpStructInvalide, FILE* pFile){
 
 
     /// Redirection http[s]://domain/xxx -> http[s]://domain/xxx
-    for (int i = 0; i < ARRAY_SIZE_CHAR(invalideUrlPath); i++){
+    for (int i = 0; i < ARRAY_SIZE_CHAR(invalideUrlFilePath); i++){
         if (!ParseUrl((char*)pHttpStructInvalide[i]->redirectionPath, urlStrcutInvalide))
             return TRUE;
-        if (strcmp(urlStrcutInvalide->urlPath, invalideUrlPath[i]) == 0)
+        if (strcmp(urlStrcutInvalide->urlPath, invalideUrlFilePath[i]) == 0)
             match++;
     }
-    if (match == ARRAY_SIZE_CHAR(invalideUrlPath)){
+    if (match == ARRAY_SIZE_CHAR(invalideUrlFilePath)){
         if (urlStrcutInvalide->port != 0)
             printf("\t\t[i] All requests return %s://%s:%i/[PAGE_NAME]\n", urlStrcutInvalide->protocol, urlStrcutInvalide->ipAddress, urlStrcutInvalide->port);
         else
@@ -460,7 +490,7 @@ BOOL TestAllHttpsRedirect(PHTTP_STRUC* pHttpStructInvalide, FILE* pFile){
     }
 
     free(urlStrcutInvalide);
-    return match == ARRAY_SIZE_CHAR(invalideUrlPath);
+    return match == ARRAY_SIZE_CHAR(invalideUrlFilePath);
 
 
     // http://192.168.59.45/.bash_history       301 -  0     -> https://192.168.59.45/.bash_history
@@ -468,6 +498,9 @@ BOOL TestAllHttpsRedirect(PHTTP_STRUC* pHttpStructInvalide, FILE* pFile){
 
 
 /*
+Directory 
+1. all invalid dir url return 200 
+
 1. Check if val are the same:
     - returnCode
     - contentLen
@@ -487,50 +520,63 @@ typedef enum {
     BASE_REDIRECT_CODE,
     BASE_DATA_SIZE_CODE,
     BASE_CODE_AUTH,
+    BASE_INVALID_CODE_LEN_DIR,
     BASE_NOT_FOUND
 }ENUM_PAGE_NOT_FOUND;
 
-ENUM_PAGE_NOT_FOUND SetPageNotFound(PHTTP_STRUC pHttpStruct, char* ipAddress, int port, char* httpAuthHeader,FILE* pFile, BOOL isSSL) {
-    PHTTP_STRUC pHttpStructInvalide[3]; // Calloc
+
+ENUM_PAGE_NOT_FOUND SetNotFound(PHTTP_STRUC pHttpStruct, char* ipAddress, int port, char* httpAuthHeader,FILE* pFile, BOOL isSSL, char* invalideUrlPath[], UINT invalideUrlPathSize) {
     BOOL isReturnCodeSame = TRUE;
     BOOL isContentLenSame = TRUE;
     BOOL isRedirectionSame = TRUE;
+    UINT isMatch = 0;
+    PHTTP_STRUC pHttpStructInvalide[3]; // Calloc
 
-    pHttpStruct->redirectionPath = (char*)malloc(REDIRECTION_PATH_SIZE);
+
+    /*pHttpStruct->redirectionPath = (char*)malloc(REDIRECTION_PATH_SIZE);
     if (pHttpStruct->redirectionPath == NULL) {
         return BASE_NOT_FOUND;
+    }*/
+
+    for (UINT i = 0; i < invalideUrlPathSize; i++) {
+        pHttpStructInvalide[i] = GetHttpRequest(ipAddress, port, (char*)invalideUrlPath[i], "HEAD", httpAuthHeader, isSSL, pFile);
+        if (pHttpStructInvalide[i] == NULL)
+            return BASE_NOT_FOUND;
+        if (pHttpStructInvalide[i]->returnCode == STATUS_CODE_OK &&
+            pHttpStructInvalide[i]->contentLen == NO_BODY_DATA)
+            isMatch++;
     }
 
-    for (int i = 0; i < ARRAY_SIZE_CHAR(invalideUrlPath); i++) {
-        pHttpStructInvalide[i] = GetHttpRequest(ipAddress, port, (char*)invalideUrlPath[i], "HEAD", httpAuthHeader, isSSL, pFile);
-        if (pHttpStructInvalide[i] == NULL) {
-            return BASE_NOT_FOUND;
-        }
+    if (isMatch == invalideUrlPathSize) {
+        for (int i = invalideUrlPathSize - 1; i > 0; i--)
+            free(pHttpStructInvalide[i]);
+        return BASE_INVALID_CODE_LEN_DIR;
     }
+
+    if (pHttpStructInvalide == NULL)
+        return BASE_CODE_ERROR_CODE;
+
+
 
     pHttpStruct->returnCode = pHttpStructInvalide[0]->returnCode;
     pHttpStruct->contentLen = pHttpStructInvalide[0]->contentLen;
 
-
-
     if (!IS_HTTP_ERROR(pHttpStruct->returnCode)) {
-        isReturnCodeSame = FALSE;
+        isReturnCodeSame = BASE_CODE_ERROR_CODE;
     } else {
         if (IS_HTTP_AUTH(pHttpStruct->returnCode)) {
             UINT countCodeAuth = 1;
-            for (int i = 1; i < ARRAY_SIZE_CHAR(invalideUrlPath); i++) {
+            for (UINT i = 1; i < invalideUrlPathSize; i++) {
                 if (IS_HTTP_AUTH(pHttpStructInvalide[i]->returnCode))
                     countCodeAuth++;
             }
             if (countCodeAuth == 3) {
-                for (int i = ARRAY_SIZE_CHAR(invalideUrlPath) - 1; i > 0; i--)
+                for (UINT i = invalideUrlPathSize - 1; i > 0; i--)
                     free(pHttpStructInvalide[i]);
                 return BASE_NOT_FOUND;
             }
         }
     }
-        
-
     if (IS_HTTP_REDIRECTS(pHttpStructInvalide[0]->returnCode)) {
         if (TestAllHttpsRedirect(pHttpStructInvalide, pFile))
             return BASE_NOT_FOUND;
@@ -541,7 +587,7 @@ ENUM_PAGE_NOT_FOUND SetPageNotFound(PHTTP_STRUC pHttpStruct, char* ipAddress, in
             strcpy_s(pHttpStruct->redirectionPath, REDIRECTION_PATH_SIZE, "");
     }
 
-    for (int i = 0; i < ARRAY_SIZE_CHAR(invalideUrlPath); i++) {
+    for (UINT i = 0; i < invalideUrlPathSize; i++) {
         if (pHttpStruct->returnCode != pHttpStructInvalide[i]->returnCode)
             isReturnCodeSame = FALSE;
         if (pHttpStruct->contentLen != pHttpStructInvalide[i]->contentLen)
@@ -550,9 +596,9 @@ ENUM_PAGE_NOT_FOUND SetPageNotFound(PHTTP_STRUC pHttpStruct, char* ipAddress, in
         if (IS_HTTP_REDIRECTS(pHttpStructInvalide[i]->returnCode) &&
             pHttpStructInvalide[i]->redirectionPath != NULL &&
             strcmp(pHttpStruct->redirectionPath, pHttpStructInvalide[i]->redirectionPath) != 0)
-            isRedirectionSame = FALSE;
+                isRedirectionSame = FALSE;
     }
-    for (int i = ARRAY_SIZE_CHAR(invalideUrlPath) - 1; i > 0; i--)
+    for (int i = invalideUrlPathSize - 1; i > 0; i--)
         free(pHttpStructInvalide[i]);
 
 
@@ -563,52 +609,84 @@ ENUM_PAGE_NOT_FOUND SetPageNotFound(PHTTP_STRUC pHttpStruct, char* ipAddress, in
     else if (isRedirectionSame)
         return BASE_DATA_SIZE_CODE;
     return BASE_NOT_FOUND;
+
+}
+
+ENUM_PAGE_NOT_FOUND SetFileNotFound(PHTTP_STRUC pHttpStruct, char* ipAddress, int port, char* httpAuthHeader, FILE* pFile, BOOL isSSL) {
+    return SetNotFound(pHttpStruct, ipAddress, port, httpAuthHeader, pFile, isSSL, (char**)invalideUrlFilePath, ARRAY_SIZE_CHAR(invalideUrlFilePath));
+}
+
+ENUM_PAGE_NOT_FOUND SetDirectoryNotFound(PHTTP_STRUC pHttpStruct, char* ipAddress, int port, char* httpAuthHeader, FILE* pFile, BOOL isSSL) {
+    return SetNotFound(pHttpStruct, ipAddress, port, httpAuthHeader, pFile, isSSL,(char**) invalideUrlDirecotryPath, ARRAY_SIZE_CHAR(invalideUrlDirecotryPath));
 }
 
 
+VOID PrintAllDir(FILE* pFile, char* printBuffer, int printBufferLen) {
+    int defaultWidth = 120;
+    int strLenNew = printBufferLen + 4;
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    HANDLE stdHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (stdHandle != NULL) {
+        if (GetConsoleScreenBufferInfo(stdHandle,&csbi)) {
+            defaultWidth = csbi.dwSize.X;
+            //defaultHeight = csbi.dwSize.Y;
+        }
+    }
+    for(int i = 0;i< printBufferLen;i++){
+        // 0x09 -> tab
+        if (printBuffer[i] == 0x09)
+            strLenNew += 5;
+    }
+    printOut(pFile, "%s", printBuffer);
+    for (int i = 0; i < defaultWidth - strLenNew; i++)
+        printf(" ");
+    printf("\n");
+}
 VOID PrintDirFindRedirect(PHTTP_STRUC pHttpStructPage, char* ipAddress, FILE* pFile, BOOL isSSL) {
-    printOut(pFile, "\t\thttp%s://%s%-20s %i -  %-5i -> %s\n",
+    char* printBuffer = (char*)malloc(1024);
+    if (printBuffer == NULL)
+        return;
+    int strLen = sprintf_s(printBuffer, 1024, "\t\thttp%s://%s%-20s %i -  %-5i -> %s",
         isSSL ? "s" : "", ipAddress,
         pHttpStructPage->requestPath, 
         pHttpStructPage->returnCode,
         (pHttpStructPage->contentLen > 0) ? pHttpStructPage->contentLen : 0,
         pHttpStructPage->redirectionPath);
+    PrintAllDir(pFile, printBuffer, strLen);
 }
 VOID PrintDirFind(PHTTP_STRUC pHttpStructPage, char* ipAddress, FILE* pFile, BOOL isSSL) {
-    printOut(pFile, "\t\thttp%s://%s%-20s %i -  %-5i\n",
-        isSSL ? "s" : "", ipAddress,
+    char* printBuffer = (char*)malloc(1024);
+    if (printBuffer == NULL)
+        return ;
+    int strLen = sprintf_s(printBuffer, 1024, "\t\thttp%s://%s%-20s %i -  %-5i", isSSL ? "s" : "", ipAddress,
         pHttpStructPage->requestPath, pHttpStructPage->returnCode,
         (pHttpStructPage->contentLen > 0) ? pHttpStructPage->contentLen : 0);
+    PrintAllDir(pFile, printBuffer, strLen);
+
+   /* printOut(pFile, "\t\thttp%s://%s%-23s %i -  %-5i                                                   \n",
+        isSSL ? "s" : "", ipAddress,
+        pHttpStructPage->requestPath, pHttpStructPage->returnCode,
+        (pHttpStructPage->contentLen > 0) ? pHttpStructPage->contentLen : 0);*/
 }
 
-BOOL HttpDirEnum(char* ipAddress, int port,char* httpAuthHeader, FILE* pFile, BOOL isSSL) {
-
-    printf("\t[HTTP%s] %s:%i - HTTP%s Directory Enum  \n", isSSL ? "S" : "", ipAddress, port, isSSL ? "S" : "");
-
-    ENUM_PAGE_NOT_FOUND enulPageNotFound;
-    PHTTP_STRUC pHttpStructInvalide = InitPHTTP_STRUC(1);
-
-    if (pHttpStructInvalide == NULL)
-        return FALSE;
-
-    // httpAuthHeader
-    enulPageNotFound = SetPageNotFound(pHttpStructInvalide, ipAddress, port, httpAuthHeader,pFile, isSSL);
-    if (enulPageNotFound == BASE_NOT_FOUND) {
-        FreePHTTP_STRUC(pHttpStructInvalide);
-        return FALSE;
-    }
-    printf("\t\tURL\t\t\t\t       Code - Length\tRedirection\n");
-    for (UINT i = 0; i < ARRAY_SIZE_CHAR(wordListCommon); i++) {
-        PHTTP_STRUC pHttpStructPage = GetHttpRequest(ipAddress, port, (char*)wordListCommon[i], "HEAD", httpAuthHeader, isSSL, pFile);
+BOOL StartHttpDirEnum(char* ipAddress, int port, char* httpAuthHeader, FILE* pFile, BOOL isSSL, ENUM_PAGE_NOT_FOUND enumPageNotFound, ENUM_PAGE_NOT_FOUND enumDirNotFound, PHTTP_STRUC pHttpStructInvalide, char** wordListCommonFile, UINT wordListCommonSize) {
+    for (UINT i = 0; i < wordListCommonSize; i++) {
+        PHTTP_STRUC pHttpStructPage = GetHttpRequest(ipAddress, port, (char*)wordListCommonFile[i], "HEAD", httpAuthHeader, isSSL, pFile);
         if (pHttpStructPage != NULL) {
-            LoadingBar(i + 1, (UINT)ARRAY_SIZE_CHAR(wordListCommon));
-            switch (enulPageNotFound) {
+            LoadingBar(i + 1, wordListCommonSize);
+
+            switch (enumPageNotFound) {
             case BASE_CODE_ERROR_CODE:
                 if (!IS_HTTP_ERROR(pHttpStructPage->returnCode)) {
                     if (IS_HTTP_REDIRECTS(pHttpStructPage->returnCode))
                         PrintDirFindRedirect(pHttpStructPage, ipAddress, pFile, isSSL);
-                    else
-                        PrintDirFind(pHttpStructPage, ipAddress, pFile, isSSL);
+                    else {
+                        BOOL isAntiDir = (enumDirNotFound == BASE_INVALID_CODE_LEN_DIR &&
+                            pHttpStructPage->returnCode == STATUS_CODE_OK &&
+                            pHttpStructPage->contentLen == NO_BODY_DATA);
+                        if(!isAntiDir)
+                            PrintDirFind(pHttpStructPage, ipAddress, pFile, isSSL);
+                    }
                 }
                 break;
             case BASE_REDIRECT_CODE:
@@ -629,6 +707,52 @@ BOOL HttpDirEnum(char* ipAddress, int port,char* httpAuthHeader, FILE* pFile, BO
             }
             FreePHTTP_STRUC(pHttpStructPage);
         }
+    }
+    return TRUE;
+}
+// HttpDirEnum(ipAddress, portNb, httpAuthHeader, serverType, pFile, isSSL);
+BOOL HttpDirEnum(char* ipAddress, int port,char* httpAuthHeader, ServerType serverType, FILE* pFile, BOOL isSSL) {
+
+    printf("\t[HTTP%s] %s:%i - HTTP%s Directory Enum  \n", isSSL ? "S" : "", ipAddress, port, isSSL ? "S" : "");
+
+    ENUM_PAGE_NOT_FOUND enumPageNotFound;
+    PHTTP_STRUC pHttpStructInvalide = InitPHTTP_STRUC(1);
+
+    if (pHttpStructInvalide == NULL)
+        return FALSE;
+    // if BASE_INVALID_CODE_LEN_DIR disable dir !!!
+    ENUM_PAGE_NOT_FOUND enumDirNotFound = SetDirectoryNotFound(pHttpStructInvalide, ipAddress, port, httpAuthHeader,pFile, isSSL);
+    enumPageNotFound = SetFileNotFound(pHttpStructInvalide, ipAddress, port, httpAuthHeader,pFile, isSSL);
+    if (enumPageNotFound == BASE_NOT_FOUND) {
+        FreePHTTP_STRUC(pHttpStructInvalide);
+        return FALSE;
+    }
+
+    printf("\t\tURL\t\t\t\t   %s      Code - Length\tRedirection\n", isSSL ? " " : "" );
+
+    StartHttpDirEnum(ipAddress, port, httpAuthHeader, pFile, isSSL, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListCommonFile,  ARRAY_SIZE_CHAR(wordListCommonFile));
+        
+    //if(enumDirNotFound != BASE_INVALID_CODE_LEN_DIR)
+    StartHttpDirEnum(ipAddress, port, httpAuthHeader, pFile, isSSL, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListCommonDir, ARRAY_SIZE_CHAR(wordListCommonDir));
+    
+    switch (serverType) {
+    case ApacheHttpd:
+        StartHttpDirEnum(ipAddress, port, httpAuthHeader, pFile, isSSL, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListApacheFile, ARRAY_SIZE_CHAR(wordListApacheFile));
+        //if (enumDirNotFound != BASE_INVALID_CODE_LEN_DIR)
+        StartHttpDirEnum(ipAddress, port, httpAuthHeader, pFile, isSSL, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListApacheDir, ARRAY_SIZE_CHAR(wordListApacheDir));
+        break;
+    case ApacheTomcat:
+        StartHttpDirEnum(ipAddress, port, httpAuthHeader, pFile, isSSL, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListApacheTomcatFile, ARRAY_SIZE_CHAR(wordListApacheTomcatFile));
+        //if (enumDirNotFound != BASE_INVALID_CODE_LEN_DIR)
+        StartHttpDirEnum(ipAddress, port, httpAuthHeader, pFile, isSSL, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListApacheTomcatDir, ARRAY_SIZE_CHAR(wordListApacheTomcatDir));
+        break;
+    case WebServerIIS:
+        StartHttpDirEnum(ipAddress, port, httpAuthHeader, pFile, isSSL, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListIisFile, ARRAY_SIZE_CHAR(wordListIisFile));
+        if (enumDirNotFound != BASE_INVALID_CODE_LEN_DIR)
+            StartHttpDirEnum(ipAddress, port, httpAuthHeader, pFile, isSSL, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListIisFDir, ARRAY_SIZE_CHAR(wordListIisFDir));
+        break;
+    default:
+        break;
     }
     FreePHTTP_STRUC(pHttpStructInvalide);
     return TRUE;
@@ -655,6 +779,7 @@ BOOL GetHTTPFingerprint(char* serverResponce, PORT_INFO* portInfo) {
                 return TRUE;
             case TrueNAS:
                 printf("\t\t[SOFTWARE] TrueNAS Detected!\n");
+                return TRUE;
             case Deluge:
                 if (!EnumDeluge(serverResponce, portInfo))
                     printf("\t\t[SOFTWARE] Deluge Detected!\n");
@@ -692,25 +817,25 @@ BOOL CheckRequerSsl(char* ipAddress, int port, BOOL* isSSL, FILE* pFile){
     return TRUE;
 }
 
-BOOL GetHttpServerInfo(char* ipAddress, int port, char* httpAuthHeader, FILE* pFile, BOOL isSSL,BOOL isBruteForce) {
+BOOL GetHttpServerInfo(char* ipAddress, int port, char* httpAuthHeader, ServerType* serverType, FILE* pFile, BOOL isSSL,BOOL isBruteForce) {
     printf("\t[HTTP%s] %s:%i - HTTP%s information\n", isSSL ? "S" : "", ipAddress, port, isSSL ? "S" : "");
-
+    
     PHTTP_STRUC pHttpStructPage = GetHttpRequest(ipAddress, port, "/", "GET", httpAuthHeader, isSSL, pFile);
     if (pHttpStructPage == NULL)
         return FALSE;
 
 
     if (pHttpStructPage->ServerName != NULL)
-        printf("\t\t[Server] %s\n", pHttpStructPage->ServerName);
+        printf("\t\t[Server]\t%s\n", pHttpStructPage->ServerName);
     if (pHttpStructPage->poweredBy != NULL)
-        printf("\t\t[X-Powered-By] %s\n", pHttpStructPage->poweredBy);
+        printf("\t\t[X-Powered-By]\t%s\n", pHttpStructPage->poweredBy);
     if (pHttpStructPage->redirectBy != NULL)
-        printf("\t\t[X-Redirect-By] %s\n", pHttpStructPage->redirectBy);
+        printf("\t\t[X-Redirect-By]\t%s\n", pHttpStructPage->redirectBy);
 
     if (pHttpStructPage->returnCode < 400) {
         if (pHttpStructPage->returnCode >= 300) {
             if (pHttpStructPage->redirectionPath != NULL)
-                printf("\t\t[Redirection] %s\n", pHttpStructPage->redirectionPath);
+                printf("\t\t[Redirection]\t%s\n", pHttpStructPage->redirectionPath);
         }
         if (pHttpStructPage->returnCode == STATUS_CODE_OK && pHttpStructPage->pContent != NULL) {
             PORT_INFO portInfo;
@@ -734,6 +859,9 @@ BOOL GetHttpServerInfo(char* ipAddress, int port, char* httpAuthHeader, FILE* pF
             return FALSE;
         }
     }
+
+    BOOL isTestEnable = FALSE;
+    *serverType = CheckCVE(ipAddress, port, *pHttpStructPage, isTestEnable);
 
     FreePHTTP_STRUC(pHttpStructPage);
     return TRUE;

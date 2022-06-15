@@ -26,6 +26,7 @@
 #define GET_RESPONSE_SIZE   10000
 #define SERVER_VERSION_SIZE 100
 
+#define NO_BODY_DATA		0
 
 extern const char* userAgentList[];
 
@@ -56,13 +57,27 @@ typedef struct {
 	int contentLen;
 }HTTP_STRUC, * PHTTP_STRUC;
 
+typedef enum {
+	UnknownServer = -1,
+	Nginx = 0,
+	ApacheTomcat,
+	ApacheHttpd,
+	WebServerIIS,
+	LiteSpeed,
+	NodeJs,
+	Lighttpd,
+	Jigsaw
+}ServerType;
+
+extern const char* sereverTypeStr[8];
+
 char* StrToLower(char* s);
 BOOL ExtractStrStr(char* data, const char* delim1, const char* delim2, char** ppBuffer, int* bufferLen);
 
 UINT GetHttpReturnCode(char* serverResponce, UINT responceSize);
-BOOL HttpDirEnum(char* ipAddress, int port, char* httpAuthHeader, FILE* pFile, BOOL isSSL);
-BOOL GetHttpServerInfo(char* ipAddress, int port, char* httpAuthHeader, FILE* pFile, BOOL isSSL, BOOL isBruteForce);
-//UINT GetHttpReturnCode(char* serverResponce, UINT responceSize);
+BOOL HttpDirEnum(char* ipAddress, int port, char* httpAuthHeader, ServerType serverType, FILE* pFile, BOOL isSSL);
+BOOL GetHttpServerInfo(char* ipAddress, int port, char* httpAuthHeader, ServerType *serverType,  FILE* pFile, BOOL isSSL, BOOL isBruteForce);
+//UINT GetHttpReturnCode(char* serverResponce, UINT responceSize); UnknownServer
 BOOL CheckRequerSsl(char* ipAddress, int port, BOOL* isSSL, FILE* pFile);
 
 #endif

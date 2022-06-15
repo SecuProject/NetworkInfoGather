@@ -28,28 +28,28 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -151,6 +151,7 @@
     <ClCompile Include="ARPQuery.c" />
     <ClCompile Include="ARPTable.c" />
     <ClCompile Include="Base64.c" />
+    <ClCompile Include="CheckCVE.c" />
     <ClCompile Include="CheckDoublePulsar.c" />
     <ClCompile Include="CheckMs17_010.c" />
     <ClCompile Include="CheckSMBv1.c" />
@@ -192,9 +193,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AdapterInformation.h" />
+    <ClInclude Include="apacheTomcatWordList.h" />
+    <ClInclude Include="apacheWordList.h" />
     <ClInclude Include="ARPQuery.h" />
     <ClInclude Include="ARPTable.h" />
     <ClInclude Include="Base64.h" />
+    <ClInclude Include="CheckCVE.h" />
     <ClInclude Include="CheckDoublePulsar.h" />
     <ClInclude Include="CheckMs17_010.h" />
     <ClInclude Include="CheckSMBv1.h" />
@@ -235,6 +239,7 @@
     <ClInclude Include="tcpIpModuel.h" />
     <ClInclude Include="ToolsHTTP.h" />
     <ClInclude Include="wordlist.h" />
+    <ClInclude Include="IisWordList.h" />
     <ClInclude Include="XorRoutine.h" />
     <ClInclude Include="ZeroLogon.h" />
   </ItemGroup>

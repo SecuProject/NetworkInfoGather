@@ -127,6 +127,12 @@
     <Filter Include="Source Files\4. FingerPrintInfo\EnumHTTP\Software\EnumDeluge">
       <UniqueIdentifier>{3d606dfa-2807-4bc0-b6ea-bd5b17dffb47}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\4. FingerPrintInfo\EnumHTTP\CheckCVE">
+      <UniqueIdentifier>{8de95818-c142-4fa5-b78e-7532ee34d542}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\wordlist\wordlistCustom">
+      <UniqueIdentifier>{c08ba104-0e12-465d-8e38-929e4f86fac4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -254,6 +260,9 @@
     </ClCompile>
     <ClCompile Include="EnumDeluge.c">
       <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\Software\EnumDeluge</Filter>
+    </ClCompile>
+    <ClCompile Include="CheckCVE.c">
+      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\CheckCVE</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -394,6 +403,18 @@
     </ClInclude>
     <ClInclude Include="EnumDeluge.h">
       <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\Software\EnumDeluge</Filter>
+    </ClInclude>
+    <ClInclude Include="CheckCVE.h">
+      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\CheckCVE</Filter>
+    </ClInclude>
+    <ClInclude Include="IisWordList.h">
+      <Filter>Resource Files\wordlist\wordlistCustom</Filter>
+    </ClInclude>
+    <ClInclude Include="apacheWordList.h">
+      <Filter>Resource Files\wordlist\wordlistCustom</Filter>
+    </ClInclude>
+    <ClInclude Include="apacheTomcatWordList.h">
+      <Filter>Resource Files\wordlist\wordlistCustom</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
