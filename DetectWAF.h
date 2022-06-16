@@ -3,6 +3,6 @@
 #ifndef DETECT_WAF_HEADER_H
 #define DETECT_WAF_HEADER_H
 
-BOOL IsHttpWaf(char* ipAddress, int port, FILE* pFile, BOOL isSSL);
+BOOL IsHttpWaf(RequestInfoStruct requestInfoStruct, FILE* pFile);
 
 #endif

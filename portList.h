@@ -26,7 +26,9 @@
 #define PORT_RDP				3389
 #define PORT_POSTGRESQL			5432
 #define PORT_DNS_ALT			5353
+#define PORT_VNC				5900
 #define PORT_WINRM				5985
+#define PORT_X11				6000
 #define PORT_HTTP_TOMCAT		8009
 #define PORT_HTTP_PROXY			8080
 #define PORT_HTTP_OTHER			8180

@@ -525,7 +525,7 @@ typedef enum {
 }ENUM_PAGE_NOT_FOUND;
 
 
-ENUM_PAGE_NOT_FOUND SetNotFound(PHTTP_STRUC pHttpStruct, char* ipAddress, int port, char* httpAuthHeader,FILE* pFile, BOOL isSSL, char* invalideUrlPath[], UINT invalideUrlPathSize) {
+ENUM_PAGE_NOT_FOUND SetNotFound(PHTTP_STRUC pHttpStruct, RequestInfoStruct requestInfoStruct,FILE* pFile, char* invalideUrlPath[], UINT invalideUrlPathSize) {
     BOOL isReturnCodeSame = TRUE;
     BOOL isContentLenSame = TRUE;
     BOOL isRedirectionSame = TRUE;
@@ -539,7 +539,7 @@ ENUM_PAGE_NOT_FOUND SetNotFound(PHTTP_STRUC pHttpStruct, char* ipAddress, int po
     }*/
 
     for (UINT i = 0; i < invalideUrlPathSize; i++) {
-        pHttpStructInvalide[i] = GetHttpRequest(ipAddress, port, (char*)invalideUrlPath[i], "HEAD", httpAuthHeader, isSSL, pFile);
+        pHttpStructInvalide[i] = GetHttpRequest(requestInfoStruct.ipAddress, requestInfoStruct.port, (char*)invalideUrlPath[i], "HEAD", requestInfoStruct.httpAuthHeader, requestInfoStruct.isSSL, pFile);
         if (pHttpStructInvalide[i] == NULL)
             return BASE_NOT_FOUND;
         if (pHttpStructInvalide[i]->returnCode == STATUS_CODE_OK &&
@@ -612,12 +612,12 @@ ENUM_PAGE_NOT_FOUND SetNotFound(PHTTP_STRUC pHttpStruct, char* ipAddress, int po
 
 }
 
-ENUM_PAGE_NOT_FOUND SetFileNotFound(PHTTP_STRUC pHttpStruct, char* ipAddress, int port, char* httpAuthHeader, FILE* pFile, BOOL isSSL) {
-    return SetNotFound(pHttpStruct, ipAddress, port, httpAuthHeader, pFile, isSSL, (char**)invalideUrlFilePath, ARRAY_SIZE_CHAR(invalideUrlFilePath));
+ENUM_PAGE_NOT_FOUND SetFileNotFound(PHTTP_STRUC pHttpStruct, RequestInfoStruct requestInfoStruct, FILE* pFile) {
+    return SetNotFound(pHttpStruct, requestInfoStruct, pFile, (char**)invalideUrlFilePath, ARRAY_SIZE_CHAR(invalideUrlFilePath));
 }
 
-ENUM_PAGE_NOT_FOUND SetDirectoryNotFound(PHTTP_STRUC pHttpStruct, char* ipAddress, int port, char* httpAuthHeader, FILE* pFile, BOOL isSSL) {
-    return SetNotFound(pHttpStruct, ipAddress, port, httpAuthHeader, pFile, isSSL,(char**) invalideUrlDirecotryPath, ARRAY_SIZE_CHAR(invalideUrlDirecotryPath));
+ENUM_PAGE_NOT_FOUND SetDirectoryNotFound(PHTTP_STRUC pHttpStruct, RequestInfoStruct requestInfoStruct, FILE* pFile) {
+    return SetNotFound(pHttpStruct, requestInfoStruct, pFile,(char**) invalideUrlDirecotryPath, ARRAY_SIZE_CHAR(invalideUrlDirecotryPath));
 }
 
 
@@ -669,37 +669,43 @@ VOID PrintDirFind(PHTTP_STRUC pHttpStructPage, char* ipAddress, FILE* pFile, BOO
         (pHttpStructPage->contentLen > 0) ? pHttpStructPage->contentLen : 0);*/
 }
 
-BOOL StartHttpDirEnum(char* ipAddress, int port, char* httpAuthHeader, FILE* pFile, BOOL isSSL, ENUM_PAGE_NOT_FOUND enumPageNotFound, ENUM_PAGE_NOT_FOUND enumDirNotFound, PHTTP_STRUC pHttpStructInvalide, char** wordListCommonFile, UINT wordListCommonSize) {
+typedef struct {
+    char** tabRedirectionPath;
+    int nbRedirectionPath;
+}RedirectionStruct;
+
+BOOL StartHttpDirEnum(RequestInfoStruct requestInfoStruct, FILE* pFile, ENUM_PAGE_NOT_FOUND enumPageNotFound, ENUM_PAGE_NOT_FOUND enumDirNotFound, PHTTP_STRUC pHttpStructInvalide, char** wordListCommonFile, UINT wordListCommonSize) {
     for (UINT i = 0; i < wordListCommonSize; i++) {
-        PHTTP_STRUC pHttpStructPage = GetHttpRequest(ipAddress, port, (char*)wordListCommonFile[i], "HEAD", httpAuthHeader, isSSL, pFile);
+        PHTTP_STRUC pHttpStructPage = GetHttpRequest(requestInfoStruct.ipAddress, requestInfoStruct.port, (char*)wordListCommonFile[i], "HEAD", requestInfoStruct.httpAuthHeader, requestInfoStruct.isSSL, pFile);
         if (pHttpStructPage != NULL) {
             LoadingBar(i + 1, wordListCommonSize);
-
             switch (enumPageNotFound) {
             case BASE_CODE_ERROR_CODE:
                 if (!IS_HTTP_ERROR(pHttpStructPage->returnCode)) {
-                    if (IS_HTTP_REDIRECTS(pHttpStructPage->returnCode))
-                        PrintDirFindRedirect(pHttpStructPage, ipAddress, pFile, isSSL);
-                    else {
+                    if (IS_HTTP_REDIRECTS(pHttpStructPage->returnCode)) {
+                        PrintDirFindRedirect(pHttpStructPage, requestInfoStruct.ipAddress, pFile, requestInfoStruct.isSSL);
+                        // Append to table 
+                        // redirectionPath = 0x00000164494a67c0 " xxxaaa.php"
+                    }else {
                         BOOL isAntiDir = (enumDirNotFound == BASE_INVALID_CODE_LEN_DIR &&
                             pHttpStructPage->returnCode == STATUS_CODE_OK &&
                             pHttpStructPage->contentLen == NO_BODY_DATA);
                         if(!isAntiDir)
-                            PrintDirFind(pHttpStructPage, ipAddress, pFile, isSSL);
+                            PrintDirFind(pHttpStructPage, requestInfoStruct.ipAddress, pFile, requestInfoStruct.isSSL);
                     }
                 }
                 break;
             case BASE_REDIRECT_CODE:
                 if (IS_HTTP_REDIRECTS(pHttpStructPage->returnCode) && strcmp(pHttpStructPage->redirectionPath, pHttpStructInvalide->redirectionPath) != 0) {
-                    PrintDirFindRedirect(pHttpStructPage, ipAddress, pFile, isSSL);
+                    PrintDirFindRedirect(pHttpStructPage, requestInfoStruct.ipAddress, pFile, requestInfoStruct.isSSL);
                 }
                 break;
             case BASE_DATA_SIZE_CODE:
                 if (pHttpStructInvalide->contentLen != pHttpStructPage->contentLen) {
                     if (IS_HTTP_REDIRECTS(pHttpStructPage->returnCode))
-                        PrintDirFindRedirect(pHttpStructPage, ipAddress, pFile, isSSL);
+                        PrintDirFindRedirect(pHttpStructPage, requestInfoStruct.ipAddress, pFile, requestInfoStruct.isSSL);
                     else
-                        PrintDirFind(pHttpStructPage, ipAddress, pFile, isSSL);
+                        PrintDirFind(pHttpStructPage, requestInfoStruct.ipAddress, pFile, requestInfoStruct.isSSL);
                 }
                 break;
             default:
@@ -711,45 +717,47 @@ BOOL StartHttpDirEnum(char* ipAddress, int port, char* httpAuthHeader, FILE* pFi
     return TRUE;
 }
 // HttpDirEnum(ipAddress, portNb, httpAuthHeader, serverType, pFile, isSSL);
-BOOL HttpDirEnum(char* ipAddress, int port,char* httpAuthHeader, ServerType serverType, FILE* pFile, BOOL isSSL) {
+//BOOL HttpDirEnum(char* ipAddress, int port,char* httpAuthHeader, ServerType serverType, FILE* pFile, BOOL isSSL) {
+BOOL HttpDirEnum(RequestInfoStruct requestInfoStruct, ServerType serverType, FILE* pFile) {
 
-    printf("\t[HTTP%s] %s:%i - HTTP%s Directory Enum  \n", isSSL ? "S" : "", ipAddress, port, isSSL ? "S" : "");
+    printf("\t[HTTP%s] %s:%i - HTTP%s Directory Enum  \n", requestInfoStruct.isSSL ? "S" : "", requestInfoStruct.ipAddress, requestInfoStruct.port, requestInfoStruct.isSSL ? "S" : "");
 
     ENUM_PAGE_NOT_FOUND enumPageNotFound;
     PHTTP_STRUC pHttpStructInvalide = InitPHTTP_STRUC(1);
 
     if (pHttpStructInvalide == NULL)
         return FALSE;
+   
     // if BASE_INVALID_CODE_LEN_DIR disable dir !!!
-    ENUM_PAGE_NOT_FOUND enumDirNotFound = SetDirectoryNotFound(pHttpStructInvalide, ipAddress, port, httpAuthHeader,pFile, isSSL);
-    enumPageNotFound = SetFileNotFound(pHttpStructInvalide, ipAddress, port, httpAuthHeader,pFile, isSSL);
+    ENUM_PAGE_NOT_FOUND enumDirNotFound = SetDirectoryNotFound(pHttpStructInvalide, requestInfoStruct,pFile);
+    enumPageNotFound = SetFileNotFound(pHttpStructInvalide, requestInfoStruct,pFile);
     if (enumPageNotFound == BASE_NOT_FOUND) {
         FreePHTTP_STRUC(pHttpStructInvalide);
         return FALSE;
     }
 
-    printf("\t\tURL\t\t\t\t   %s      Code - Length\tRedirection\n", isSSL ? " " : "" );
+    printf("\t\tURL\t\t\t\t   %s      Code - Length\tRedirection\n", requestInfoStruct.isSSL ? " " : "" );
 
-    StartHttpDirEnum(ipAddress, port, httpAuthHeader, pFile, isSSL, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListCommonFile,  ARRAY_SIZE_CHAR(wordListCommonFile));
+    StartHttpDirEnum(requestInfoStruct, pFile, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListCommonFile, ARRAY_SIZE_CHAR(wordListCommonFile));
         
-    //if(enumDirNotFound != BASE_INVALID_CODE_LEN_DIR)
-    StartHttpDirEnum(ipAddress, port, httpAuthHeader, pFile, isSSL, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListCommonDir, ARRAY_SIZE_CHAR(wordListCommonDir));
+    // temp 
+    /*StartHttpDirEnum(ipAddress, port, httpAuthHeader, pFile, isSSL, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListCommonDir, ARRAY_SIZE_CHAR(wordListCommonDir));*/
     
     switch (serverType) {
     case ApacheHttpd:
-        StartHttpDirEnum(ipAddress, port, httpAuthHeader, pFile, isSSL, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListApacheFile, ARRAY_SIZE_CHAR(wordListApacheFile));
+        StartHttpDirEnum(requestInfoStruct, pFile, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListApacheFile, ARRAY_SIZE_CHAR(wordListApacheFile));
         //if (enumDirNotFound != BASE_INVALID_CODE_LEN_DIR)
-        StartHttpDirEnum(ipAddress, port, httpAuthHeader, pFile, isSSL, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListApacheDir, ARRAY_SIZE_CHAR(wordListApacheDir));
+        StartHttpDirEnum(requestInfoStruct, pFile, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListApacheDir, ARRAY_SIZE_CHAR(wordListApacheDir));
         break;
     case ApacheTomcat:
-        StartHttpDirEnum(ipAddress, port, httpAuthHeader, pFile, isSSL, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListApacheTomcatFile, ARRAY_SIZE_CHAR(wordListApacheTomcatFile));
+        StartHttpDirEnum(requestInfoStruct, pFile, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListApacheTomcatFile, ARRAY_SIZE_CHAR(wordListApacheTomcatFile));
         //if (enumDirNotFound != BASE_INVALID_CODE_LEN_DIR)
-        StartHttpDirEnum(ipAddress, port, httpAuthHeader, pFile, isSSL, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListApacheTomcatDir, ARRAY_SIZE_CHAR(wordListApacheTomcatDir));
+        StartHttpDirEnum(requestInfoStruct, pFile, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListApacheTomcatDir, ARRAY_SIZE_CHAR(wordListApacheTomcatDir));
         break;
     case WebServerIIS:
-        StartHttpDirEnum(ipAddress, port, httpAuthHeader, pFile, isSSL, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListIisFile, ARRAY_SIZE_CHAR(wordListIisFile));
+        StartHttpDirEnum(requestInfoStruct, pFile, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListIisFile, ARRAY_SIZE_CHAR(wordListIisFile));
         if (enumDirNotFound != BASE_INVALID_CODE_LEN_DIR)
-            StartHttpDirEnum(ipAddress, port, httpAuthHeader, pFile, isSSL, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListIisFDir, ARRAY_SIZE_CHAR(wordListIisFDir));
+            StartHttpDirEnum(requestInfoStruct, pFile, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListIisFDir, ARRAY_SIZE_CHAR(wordListIisFDir));
         break;
     default:
         break;
@@ -817,10 +825,10 @@ BOOL CheckRequerSsl(char* ipAddress, int port, BOOL* isSSL, FILE* pFile){
     return TRUE;
 }
 
-BOOL GetHttpServerInfo(char* ipAddress, int port, char* httpAuthHeader, ServerType* serverType, FILE* pFile, BOOL isSSL,BOOL isBruteForce) {
-    printf("\t[HTTP%s] %s:%i - HTTP%s information\n", isSSL ? "S" : "", ipAddress, port, isSSL ? "S" : "");
+BOOL GetHttpServerInfo(RequestInfoStruct requestInfoStruct, ServerType* serverType, FILE* pFile,BOOL isBruteForce) {
+    printf("\t[HTTP%s] %s:%i - HTTP%s information\n", requestInfoStruct.isSSL ? "S" : "", requestInfoStruct.ipAddress, requestInfoStruct.port, requestInfoStruct.isSSL ? "S" : "");
     
-    PHTTP_STRUC pHttpStructPage = GetHttpRequest(ipAddress, port, "/", "GET", httpAuthHeader, isSSL, pFile);
+    PHTTP_STRUC pHttpStructPage = GetHttpRequest(requestInfoStruct.ipAddress, requestInfoStruct.port, "/", "GET", requestInfoStruct.httpAuthHeader, requestInfoStruct.isSSL, pFile);
     if (pHttpStructPage == NULL)
         return FALSE;
 
@@ -839,7 +847,7 @@ BOOL GetHttpServerInfo(char* ipAddress, int port, char* httpAuthHeader, ServerTy
         }
         if (pHttpStructPage->returnCode == STATUS_CODE_OK && pHttpStructPage->pContent != NULL) {
             PORT_INFO portInfo;
-            portInfo.portNumber = port;
+            portInfo.portNumber = requestInfoStruct.port;
             portInfo.banner[0] = 0x00;
             GetHTTPFingerprint(pHttpStructPage->pContent, &portInfo);
 
@@ -848,10 +856,10 @@ BOOL GetHttpServerInfo(char* ipAddress, int port, char* httpAuthHeader, ServerTy
         }
     } else {
         if (IS_HTTP_AUTH(pHttpStructPage->returnCode)) {
-            if (HttpBasicAuth(ipAddress, port, pHttpStructPage, isBruteForce, isSSL)) {
+            if (HttpBasicAuth(requestInfoStruct.ipAddress, requestInfoStruct.port, pHttpStructPage, isBruteForce, requestInfoStruct.isSSL)) {
                 if (pHttpStructPage->AuthHeader != NULL) {
                     //size_t strSize = strlen(pHttpStructPage->AuthHeader);
-                    strcpy_s(httpAuthHeader, 1024, pHttpStructPage->AuthHeader);
+                    strcpy_s(requestInfoStruct.httpAuthHeader, 1024, pHttpStructPage->AuthHeader);
                 }
             }
         } else{
@@ -861,7 +869,7 @@ BOOL GetHttpServerInfo(char* ipAddress, int port, char* httpAuthHeader, ServerTy
     }
 
     BOOL isTestEnable = FALSE;
-    *serverType = CheckCVE(ipAddress, port, *pHttpStructPage, isTestEnable);
+    *serverType = CheckCVE(requestInfoStruct.ipAddress, requestInfoStruct.port, *pHttpStructPage, isTestEnable);
 
     FreePHTTP_STRUC(pHttpStructPage);
     return TRUE;

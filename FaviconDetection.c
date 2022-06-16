@@ -6,6 +6,7 @@
 #include "GetHTTPserver.h"
 #include "FaviconDatabase.h"
 #include "Network.h"
+#include "ToolsHTTP.h"
 
 
 char* GetHttpBody2(char* httpData) {
@@ -19,15 +20,15 @@ char* GetHttpBody2(char* httpData) {
 	return pBody;
 }
 
-UINT GetFavicon(char* ipAddress, int port, char* requestPath, char** ppDataFavion, char** ppDataFavionBody, BOOL isSSL) {
+UINT GetFavicon(RequestInfoStruct requestInfoStruct, char* requestPath, char** ppDataFavion, char** ppDataFavionBody) {
 	char* dataFavion = NULL;
 	char* dataFavionBody = NULL;
 	UINT faviconSize = 0;
 
-	if (isSSL)
-		faviconSize = GetHttpsServer(ipAddress, port, "GET", requestPath, NULL, &dataFavion, NULL,TRUE, NULL);
+	if (requestInfoStruct.isSSL)
+		faviconSize = GetHttpsServer(requestInfoStruct.ipAddress, requestInfoStruct.port, "GET", requestPath, NULL, &dataFavion, requestInfoStruct.httpAuthHeader,TRUE, NULL);
 	else
-		faviconSize = GetHttpServer(ipAddress, port, "GET", requestPath, NULL, &dataFavion, NULL,NULL);
+		faviconSize = GetHttpServer(requestInfoStruct.ipAddress, requestInfoStruct.port, "GET", requestPath, NULL, &dataFavion, requestInfoStruct.httpAuthHeader,NULL);
 	if (faviconSize == 0)
 		return FALSE;
 
@@ -54,7 +55,7 @@ int DatabaseSearch(char* md5Hash) {
 }
 
 // Call show SSL config ??
-BOOL FaviconIdentification(char* ipAddress, int port, FILE* pFile, BOOL isSSL) {
+BOOL FaviconIdentification(RequestInfoStruct requestInfoStruct, FILE* pFile) {
 	char* dataFavion = NULL;
 	char* dataFavionBody = NULL;
 
@@ -63,7 +64,7 @@ BOOL FaviconIdentification(char* ipAddress, int port, FILE* pFile, BOOL isSSL) {
 		//"/phpMyAdmin/favicon.ico",
 	};
 
-	UINT faviconSize = GetFavicon(ipAddress, port, (char*)tabRequestPath[0], &dataFavion, &dataFavionBody, isSSL);
+	UINT faviconSize = GetFavicon(requestInfoStruct, (char*)tabRequestPath[0], &dataFavion, &dataFavionBody);
 	if (faviconSize > 0) {
 		char* faviconHash = NULL;
 		if (MD5Hash(dataFavionBody, faviconSize, &faviconHash)) {
@@ -81,13 +82,3 @@ BOOL FaviconIdentification(char* ipAddress, int port, FILE* pFile, BOOL isSSL) {
 	}
 	return FALSE;
 }
-
-/*
-int main() {
-	initWSA();
-
-	FaviconIdentification("192.168.1.10", 80);
-
-	system("pause");
-	return FALSE;
-}*/

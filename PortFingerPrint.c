@@ -88,6 +88,7 @@ BOOL PortFingerPrint(NetworkPcInfo* networkPcInfo, int nbDetected, BOOL isBrutef
 				case PORT_FTP_ALT:
 					GrabBanner("FTP", ipAddress, portNb, networkPcInfo[i].port[j].banner, BANNER_BUFFER_SIZE, NO_OFFSET, pFile);
 					FtpEnum(ipAddress, isBruteforce, pFile);
+					// version 2.3.4 -> Backdoor
 					break;
 				case PORT_SSH:
 				case PORT_SSH_ALT:

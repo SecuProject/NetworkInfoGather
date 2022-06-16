@@ -16,7 +16,6 @@ const char* wordListCommonFile[] = {
 "/.git/HEAD",
 "/.git/config",
 "/.git/index",
-"/.git/logs/",
 "/.git_release",
 "/.gitattributes",
 "/.gitconfig",
@@ -176,6 +175,7 @@ const char* wordListCommonFile[] = {
 "/xmlrpc.php"
 };
 const char* wordListCommonDir[] = {
+"/.git/logs/",
 "/0",
 "/00",
 "/01",

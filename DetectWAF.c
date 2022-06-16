@@ -18,7 +18,7 @@ char* userAgentWaf[] = {
 
 };
 
-BOOL TestUserAgent(char* ipAddress, int port, FILE* pFile, BOOL isSSL) {
+BOOL TestUserAgent(RequestInfoStruct requestInfoStruct, FILE* pFile) {
 	char* path = "/";
 	char* serverResponce = (char*)malloc(GET_REQUEST_SIZE);
 
@@ -28,14 +28,14 @@ BOOL TestUserAgent(char* ipAddress, int port, FILE* pFile, BOOL isSSL) {
 	}
 
 	// Default test
-	if (isSSL) {
-		if (!GetHttpsServer(ipAddress, port, "HEAD", path, (char*)userAgentList[rand() % 5], &serverResponce,NULL,FALSE, pFile)) {
+	if (requestInfoStruct.isSSL) {
+		if (!GetHttpsServer(requestInfoStruct.ipAddress, requestInfoStruct.port, "HEAD", path, (char*)userAgentList[rand() % 5], &serverResponce, requestInfoStruct.httpAuthHeader,FALSE, pFile)) {
 			printOut(pFile, "\t\t[-] Page not available !\n");
 			free(serverResponce);
 			return FALSE;
 		}
 	} else {
-		if (!GetHttpServer(ipAddress, port, "HEAD", path, NULL, &serverResponce, NULL, pFile)) {
+		if (!GetHttpServer(requestInfoStruct.ipAddress, requestInfoStruct.port, "HEAD", path, NULL, &serverResponce, requestInfoStruct.httpAuthHeader, pFile)) {
 			printOut(pFile, "\t\t[-] Page not available !\n");
 			free(serverResponce);
 			return FALSE;
@@ -43,14 +43,14 @@ BOOL TestUserAgent(char* ipAddress, int port, FILE* pFile, BOOL isSSL) {
 	}
 
 	for (int i = 0; i < ARRAY_SIZE_CHAR(userAgentWaf); i++) {
-		if (isSSL) {
-			if (!GetHttpsServer(ipAddress, port, "HEAD", path, userAgentWaf[i], &serverResponce, NULL, FALSE, pFile)) {
+		if (requestInfoStruct.isSSL) {
+			if (!GetHttpsServer(requestInfoStruct.ipAddress, requestInfoStruct.port, "HEAD", path, userAgentWaf[i], &serverResponce, NULL, FALSE, pFile)) {
 				printOut(pFile, "\t\t[-] WAF Detected (Blocked user agent: %s) !\n", userAgentWaf[i]);
 				free(serverResponce);
 				return FALSE;
 			}
 		} else {
-			if (!GetHttpServer(ipAddress, port, "HEAD", path, userAgentWaf[i], &serverResponce, NULL, pFile)) {
+			if (!GetHttpServer(requestInfoStruct.ipAddress, requestInfoStruct.port, "HEAD", path, userAgentWaf[i], &serverResponce, NULL, pFile)) {
 				printOut(pFile, "\t\t[-] WAF Detected (Blocked user agent: %s) !\n", userAgentWaf[i]);
 				free(serverResponce);
 				return FALSE;
@@ -61,7 +61,7 @@ BOOL TestUserAgent(char* ipAddress, int port, FILE* pFile, BOOL isSSL) {
 	free(serverResponce);
 	return TRUE;
 }
-BOOL TestAttacks(char* ipAddress, int port, FILE* pFile, BOOL isSSL) {
+BOOL TestAttacks(RequestInfoStruct requestInfoStruct, FILE* pFile) {
 	/*
 	* 
 	* Source: https://github.com/EnableSecurity/wafw00f/blob/master/wafw00f/main.py
@@ -78,11 +78,11 @@ BOOL TestAttacks(char* ipAddress, int port, FILE* pFile, BOOL isSSL) {
 }
 
 
-BOOL IsHttpWaf(char* ipAddress, int port, FILE* pFile, BOOL isSSL) {
-	printOut(pFile, "[*] %s:%i - Detect HTTP%s WAF\n", ipAddress, port, isSSL ? "S" : "");
-	if (TestUserAgent( ipAddress, port, pFile, isSSL))
+BOOL IsHttpWaf(RequestInfoStruct requestInfoStruct, FILE* pFile) {
+	printOut(pFile, "[*] %s:%i - Detect HTTP%s WAF\n", requestInfoStruct.ipAddress, requestInfoStruct.port, requestInfoStruct.isSSL ? "S" : "");
+	if (TestUserAgent(requestInfoStruct, pFile))
 		return FALSE;
-	if (TestAttacks(ipAddress, port, pFile, isSSL))
+	if (TestAttacks(requestInfoStruct, pFile))
 		return FALSE;
 	printOut(pFile,"\t[i] Not WAF detected !\n");
 	return TRUE;

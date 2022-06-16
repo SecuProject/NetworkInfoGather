@@ -50,6 +50,9 @@ BOOL CheckApacheNginxCVE(char* ipAddress, int port, HTTP_STRUC httpStructPage, B
 }
 ServerType CheckCVE(char* ipAddress, int port, HTTP_STRUC httpStructPage, BOOL isTestEnable) {
 	UINT i;
+	if(httpStructPage.ServerName == NULL)
+		return UnknownServer;
+
 	char* tempServerName = (char*)malloc(BUFFER_SIZE);
 	if (tempServerName == NULL)
 		return UnknownServer;
@@ -60,6 +63,7 @@ ServerType CheckCVE(char* ipAddress, int port, HTTP_STRUC httpStructPage, BOOL i
 		strcpy_s(tempServerName, BUFFER_SIZE, httpStructPage.ServerName);
 		StrToLower(tempServerName);
 	}
+
 	switch (i) {
 	case ApacheTomcat:
 		CheckApacheTomcatCVE(ipAddress, port, httpStructPage, isTestEnable);

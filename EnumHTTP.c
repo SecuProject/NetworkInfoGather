@@ -9,26 +9,32 @@
 
 BOOL EnumHTTP(char* ipAddress, int portNb,BOOL isWAfDetection, FILE* pFile, BOOL isSSL, BOOL isBruteForce) {
 	ServerType serverType;
-	char* httpAuthHeader = (char*)malloc(BUFFER_SIZE);
-	if (httpAuthHeader == NULL)
+	RequestInfoStruct requestInfoStruct = {
+		.ipAddress = ipAddress,
+		.isSSL = isSSL,
+		.port = portNb,
+		.httpAuthHeader = (char*)malloc(BUFFER_SIZE)
+	};
+
+	if (requestInfoStruct.httpAuthHeader == NULL)
 		return FALSE;
-	httpAuthHeader[0] = 0x00;
+	requestInfoStruct.httpAuthHeader[0] = 0x00;
 
 	// Check if http or https 
 	if (!isSSL)
 		CheckRequerSsl(ipAddress, portNb, &isSSL, pFile);
 
-	if (GetHttpServerInfo(ipAddress, portNb, httpAuthHeader, &serverType, pFile, isSSL, isBruteForce)) {
+	if (GetHttpServerInfo(requestInfoStruct, &serverType, pFile, isBruteForce)) {
 		if (isWAfDetection)
-			IsHttpWaf(ipAddress, portNb, pFile, isSSL);
-		FaviconIdentification(ipAddress, portNb, pFile, isSSL);
-		HttpDirEnum(ipAddress, portNb, httpAuthHeader, serverType, pFile, isSSL);
+			IsHttpWaf(requestInfoStruct, pFile);
+		FaviconIdentification(requestInfoStruct, pFile);
+		HttpDirEnum(requestInfoStruct, serverType, pFile);
 
 
-		free(httpAuthHeader);
+		free(requestInfoStruct.httpAuthHeader);
 		return TRUE;
 	}
 
-	free(httpAuthHeader);
+	free(requestInfoStruct.httpAuthHeader);
 	return FALSE;
 }

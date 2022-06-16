@@ -114,10 +114,10 @@ int GetDnsServerVersion(char* ipAddress, int port, char** ppDnsServerVersion) {
 
 int EnumDnsServer(char* ipAddress, int port, FILE* pFile) {
     char* dnsServerVersion = NULL;
-    printf("\t\t[DNS] Enumeration:\n");
+    printf("\t[DNS] Enumeration:\n");
 
     if (GetDnsServerVersion("192.168.1.111", 53, &dnsServerVersion)) {
-        printf("\t\t\t[i] Server DNS version: %s\n", dnsServerVersion);
+        printf("\t\t[i] Server DNS version: %s\n", dnsServerVersion);
         free(dnsServerVersion);
     }
 	return TRUE;
