@@ -31,7 +31,7 @@ void Base64Dencode(char* input, char* output) {
         }
         p = strchr(b64, c);
         if (p) {
-            in[phase] = p - b64;
+            in[phase] = (unsigned char)(p - b64);
             phase = (phase + 1) % 4;
             if (phase == 0) {
                 decodeblock(in, output);

@@ -50,7 +50,7 @@ typedef struct {
 
 
 BOOL initWSA(FILE* pFile);
-int set_options(SOCKET fd);
+int SetOptions(SOCKET fd);
 
 
 BOOL IsIpAddressValid(int a, int b, int c, int d);
@@ -73,5 +73,6 @@ void* xcalloc(size_t _Count, size_t _Size);
 void* xmalloc(size_t _Size);
 
 VOID LoadingBar(UINT i, UINT total);
+char* StrToLower(char* s);
 
 #endif

@@ -71,5 +71,8 @@ BOOL HttpDirEnum(RequestInfoStruct requestInfoStruct, ServerType serverType, FIL
 BOOL GetHttpServerInfo(RequestInfoStruct requestInfoStruct, ServerType *serverType,  FILE* pFile, BOOL isBruteForce);
 //UINT GetHttpReturnCode(char* serverResponce, UINT responceSize); UnknownServer
 BOOL CheckRequerSsl(char* ipAddress, int port, BOOL* isSSL, FILE* pFile);
+BOOL ExtractStrInt(char* str, int matchStr, char* buffer, int bufferLen);
+
+PHTTP_STRUC GetHttpRequest2(char* ipAddress, int port, char* path, char* requestType, char* httpAuthHeader, BOOL isSSL, FILE* pFile);
 
 #endif

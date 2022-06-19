@@ -190,6 +190,7 @@
     <ClCompile Include="portList.c" />
     <ClCompile Include="PortScan.c" />
     <ClCompile Include="PrintNightmare.c" />
+    <ClCompile Include="DirBruteForce.c" />
     <ClCompile Include="ToolsHTTP.c" />
     <ClCompile Include="wordlist.c" />
     <ClCompile Include="XorRoutine.c" />
@@ -211,6 +212,7 @@
     <ClInclude Include="Curl.h" />
     <ClInclude Include="DetectHttpBasicAuth.h" />
     <ClInclude Include="DetectWAF.h" />
+    <ClInclude Include="DirBruteForce.h" />
     <ClInclude Include="DNSscan.h" />
     <ClInclude Include="EnumDeluge.h" />
     <ClInclude Include="EnumDNS.h" />

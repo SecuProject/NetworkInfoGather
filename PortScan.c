@@ -31,7 +31,7 @@ BOOL scanPortOpenUDP(char* dest_ip, int port, FILE* pFile) {
 		int send_size = sendto(udp_sock, msg, (int)sizeof(msg), 0, (struct sockaddr*)&server_addr, sizeof(SOCKADDR_IN));
 		if (send_size != SOCKET_ERROR) {
 			int servAddSize = sizeof(server_addr);
-			if (set_options(udp_sock) != SOCKET_ERROR){
+			if (SetOptions(udp_sock) != SOCKET_ERROR){
 				char buffer[OCTE_MAX];
 				if (recvfrom(udp_sock, buffer, OCTE_MAX, 0, (struct sockaddr*)&server_addr, &servAddSize) != SOCKET_ERROR){
 					closesocket(udp_sock);
@@ -48,7 +48,7 @@ BOOL scanPortOpenTCP(char* ipAddress, int port,FILE* pFile) {
 	SOCKET tcp_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (tcp_sock != INVALID_SOCKET){
 		SOCKADDR_IN ssin = InitSockAddr(ipAddress, port);
-		if (set_options(tcp_sock) != SOCKET_ERROR){
+		if (SetOptions(tcp_sock) != SOCKET_ERROR){
 			if (connect(tcp_sock, (struct sockaddr*)&ssin, sizeof(SOCKADDR_IN)) != SOCKET_ERROR){
 				closesocket(tcp_sock);
 				return TRUE;

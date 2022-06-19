@@ -114,6 +114,12 @@ BOOL GetIpPortFromArg(char* argv, pBruteforceStruct pBruteforceStruct) {
 	return FALSE;
 }
 
+char* StrToLower(char* s) {
+	for (char* p = s; *p; p++) *p = tolower(*p);
+	return s;
+}
+
+
 BOOL printOut(FILE* pFile, const char* format, ...) {
 	va_list args;
 	va_start(args, format);
@@ -177,6 +183,7 @@ SOCKET ConnectTcpServer(char* ipAddress, int port){
 		return INVALID_SOCKET;
 	SOCKADDR_IN ssin = InitSockAddr(ipAddress, port);
 
+	SetOptions(sock);
 	//printf("\t[i] Connecting...\n");
 	if (connect(sock, (struct sockaddr*)&ssin, sizeof(ssin)) == SOCKET_ERROR){
 		printf("\t[x] Connection Error %lu\n", WSAGetLastError());
@@ -198,7 +205,9 @@ BOOL initWSA(FILE* pFile) {
 	//printOut(pFile,"Initialised.\n");
 	return TRUE;
 }
-int set_options(SOCKET fd){
+
+// Set socket time out 2 sec
+int SetOptions(SOCKET fd){
 	struct timeval timeout;
 
 	timeout.tv_sec = 2;

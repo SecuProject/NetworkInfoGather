@@ -77,11 +77,11 @@ UINT RecvResponce(SOCKET Socket, char** pServerResponce, FILE* pFile) {
         nDataLength += nDataLengthTmp;
     }
     if (nDataLengthTmp == SOCKET_ERROR) {
-        printOut(pFile, "\t\t[X] Error receiving data.\n");
+        //printOut(pFile, "\t\t[x] Error receiving data.\n");
         closesocket(Socket);
         return FALSE;
     }
-    serverResponce = (char*)xrealloc(serverResponce, nDataLength + 1);
+    serverResponce = (char*)xrealloc(serverResponce, (size_t)(nDataLength + 1));
     if (serverResponce == NULL) {
         closesocket(Socket);
         return FALSE;
@@ -91,15 +91,6 @@ UINT RecvResponce(SOCKET Socket, char** pServerResponce, FILE* pFile) {
     *pServerResponce = serverResponce;
     return nDataLength;
 }
-
-/*BOOL SetSocketTimout(SOCKET Socket) {
-    struct timeval timeout;
-    timeout.tv_sec = 1000;
-    timeout.tv_usec = 0;
-
-    return (setsockopt(Socket, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(struct timeval)) < 0);
-}*/
-
 
 UINT GetHttpServer(char* ipAddress, int port, char* requestType, char* resourcePath, char* userAgent, char** pServerResponce, char* customHeader, FILE* pFile) {
     SOCKET Socket = ConnectTcpServer(ipAddress, port);

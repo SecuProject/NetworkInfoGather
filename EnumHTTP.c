@@ -6,7 +6,6 @@
 #include "FaviconDetection.h"
 #include "NetDiscovery.h"
 
-
 BOOL EnumHTTP(char* ipAddress, int portNb,BOOL isWAfDetection, FILE* pFile, BOOL isSSL, BOOL isBruteForce) {
 	ServerType serverType;
 	RequestInfoStruct requestInfoStruct = {

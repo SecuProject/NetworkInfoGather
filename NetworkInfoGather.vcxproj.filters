@@ -145,6 +145,9 @@
     <Filter Include="Source Files\4. FingerPrintInfo\EnumHTTP\ToolsHTTP\ParseHttpResponse">
       <UniqueIdentifier>{871c6ff6-1e36-421e-aa4b-29f5da535050}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\4. FingerPrintInfo\EnumHTTP\DirBruteForce">
+      <UniqueIdentifier>{4b16791e-0f63-4d0f-9142-4d72c8d9ff65}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -287,6 +290,9 @@
     </ClCompile>
     <ClCompile Include="ParseHttpResponse.c">
       <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\ToolsHTTP\ParseHttpResponse</Filter>
+    </ClCompile>
+    <ClCompile Include="DirBruteForce.c">
+      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\DirBruteForce</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -454,6 +460,9 @@
     </ClInclude>
     <ClInclude Include="ParseHttpResponse.h">
       <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\ToolsHTTP\ParseHttpResponse</Filter>
+    </ClInclude>
+    <ClInclude Include="DirBruteForce.h">
+      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\DirBruteForce</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
