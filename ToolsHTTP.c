@@ -19,6 +19,9 @@
 #include "apacheWordList.h"
 #include "apacheTomcatWordList.h"
 #include "IisWordList.h"
+#include "ChainListUrlRedir.h"
+#include "backupWordList.h"
+#include "ParseHttpResponse.h"
 
 const char* sereverTypeStr[] = {
     "nginx",
@@ -95,227 +98,6 @@ BOOL ExtractStrInt(char* str, int matchStr, char* buffer, int bufferLen){
         return strLen;
     }
     return FALSE;
-}
-
-
-
-UINT GetHttpReturnCode(char* serverResponce, UINT responceSize){
-    const char* delim1[] = {
-        "HTTP/0.9 ", // 1991	Obsolete
-        "HTTP/1.0 ", // 1996	Obsolete
-        "HTTP/1.1 ", // 1997	Standard
-        "HTTP/2 ",   // 2015	Standard
-        "HTTP/3 "    // 2020	Draft
-    };
-    const char delim2[] = " ";
-    char* buffer;
-    int bufferLen;
-
-    for (int i = 0; i < ARRAY_SIZE_CHAR(delim1); i++){
-        if (ExtractStrStr(serverResponce, delim1[i], delim2, &buffer, &bufferLen)){
-            UINT responceCode;
-            responceCode = atoi(buffer);
-            free(buffer);
-            return responceCode;
-        }
-    }
-    return FALSE;
-}
-
-int GetHttpContentLen(char* serverResponce, UINT responceSize) {
-    const char delim1[] = "Content-Length: ";
-    const char delim2[] = "\r\n";
-
-    char* buffer;
-    int bufferLen;
-
-    if (ExtractStrStr(serverResponce, delim1, delim2, &buffer, &bufferLen)){
-        int contentLen;
-        contentLen = atoi(buffer);
-        free(buffer);
-        return contentLen;
-    } else {
-        //printf("[d] Header 'Content-Length' Not found !\n");
-        const char delim2[] = "\r\n\r\n";
-        char* ptr = strstr(serverResponce, delim2);
-        if (ptr != NULL) {
-            ptr += strlen(delim2);
-            if (responceSize - (ptr - serverResponce) == 0) {
-                //printf("[d] The body is empty !\n");
-                return 0;
-            }
-        }
-    }
-    return -1;
-}
-
-BOOL GetHttpHeaderStr(const char* delim1, int sizeDelim1, char* serverResponce, char* serverVersion, int* bufferSize) {
-    const char delim2[] = "\r\n";
-    char* buffer;
-    int bufferLen;
-
-    if (ExtractStrStr(serverResponce, delim1, delim2, &buffer, &bufferLen)){
-        strncpy_s(serverVersion, *bufferSize, buffer, bufferLen);
-        *bufferSize = bufferLen;
-        free(buffer);
-        return TRUE;
-    }
-    return FALSE;
-}
-
-BOOL GetHttpHeaderServerVersion(PHTTP_STRUC httpStruct, UINT responceSize) {
-    UINT serverVersionSize = responceSize + 1;
-    httpStruct->ServerName = (char*)malloc(serverVersionSize);
-    if (httpStruct->ServerName != NULL) {
-        const char delim1[] = "Server:";
-        if (GetHttpHeaderStr(delim1, sizeof(delim1), httpStruct->rawData, httpStruct->ServerName, &serverVersionSize)) {
-            httpStruct->ServerName = (char*)xrealloc(httpStruct->ServerName, serverVersionSize + (UINT)1);
-            if (httpStruct->ServerName == NULL)
-                return FALSE;
-            return TRUE;
-        }
-        free(httpStruct->ServerName);
-    }
-    httpStruct->ServerName = NULL;
-    return FALSE;
-}
-BOOL GetHttpHeaderPowerby(PHTTP_STRUC httpStruct, UINT responceSize) {
-    UINT serverVersionSize = responceSize + 1;
-    httpStruct->poweredBy = (char*)malloc(serverVersionSize);
-    if (httpStruct->poweredBy != NULL) {
-        const char delim1[] = "X-Powered-By:";
-        if (GetHttpHeaderStr(delim1, sizeof(delim1), httpStruct->rawData, httpStruct->poweredBy, &serverVersionSize)) {
-            httpStruct->poweredBy = (char*)xrealloc(httpStruct->poweredBy, serverVersionSize + (UINT)1);
-            if (httpStruct->poweredBy == NULL)
-                return FALSE;
-            return TRUE;
-        }
-        free(httpStruct->poweredBy);
-    }
-    httpStruct->poweredBy = NULL;
-    return FALSE;
-}
-
-BOOL GetHttpHeaderRedirectby(PHTTP_STRUC httpStruct, UINT responceSize){
-    UINT serverVersionSize = responceSize + 1;
-    httpStruct->redirectBy = (char*)malloc(serverVersionSize);
-    if (httpStruct->redirectBy != NULL){
-        const char delim1[] = "	X-Redirect-By:";
-        if (GetHttpHeaderStr(delim1, sizeof(delim1), httpStruct->rawData, httpStruct->redirectBy, &serverVersionSize)){
-            httpStruct->redirectBy = (char*)xrealloc(httpStruct->redirectBy, serverVersionSize + (UINT)1);
-            if (httpStruct->redirectBy == NULL)
-                return FALSE;
-            return TRUE;
-        }
-        free(httpStruct->redirectBy);
-    }
-    httpStruct->redirectBy = NULL;
-    return FALSE;
-}
-
-
-BOOL GetHttpHeaderContentType(PHTTP_STRUC httpStruct, UINT responceSize) {
-    UINT serverVersionSize = responceSize + 1;
-    httpStruct->contentType = (char*)malloc(responceSize + 1);
-    if (httpStruct->contentType != NULL) {
-        const char delim1[] = "Content-Type:";
-        if (GetHttpHeaderStr(delim1, sizeof(delim1), httpStruct->rawData, httpStruct->contentType, &serverVersionSize)) {
-            httpStruct->contentType = (char*)xrealloc(httpStruct->contentType, serverVersionSize +1);
-            if (httpStruct->contentType == NULL)
-                return FALSE;
-            return TRUE;
-        }
-        free(httpStruct->contentType);
-    }
-    httpStruct->contentType = NULL;
-    return FALSE;
-}
-BOOL GetHttpHeaderRedirection(PHTTP_STRUC httpStruct, UINT responceSize) {
-    UINT serverVersionSize = responceSize +1;
-    httpStruct->redirectionPath = (char*)malloc(serverVersionSize);
-    if (httpStruct->redirectionPath != NULL) {
-        const char delim1[] = "Location:";
-        if (GetHttpHeaderStr(delim1, sizeof(delim1), httpStruct->rawData, httpStruct->redirectionPath, &serverVersionSize)) {
-            httpStruct->redirectionPath = (char*)xrealloc(httpStruct->redirectionPath, serverVersionSize + 1);
-            if (httpStruct->redirectionPath == NULL)
-                return FALSE;
-            return TRUE;
-        }
-        free(httpStruct->redirectionPath);
-    }
-    httpStruct->redirectionPath = NULL;
-    return FALSE;
-}
-
-BOOL GetHttpBody(PHTTP_STRUC httpStruct) {
-    const char delim1[] = "\r\n\r\n";
-    char* ptr1 = strstr(httpStruct->rawData, delim1);
-    if (ptr1 != NULL) {
-        httpStruct->pContent = ptr1 + sizeof(delim1);
-        return TRUE;
-    }
-    return FALSE;
-}
-
-BOOL GetHttpRequestInfo(PHTTP_STRUC httpStruct) {
-    if (httpStruct->responseLen == 0) {
-        printf("[d] Test response size: %u !!!\n", httpStruct->contentLen);
-        return FALSE;
-    }
-
-    httpStruct->returnCode = GetHttpReturnCode(httpStruct->rawData, httpStruct->responseLen);
-    httpStruct->contentLen = GetHttpContentLen(httpStruct->rawData, httpStruct->responseLen);
-    if (httpStruct->contentLen > 0)
-        GetHttpBody(httpStruct);
-    else if (httpStruct->contentLen == -1)
-        httpStruct->pContent = NULL;
-
-    GetHttpHeaderServerVersion(httpStruct, httpStruct->responseLen);
-    GetHttpHeaderPowerby(httpStruct, httpStruct->responseLen);
-    GetHttpHeaderRedirectby(httpStruct, httpStruct->responseLen);
-    GetHttpHeaderContentType(httpStruct, httpStruct->responseLen);
-
-    if (IS_HTTP_REDIRECTS(httpStruct->returnCode)) {
-
-        GetHttpHeaderRedirection(httpStruct, httpStruct->responseLen);
-    }else
-        httpStruct->redirectionPath = NULL;
-
-    return TRUE;
-}
-
-
-
-PHTTP_STRUC InitPHTTP_STRUC(UINT nbElement) {
-    PHTTP_STRUC httpStruct = (PHTTP_STRUC)calloc(nbElement, sizeof(HTTP_STRUC));
-    if (httpStruct == NULL)
-        return NULL;
-
-    for (UINT i = 0; i < nbElement; i++) {
-        httpStruct[i].AuthHeader = NULL;
-        httpStruct[i].ServerName = NULL;
-        httpStruct[i].poweredBy = NULL;
-        httpStruct[i].contentType = NULL;
-        httpStruct[i].pContent = NULL;
-        httpStruct[i].rawData = NULL;
-    }
-    return httpStruct;
-}
-
-VOID FreePHTTP_STRUC(PHTTP_STRUC pHTTP_STRUC) {
-    if (pHTTP_STRUC->rawData != NULL)
-        free(pHTTP_STRUC->rawData);
-    if (pHTTP_STRUC->ServerName != NULL)
-        free(pHTTP_STRUC->ServerName);
-    if (pHTTP_STRUC->poweredBy != NULL)
-        free(pHTTP_STRUC->poweredBy);
-    if (pHTTP_STRUC->contentType != NULL)
-        free(pHTTP_STRUC->contentType);
-    if (pHTTP_STRUC->redirectionPath != NULL)
-        free(pHTTP_STRUC->redirectionPath);
-    if (pHTTP_STRUC->AuthHeader != NULL)
-        free(pHTTP_STRUC->AuthHeader);
-    free(pHTTP_STRUC);
 }
 
 PHTTP_STRUC GetHttpRequest(char* ipAddress, int port, char* path, char* requestType, char* httpAuthHeader, BOOL isSSL, FILE* pFile) {
@@ -535,7 +317,7 @@ ENUM_PAGE_NOT_FOUND SetNotFound(PHTTP_STRUC pHttpStruct, RequestInfoStruct reque
 
     /*pHttpStruct->redirectionPath = (char*)malloc(REDIRECTION_PATH_SIZE);
     if (pHttpStruct->redirectionPath == NULL) {
-        return BASE_NOT_FOUND;
+        
     }*/
 
     for (UINT i = 0; i < invalideUrlPathSize; i++) {
@@ -646,7 +428,7 @@ VOID PrintDirFindRedirect(PHTTP_STRUC pHttpStructPage, char* ipAddress, FILE* pF
     char* printBuffer = (char*)malloc(1024);
     if (printBuffer == NULL)
         return;
-    int strLen = sprintf_s(printBuffer, 1024, "\t\thttp%s://%s%-20s %i -  %-5i -> %s",
+    int strLen = sprintf_s(printBuffer, 1024, "\t\thttp%s://%s%-24s %i  -  %-5i -> %s",
         isSSL ? "s" : "", ipAddress,
         pHttpStructPage->requestPath, 
         pHttpStructPage->returnCode,
@@ -658,7 +440,7 @@ VOID PrintDirFind(PHTTP_STRUC pHttpStructPage, char* ipAddress, FILE* pFile, BOO
     char* printBuffer = (char*)malloc(1024);
     if (printBuffer == NULL)
         return ;
-    int strLen = sprintf_s(printBuffer, 1024, "\t\thttp%s://%s%-20s %i -  %-5i", isSSL ? "s" : "", ipAddress,
+    int strLen = sprintf_s(printBuffer, 1024, "\t\thttp%s://%s%-24s %i  -  %-5i", isSSL ? "s" : "", ipAddress,
         pHttpStructPage->requestPath, pHttpStructPage->returnCode,
         (pHttpStructPage->contentLen > 0) ? pHttpStructPage->contentLen : 0);
     PrintAllDir(pFile, printBuffer, strLen);
@@ -669,12 +451,9 @@ VOID PrintDirFind(PHTTP_STRUC pHttpStructPage, char* ipAddress, FILE* pFile, BOO
         (pHttpStructPage->contentLen > 0) ? pHttpStructPage->contentLen : 0);*/
 }
 
-typedef struct {
-    char** tabRedirectionPath;
-    int nbRedirectionPath;
-}RedirectionStruct;
 
-BOOL StartHttpDirEnum(RequestInfoStruct requestInfoStruct, FILE* pFile, ENUM_PAGE_NOT_FOUND enumPageNotFound, ENUM_PAGE_NOT_FOUND enumDirNotFound, PHTTP_STRUC pHttpStructInvalide, char** wordListCommonFile, UINT wordListCommonSize) {
+int StartHttpDirEnum(RequestInfoStruct requestInfoStruct, FILE* pFile, ENUM_PAGE_NOT_FOUND enumPageNotFound, ENUM_PAGE_NOT_FOUND enumDirNotFound, PHTTP_STRUC pHttpStructInvalide, char** wordListCommonFile, UINT wordListCommonSize, pRedirectionNode* pHeadRedirUrl, pRedirectionNode* pTailRedirUrl) {
+    INT nbFirstMatch = -1;
     for (UINT i = 0; i < wordListCommonSize; i++) {
         PHTTP_STRUC pHttpStructPage = GetHttpRequest(requestInfoStruct.ipAddress, requestInfoStruct.port, (char*)wordListCommonFile[i], "HEAD", requestInfoStruct.httpAuthHeader, requestInfoStruct.isSSL, pFile);
         if (pHttpStructPage != NULL) {
@@ -684,28 +463,51 @@ BOOL StartHttpDirEnum(RequestInfoStruct requestInfoStruct, FILE* pFile, ENUM_PAG
                 if (!IS_HTTP_ERROR(pHttpStructPage->returnCode)) {
                     if (IS_HTTP_REDIRECTS(pHttpStructPage->returnCode)) {
                         PrintDirFindRedirect(pHttpStructPage, requestInfoStruct.ipAddress, pFile, requestInfoStruct.isSSL);
-                        // Append to table 
+                        if(nbFirstMatch == -1)
+                            nbFirstMatch = i;
+
+                        // TEST
                         // redirectionPath = 0x00000164494a67c0 " xxxaaa.php"
+                        /*if (AppendRedirectNode(pHeadRedirUrl, pTailRedirUrl, pHttpStructPage->redirectionPath))
+                            printf("[AppendRedirectNode] %s !!!\n", pHttpStructPage->redirectionPath);*/
+
+
+                        /*if (*pHeadRedirUrl == NULL) {
+                            *pHeadRedirUrl = InitStructUrlRedirect(pHttpStructPage->redirectionPath);
+                            if (*pHeadRedirUrl == NULL)
+                                return FALSE;
+                            *pTailRedirUrl = *pHeadRedirUrl;
+                        } else
+                            *pTailRedirUrl = AppendRedirectNode(*pTailRedirUrl, pHttpStructPage->redirectionPath);*/
                     }else {
                         BOOL isAntiDir = (enumDirNotFound == BASE_INVALID_CODE_LEN_DIR &&
                             pHttpStructPage->returnCode == STATUS_CODE_OK &&
                             pHttpStructPage->contentLen == NO_BODY_DATA);
                         if(!isAntiDir)
                             PrintDirFind(pHttpStructPage, requestInfoStruct.ipAddress, pFile, requestInfoStruct.isSSL);
+                        if (nbFirstMatch == -1)
+                            nbFirstMatch = i;
                     }
                 }
                 break;
             case BASE_REDIRECT_CODE:
                 if (IS_HTTP_REDIRECTS(pHttpStructPage->returnCode) && strcmp(pHttpStructPage->redirectionPath, pHttpStructInvalide->redirectionPath) != 0) {
                     PrintDirFindRedirect(pHttpStructPage, requestInfoStruct.ipAddress, pFile, requestInfoStruct.isSSL);
+                    if (nbFirstMatch == -1)
+                        nbFirstMatch = i;
                 }
                 break;
             case BASE_DATA_SIZE_CODE:
                 if (pHttpStructInvalide->contentLen != pHttpStructPage->contentLen) {
-                    if (IS_HTTP_REDIRECTS(pHttpStructPage->returnCode))
+                    if (IS_HTTP_REDIRECTS(pHttpStructPage->returnCode)) {
                         PrintDirFindRedirect(pHttpStructPage, requestInfoStruct.ipAddress, pFile, requestInfoStruct.isSSL);
-                    else
+                        if (nbFirstMatch == -1)
+                            nbFirstMatch = i;
+                    } else {
                         PrintDirFind(pHttpStructPage, requestInfoStruct.ipAddress, pFile, requestInfoStruct.isSSL);
+                        if (nbFirstMatch == -1)
+                            nbFirstMatch = i;
+                    }
                 }
                 break;
             default:
@@ -714,16 +516,41 @@ BOOL StartHttpDirEnum(RequestInfoStruct requestInfoStruct, FILE* pFile, ENUM_PAG
             FreePHTTP_STRUC(pHttpStructPage);
         }
     }
-    return TRUE;
+    return nbFirstMatch;
 }
-// HttpDirEnum(ipAddress, portNb, httpAuthHeader, serverType, pFile, isSSL);
-//BOOL HttpDirEnum(char* ipAddress, int port,char* httpAuthHeader, ServerType serverType, FILE* pFile, BOOL isSSL) {
+
+char** CreateTableBackup(UINT numIndexFile, UINT* nbLineListBackup) {
+    char** wordListBackupFile = (char**)calloc(ARRAY_SIZE_CHAR(wordListBackupAppendFile), sizeof(char*));
+    if (wordListBackupFile == NULL)
+        return NULL;
+
+    for (int i = 0; i < ARRAY_SIZE_CHAR(wordListBackupAppendFile); i++) {
+        //printf("%s%s\n", wordListIndexFile[numIndexFile], strToAppend[i]);
+
+        wordListBackupFile[i] = (char*)malloc(MAX_PATH);
+        if (wordListBackupFile[i] == NULL)
+            return FALSE;
+        sprintf_s(wordListBackupFile[i], MAX_PATH, "%s%s", wordListIndexFile[numIndexFile], wordListBackupAppendFile[i]);
+
+        (*nbLineListBackup)++;
+    }
+    return wordListBackupFile;
+}
+VOID ClearTableBackup(char** wordListBackupFile, UINT nbLineListBackup) {
+    for (UINT i = nbLineListBackup; nbLineListBackup != 0; i++)
+        free(wordListBackupFile[i]);
+    free(wordListBackupFile);
+}
+
+#define DEBUG_TEST 1
+
 BOOL HttpDirEnum(RequestInfoStruct requestInfoStruct, ServerType serverType, FILE* pFile) {
 
-    printf("\t[HTTP%s] %s:%i - HTTP%s Directory Enum  \n", requestInfoStruct.isSSL ? "S" : "", requestInfoStruct.ipAddress, requestInfoStruct.port, requestInfoStruct.isSSL ? "S" : "");
+    printf("\t[HTTP%s] %s:%i - HTTP%s Directory Enum\n", requestInfoStruct.isSSL ? "S" : "", requestInfoStruct.ipAddress, requestInfoStruct.port, requestInfoStruct.isSSL ? "S" : "");
 
     ENUM_PAGE_NOT_FOUND enumPageNotFound;
     PHTTP_STRUC pHttpStructInvalide = InitPHTTP_STRUC(1);
+    pRedirectionNode headRedirUrl = NULL, tailRedirUrl = NULL;
 
     if (pHttpStructInvalide == NULL)
         return FALSE;
@@ -738,30 +565,65 @@ BOOL HttpDirEnum(RequestInfoStruct requestInfoStruct, ServerType serverType, FIL
 
     printf("\t\tURL\t\t\t\t   %s      Code - Length\tRedirection\n", requestInfoStruct.isSSL ? " " : "" );
 
-    StartHttpDirEnum(requestInfoStruct, pFile, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListCommonFile, ARRAY_SIZE_CHAR(wordListCommonFile));
+    // Word List - Git
+    if (StartHttpDirEnum(requestInfoStruct, pFile, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListGitFile, ARRAY_SIZE_CHAR(wordListGitFile), &headRedirUrl, &tailRedirUrl)) {
         
-    // temp 
-    /*StartHttpDirEnum(ipAddress, port, httpAuthHeader, pFile, isSSL, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListCommonDir, ARRAY_SIZE_CHAR(wordListCommonDir));*/
+        printf("\t\t[!] Github file exposed !!!\n");
+    }
+      
+    // Word List - Index
+    int numIndexFile = StartHttpDirEnum(requestInfoStruct, pFile, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListIndexFile, ARRAY_SIZE_CHAR(wordListIndexFile), &headRedirUrl, &tailRedirUrl);
+    
+    // Word List - Backup
+    if (numIndexFile != -1) {
+        UINT nbLineListBackup = 0;
+        char** wordListBackupFile = CreateTableBackup(numIndexFile, &nbLineListBackup);
+        StartHttpDirEnum(requestInfoStruct, pFile, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListBackupFile, nbLineListBackup, &headRedirUrl, &tailRedirUrl);
+    }
+
+
+    
+    StartHttpDirEnum(requestInfoStruct, pFile, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListCommonFile, ARRAY_SIZE_CHAR(wordListCommonFile), &headRedirUrl, &tailRedirUrl);
+        
+
+
+
+#if !DEBUG_TEST
+    //StartHttpDirEnum(ipAddress, port, httpAuthHeader, pFile, isSSL, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListCommonDir, ARRAY_SIZE_CHAR(wordListCommonDir), &headRedirUrl, &tailRedirUrl);
+    StartHttpDirEnum(requestInfoStruct, pFile, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListCommonDir, ARRAY_SIZE_CHAR(wordListCommonDir), &headRedirUrl, &tailRedirUrl);
+
+    // TO add wordListBackUpFile
+    // StartHttpDirEnum(requestInfoStruct, pFile, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListBackUpFile, ARRAY_SIZE_CHAR(wordListBackUpFile), &headRedirUrl, &tailRedirUrl);
+#endif
+
     
     switch (serverType) {
     case ApacheHttpd:
-        StartHttpDirEnum(requestInfoStruct, pFile, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListApacheFile, ARRAY_SIZE_CHAR(wordListApacheFile));
-        //if (enumDirNotFound != BASE_INVALID_CODE_LEN_DIR)
-        StartHttpDirEnum(requestInfoStruct, pFile, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListApacheDir, ARRAY_SIZE_CHAR(wordListApacheDir));
+        StartHttpDirEnum(requestInfoStruct, pFile, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListApacheFile, ARRAY_SIZE_CHAR(wordListApacheFile), &headRedirUrl, &tailRedirUrl);
+        StartHttpDirEnum(requestInfoStruct, pFile, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListApacheDir, ARRAY_SIZE_CHAR(wordListApacheDir), &headRedirUrl, &tailRedirUrl);
         break;
     case ApacheTomcat:
-        StartHttpDirEnum(requestInfoStruct, pFile, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListApacheTomcatFile, ARRAY_SIZE_CHAR(wordListApacheTomcatFile));
-        //if (enumDirNotFound != BASE_INVALID_CODE_LEN_DIR)
-        StartHttpDirEnum(requestInfoStruct, pFile, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListApacheTomcatDir, ARRAY_SIZE_CHAR(wordListApacheTomcatDir));
+        StartHttpDirEnum(requestInfoStruct, pFile, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListApacheTomcatFile, ARRAY_SIZE_CHAR(wordListApacheTomcatFile), &headRedirUrl, &tailRedirUrl);
+        StartHttpDirEnum(requestInfoStruct, pFile, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListApacheTomcatDir, ARRAY_SIZE_CHAR(wordListApacheTomcatDir), &headRedirUrl, &tailRedirUrl);
         break;
     case WebServerIIS:
-        StartHttpDirEnum(requestInfoStruct, pFile, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListIisFile, ARRAY_SIZE_CHAR(wordListIisFile));
+        StartHttpDirEnum(requestInfoStruct, pFile, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListIisFile, ARRAY_SIZE_CHAR(wordListIisFile), &headRedirUrl, &tailRedirUrl);
         if (enumDirNotFound != BASE_INVALID_CODE_LEN_DIR)
-            StartHttpDirEnum(requestInfoStruct, pFile, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListIisFDir, ARRAY_SIZE_CHAR(wordListIisFDir));
+            StartHttpDirEnum(requestInfoStruct, pFile, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListIisFDir, ARRAY_SIZE_CHAR(wordListIisFDir), &headRedirUrl, &tailRedirUrl);
         break;
     default:
         break;
     }
+
+    StartHttpDirEnum(requestInfoStruct, pFile, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListIisFile, ARRAY_SIZE_CHAR(wordListIisFile), &headRedirUrl, &tailRedirUrl);
+
+    /*PrintRedirectionNode(headRedirUrl);
+
+
+    printf("\t[HTTP%s] %s:%i - HTTP%s Backup Enum\n", requestInfoStruct.isSSL ? "S" : "", requestInfoStruct.ipAddress, requestInfoStruct.port, requestInfoStruct.isSSL ? "S" : "");
+    StartHttpDirEnum(requestInfoStruct, pFile, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListBackupFile, ARRAY_SIZE_CHAR(wordListBackupFile), &headRedirUrl, &tailRedirUrl);
+    ClearRedirectionNode(headRedirUrl);*/
+
     FreePHTTP_STRUC(pHttpStructInvalide);
     return TRUE;
 }

@@ -18,6 +18,7 @@
 #include "EnumRPC.h"
 #include "DetectHttpBasicAuth.h"
 #include "EnumPort.h"
+#include "Curl.h"
 
 #pragma comment(lib, "Advapi32.lib")
 #pragma comment(lib, "iphlpapi.lib")
@@ -61,7 +62,6 @@ BOOL Scan(ScanStruct scanStruct) {
 		return FALSE;
 	}
 	
-
 	if (scanStruct.isListInterface || scanStruct.interfaceNb == 0 || scanStruct.interfaceNb > nbAdapter) {
 		if (scanStruct.interfaceNb > nbAdapter)
 			printOut(scanStruct.ouputFile, "[x] Invalid number for the adapter !\n\n");
@@ -189,10 +189,10 @@ int main(int argc, char* argv[]) {
 
 	if (!initWSA(NULL))
 		return FALSE;
+
 	if (GetArguments(argc, argv, &listAgrument)) {
 
 		srand((UINT)time(0));
-
 		switch (listAgrument.programMode) {
 		case ModeScan:
 			Scan(listAgrument.scanStruct);
@@ -205,6 +205,9 @@ int main(int argc, char* argv[]) {
 			break;
 		case ModeEnum:
 			EnumPort(listAgrument.enumStruct);
+			break;
+		case ModeCurl:
+			Curl(listAgrument.curlStruct);
 			break;
 		}
 		WSACleanup();

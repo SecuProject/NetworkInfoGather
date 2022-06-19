@@ -4,6 +4,7 @@
 #define TOOLS_HTTP_HEADER_H
 
 #include "NetDiscovery.h"
+#include "ParseHttpResponse.h"
 
 #define IS_HTTP_SUCCESSFUL(StatusCode)		(StatusCode >= 200 && StatusCode < 300)
 #define IS_HTTP_REDIRECTS(StatusCode)		(StatusCode >= 300 && StatusCode < 400)
@@ -39,23 +40,7 @@ typedef struct {
 extern const StrucStrDev structStrDev[];
 
 
-typedef struct {
-	UINT returnCode;
-	UINT responseLen;
-	char* ServerName;
-	char* poweredBy;
-	char* redirectBy;
-	char* contentType;
-	char* requestPath;
 
-	char* redirectionPath;
-	char* rawData;
-	char* pContent;
-
-	char* AuthHeader;
-
-	int contentLen;
-}HTTP_STRUC, * PHTTP_STRUC;
 
 typedef enum {
 	UnknownServer = -1,

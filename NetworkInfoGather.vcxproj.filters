@@ -136,6 +136,15 @@
     <Filter Include="Source Files\4. FingerPrintInfo\EnumDNS">
       <UniqueIdentifier>{0d135bbc-615b-4267-9579-7b152d13220e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Tools\Curl">
+      <UniqueIdentifier>{232ba5dc-c4be-400a-b75b-0731ffb3eb03}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\4. FingerPrintInfo\EnumHTTP\ChainList">
+      <UniqueIdentifier>{eb7367fe-a5e6-46df-8a2f-f4a2bd58716a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\4. FingerPrintInfo\EnumHTTP\ToolsHTTP\ParseHttpResponse">
+      <UniqueIdentifier>{871c6ff6-1e36-421e-aa4b-29f5da535050}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -269,6 +278,15 @@
     </ClCompile>
     <ClCompile Include="EnumDNS.c">
       <Filter>Source Files\4. FingerPrintInfo\EnumDNS</Filter>
+    </ClCompile>
+    <ClCompile Include="Curl.c">
+      <Filter>Source Files\Tools\Curl</Filter>
+    </ClCompile>
+    <ClCompile Include="ChainListUrlRedir.c">
+      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\ChainList</Filter>
+    </ClCompile>
+    <ClCompile Include="ParseHttpResponse.c">
+      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\ToolsHTTP\ParseHttpResponse</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -424,6 +442,18 @@
     </ClInclude>
     <ClInclude Include="EnumDNS.h">
       <Filter>Source Files\4. FingerPrintInfo\EnumDNS</Filter>
+    </ClInclude>
+    <ClInclude Include="Curl.h">
+      <Filter>Source Files\Tools\Curl</Filter>
+    </ClInclude>
+    <ClInclude Include="ChainListUrlRedir.h">
+      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\ChainList</Filter>
+    </ClInclude>
+    <ClInclude Include="backupWordList.h">
+      <Filter>Resource Files\wordlist\wordlistCustom</Filter>
+    </ClInclude>
+    <ClInclude Include="ParseHttpResponse.h">
+      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\ToolsHTTP\ParseHttpResponse</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -11,6 +11,9 @@
 #include "wordlist.h"
 #include "Network.h"
 
+#define MATCH(strA,strB)            (strcmp(strA, strB) == 0)
+#define MATCHN(strA,strB,strLen)    (strncmp(strA, strB,strLen) == 0)
+
 
 // InetPton(AF_INET, _T("192.168.1.1"), &RecvAddr.sin_addr.s_addr);
 #pragma warning(disable:4996) 
@@ -175,9 +178,9 @@ VOID PrintMenuScan() {
     return;
 }
 VOID PrintMenuEnum(){
-    printf("NetworkInfoGather.exe Enum PROTOCOL IP_ADDRESS [-u USERNAME] [-p PASSWORD]\n\n");
-    printf("NetworkInfoGather.exe Enum smb IP_ADDRESS [-u USERNAME] [-p PASSWORD] [-S] [-U]\n");
-    printf("NetworkInfoGather.exe Enum ftp IP_ADDRESS [-u USERNAME] [-p PASSWORD] [-P PORT]\n\n");
+    printf("NetworkInfoGather.exe enum PROTOCOL IP_ADDRESS [-u USERNAME] [-p PASSWORD]\n\n");
+    printf("NetworkInfoGather.exe enum smb IP_ADDRESS [-u USERNAME] [-p PASSWORD] [-S] [-U]\n");
+    printf("NetworkInfoGather.exe enum ftp IP_ADDRESS [-u USERNAME] [-p PASSWORD] [-P PORT]\n\n");
 
     printf("PROTOCOL:\n");
     //printf("\thttp\n");
@@ -198,6 +201,24 @@ VOID PrintMenuEnum(){
     printf("\t-p PASSWORD\t\tThe password of the targeted account\n");
     return;
 }
+VOID PrintMenuCurl() {
+    printf("NetworkInfoGather.exe curl [http|https]://IP_ADDRESS/resource [-v] [-o FILE] [-X GET] []\n\n");
+    printf("URL:\n");
+    printf("\tProtocol\n");
+    printf("\tTarget IP Address\n");
+    printf("\tPort number\n");
+    printf("OPTIONS:\n");
+    printf("\t-v\t\tEnable verbose mode\n");
+    printf("\t-I\t\tSet method to HEAD and print header\n");
+    printf("\t-a\t\tSet random user agent\n");
+
+    printf("\t-A USER_AGENT\tSet specific user agent\n");
+    printf("\t-o PATH\t\tWrite to file instead of stdout\n");
+    printf("\t-X METHOD\tSpecify request method to use\n\n");
+
+    //printf("\t-L\t\tFollow redirection\n");
+    //printf("\t-k\t\t...\n\n");
+}
 VOID PrintMenu() {
     printf("\n\nNetworkInfoGather.exe {scan,bf,exploit,enum} [-h]\n\n");
     printf("OPTION:\n");
@@ -205,6 +226,7 @@ VOID PrintMenu() {
     printf("\tbf\tbrute force protocol\n");
     printf("\texploit\tExploit vulnerability\n");
     printf("\tenum\tPerform enumeration\n");
+    printf("\tcurl\tWeb request\n");
     return;
 }
 
@@ -409,7 +431,7 @@ VOID LoadFileEG(){
 */
 
 
-int HostnameToIp(char* hostname, char** ppIpAddress){
+BOOL HostnameToIp(char* hostname, char** ppIpAddress){
     struct hostent* he;
     struct in_addr** addr_list;
     *ppIpAddress = (char*)malloc(IP_ADDRESS_LEN + 1);
@@ -641,6 +663,82 @@ BOOL ParseExploitArg(int argc, char* argv[], pExploitStruct pExploitStruct) {
 }
 
 
+/*
+    printf("\t-A USER_AGENT\tSet specific user agent\n");
+    printf("\t-o PATH\t\tWrite to file instead of stdout\n");
+    printf("\t-X METHOD\tSpecify request method to use\n\n");
+*/
+BOOL ParseCurlArg(int argc, char* argv[], pCurlStruct pCurlStruct) {
+    pCurlStruct->isVerbose = FALSE;
+    pCurlStruct->isSsl = FALSE;
+    pCurlStruct->hostUrl = NULL;
+    pCurlStruct->filePath = NULL;
+    pCurlStruct->userAgent = NULL;
+    pCurlStruct->method = NULL;
+
+    pCurlStruct->agentInfo = FALSE;
+    pCurlStruct->agentRand = FALSE;
+
+    for (UINT i = 2; (int)i < argc; i++) {
+        if ((argv[i][0] == '-'|| argv[i][0] == '/') && argv[i][1] != 0x00) {
+            if (strlen(argv[i]) == 2) {
+                if (i + 1 < (UINT)argc) { // TO CHECK !!!
+                    switch (argv[i][1]) {
+                    case 'A':
+                        pCurlStruct->method = argv[i + 1];
+                        break;
+                    case 'o':
+                        pCurlStruct->filePath = argv[i + 1];
+                        break;
+                    case 'X':
+                        pCurlStruct->userAgent = argv[i + 1];
+                        break;
+                    default:
+                        break;
+                    }
+                }
+                switch (argv[i][1]) {
+                case 'I':
+                    pCurlStruct->agentInfo = TRUE;
+                    break;
+                case 'a':
+                    pCurlStruct->agentRand = TRUE;
+                    break;
+                case 'v':
+                    pCurlStruct->isVerbose = TRUE;
+                    break;
+                default:
+                    break;
+                }
+            }
+        } else {
+            size_t strLen = strlen(argv[i]) + (size_t)1;
+            if (MATCHN(argv[i], "https://", 8)) {
+                pCurlStruct->isSsl = TRUE;
+                pCurlStruct->hostUrl = (char*)malloc(strLen);
+                if (pCurlStruct->hostUrl == NULL)
+                    return FALSE;
+                strcpy_s(pCurlStruct->hostUrl, strLen, argv[i]);
+            }else if (MATCHN(argv[i], "http://", 7)) {
+                pCurlStruct->hostUrl = (char*)malloc(strLen);
+                if (pCurlStruct->hostUrl == NULL)
+                    return FALSE;
+                strcpy_s(pCurlStruct->hostUrl, strLen, argv[i]);
+            }
+        }
+    }
+    // Check incompatible args
+    if (pCurlStruct->agentRand && pCurlStruct->agentInfo) {
+        printf("[x] Arg error (-A and -a)!\n");
+    }
+    if (pCurlStruct->method != NULL && pCurlStruct->agentInfo) {
+        printf("[x] Arg error (-I and -X)!\n");
+    }
+    // Check requirements 
+    if (pCurlStruct->hostUrl == NULL)
+        return FALSE;
+    return TRUE;
+}
 
 BOOL ParseEnumArg(int argc, char* argv[], pEnumStruct pEnumStruct){
     if (argc < 4 || 10 < argc){
@@ -715,12 +813,10 @@ BOOL ParseEnumArg(int argc, char* argv[], pEnumStruct pEnumStruct){
         PrintMenuEnum();
         return FALSE;
     }
-
     if (!pEnumStruct->enumUser && !pEnumStruct->enumShare){
         pEnumStruct->enumUser = TRUE;
         pEnumStruct->enumShare = TRUE;
     }
-
     return TRUE;
 }
 BOOL GetArguments(int argc, char* argv[], pArguments pListAgrument) {
@@ -740,6 +836,9 @@ BOOL GetArguments(int argc, char* argv[], pArguments pListAgrument) {
         } else if (strcmp(argv[1], "enum") == 0) {
             PrintMenuEnum();
             return FALSE;
+        } else if (strcmp(argv[1], "curl") == 0) {
+            PrintMenuCurl();
+            return FALSE;
         } else {
             PrintMenu();
             return FALSE;
@@ -757,6 +856,9 @@ BOOL GetArguments(int argc, char* argv[], pArguments pListAgrument) {
         } else if (strcmp(argv[1], "enum") == 0) {
             pListAgrument->programMode = ModeEnum;
             return ParseEnumArg(argc, argv, &(pListAgrument->enumStruct));
+        } else if (strcmp(argv[1], "curl") == 0) {
+            pListAgrument->programMode = ModeCurl;
+            return ParseCurlArg(argc, argv, &(pListAgrument->curlStruct));
         } else {
             PrintMenu();
             return FALSE;

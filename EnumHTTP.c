@@ -30,7 +30,6 @@ BOOL EnumHTTP(char* ipAddress, int portNb,BOOL isWAfDetection, FILE* pFile, BOOL
 		FaviconIdentification(requestInfoStruct, pFile);
 		HttpDirEnum(requestInfoStruct, serverType, pFile);
 
-
 		free(requestInfoStruct.httpAuthHeader);
 		return TRUE;
 	}

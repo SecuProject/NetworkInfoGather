@@ -123,6 +123,15 @@ BOOL printOut(FILE* pFile, const char* format, ...) {
 	va_end(args);
 	return TRUE;
 }
+BOOL printVerbose(BOOL isVerbose, const char* format, ...) {
+	if (isVerbose) {
+		va_list args;
+		va_start(args, format);
+		vprintf(format, args);
+		va_end(args);
+	}
+	return TRUE;
+}
 
 DWORD SyncWaitForMultipleObjs(HANDLE* handles, DWORD count) {
 	DWORD waitingThreadsCount = count;
@@ -170,7 +179,7 @@ SOCKET ConnectTcpServer(char* ipAddress, int port){
 
 	//printf("\t[i] Connecting...\n");
 	if (connect(sock, (struct sockaddr*)&ssin, sizeof(ssin)) == SOCKET_ERROR){
-		printf("\t[x] Connection Error %lu\n", GetLastError());
+		printf("\t[x] Connection Error %lu\n", WSAGetLastError());
 		closesocket(sock);
 		return INVALID_SOCKET;
 	}

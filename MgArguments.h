@@ -138,11 +138,32 @@ typedef struct pEnumStruct{
 ///////////////////// Enumeration /////////////////////////
 
 
+
+///////////////////// Curl /////////////////////////
+// 
+typedef struct pCurlStruct {
+    char* hostUrl;
+    char* filePath;
+    char* userAgent;
+    char* method;
+
+    BOOL isVerbose;
+    BOOL isSsl;
+    BOOL isOutputfile;
+    BOOL isFollowRedirect;
+    BOOL agentRand;
+    BOOL agentInfo;
+}CurlStruct, *pCurlStruct;
+// 
+///////////////////// Curl /////////////////////////
+
+
 typedef enum {
     ModeScan,
     ModeBruteforce,
     ModeExploit,
-    ModeEnum
+    ModeEnum,
+    ModeCurl
 }ProgramMode;
 
 typedef struct Argument {
@@ -152,10 +173,11 @@ typedef struct Argument {
         BruteforceStruct bruteforceStruct;
         ScanStruct scanStruct;
         EnumStruct enumStruct;
+        CurlStruct curlStruct;
     };
 }Arguments, * pArguments;
 
 BOOL GetArguments(int argc, char* argv[], pArguments listAgrument);
-
+BOOL HostnameToIp(char* hostname, char** ppIpAddress);
 
 #endif

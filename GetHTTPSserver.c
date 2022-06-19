@@ -232,7 +232,6 @@ UINT GetHttpsServer(char* ipAddress, int port, char* requestType, char* resource
                 if (WinHttpSetOptionF(hRequest)) {
                     WinHttpSetCustomHeader(hRequest, customHeader, pFile);
                     
-
                     // ERROR_WINHTTP_SECURE_FAILURE -> WinHttpSendRequest:Error 12175 has occurred.
                     if (WinHttpSendRequest(hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
                         if (WinHttpReceiveResponse(hRequest, NULL)) {

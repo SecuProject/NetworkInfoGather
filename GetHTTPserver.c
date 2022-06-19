@@ -105,12 +105,11 @@ UINT GetHttpServer(char* ipAddress, int port, char* requestType, char* resourceP
     SOCKET Socket = ConnectTcpServer(ipAddress, port);
     if (Socket != INVALID_SOCKET){
         if (SendRequest(Socket, ipAddress, requestType, resourcePath, userAgent, customHeader, pFile)){
-            int nDataLength = RecvResponce(Socket, pServerResponce, pFile);
+            UINT nDataLength = RecvResponce(Socket, pServerResponce, pFile);
             closesocket(Socket);
             return nDataLength;
         }
         closesocket(Socket);
-    } else
-        printOut(pFile, "\t\t[X] socket open failed %lu\n", GetLastError());
+    }
     return FALSE;
 }
