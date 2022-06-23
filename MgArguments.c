@@ -219,6 +219,26 @@ VOID PrintMenuCurl() {
     //printf("\t-L\t\tFollow redirection\n");
     //printf("\t-k\t\t...\n\n");
 }
+VOID PrintMenuDos() {
+    printf("NetworkInfoGather.exe dos -t IP_ADDERSS -p PORT [-aS|-aC|-aU|-aP|-aH] [-d data] [-t time]\n\n");
+    printf("REQUIRED:\n");
+    printf("-t IP_ADDERSS\tIP address of the target\n");
+    printf("-p PORT\t\tPort to target\n\n");
+
+
+    printf("OPTIONS:\n");
+    printf("-d DATA\t\tSet the amount of data to send (default: 5 Kb)\n");
+    printf("-T time\t\tSet the amount of time in sec (default: 5 sec)\n\n");
+    //printf("-n Thread\tSet the number of thread to run\n");
+   // printf("-s data\tSet the task schedule\n");
+
+    printf("OPTIONS - TYPE OF ATTACK:\n");
+    printf("-aS\t\tTCP flood (SYN) attack\n");
+    printf("-aC\t\tTCP flood (Full connection)\n");
+    printf("-aU\t\tUDP flood (Full connection)\n");
+    printf("-aP\t\tPing flood\n");
+    printf("-aH\t\tHTTP flood (KeepAlive -> slowloris)\n\n");
+}
 VOID PrintMenu() {
     printf("\n\nNetworkInfoGather.exe {scan,bf,exploit,enum} [-h]\n\n");
     printf("OPTION:\n");
@@ -226,6 +246,7 @@ VOID PrintMenu() {
     printf("\tbf\tbrute force protocol\n");
     printf("\texploit\tExploit vulnerability\n");
     printf("\tenum\tPerform enumeration\n");
+    printf("\tdos\tDenial of service attack\n");
     printf("\tcurl\tWeb request\n");
     return;
 }
@@ -649,7 +670,7 @@ BOOL ParseExploitArg(int argc, char* argv[], pExploitStruct pExploitStruct) {
             char* ipAddress = NULL;
             if (!HostnameToIp(argv[3], &ipAddress) ||
                 !GetIpPortFromArg(ipAddress, pBruteforceStruct)){
-                printf("[!] Invalid format for the ip address '%s'\n", argv[3]);
+                printf("[!] Invalid format for the IP address '%s'\n", argv[3]);
                 printf("[i] Valid format: 192.168.1.1 or 192.168.1.1:80\n");
                 return FALSE;
             }
@@ -727,7 +748,7 @@ BOOL ParseCurlArg(int argc, char* argv[], pCurlStruct pCurlStruct) {
             }
         }
     }
-    // Check incompatible args
+    // Check incompatible arguments
     if (pCurlStruct->agentRand && pCurlStruct->agentInfo) {
         printf("[x] Arg error (-A and -a)!\n");
     }
@@ -740,6 +761,73 @@ BOOL ParseCurlArg(int argc, char* argv[], pCurlStruct pCurlStruct) {
     return TRUE;
 }
 
+BOOL ParseDosArg(int argc, char* argv[], pDosStruct pDosStruct) {
+    // default: porgram dos ip port => 4
+    if (argc < 4 || 10 < argc) {
+        PrintMenuEnum();
+        return FALSE;
+    }
+    pDosStruct->ipAddress = NULL;
+    pDosStruct->port = 0;
+    pDosStruct->attackType = INVALID_FULL;
+    pDosStruct->time = 5*1000;
+    pDosStruct->dataSize = 5*1000;
+
+    for (UINT i = 2; (int)i < argc; i++) {
+        if ((argv[i][0] == '-' || argv[i][0] == '/') && argv[i][1] != 0x00) {
+            if (strlen(argv[i]) == 2 && i + 1 < (UINT)argc) {
+                switch (argv[i][1]) {
+                case 't':
+                    pDosStruct->ipAddress = argv[i + 1];
+                    break;
+                case 'p':
+                    pDosStruct->port = atoi(argv[i + 1]);
+                    break;
+                case 'd':
+                    pDosStruct->dataSize = atoi(argv[i + 1]);
+                    break;
+                case 'T':
+                    pDosStruct->time = atoi(argv[i + 1]);
+                    break;
+                default:
+                    break;
+                }
+                i++;
+            } else if (strlen(argv[i]) == 3 && argv[i][1] == 'a') {
+                switch (argv[i][2]) {
+                case 'S':
+                    pDosStruct->attackType = TCP_FLOOD_SYN;
+                    break;
+                case 'C':
+                    pDosStruct->attackType = TCP_FLOOD_FULL;
+                    break;
+                case 'U':
+                    pDosStruct->attackType = UDP_FLOOD;
+                    break;
+                case 'P':
+                    pDosStruct->attackType = PING_FLOOD;
+                    break;
+                case 'H':
+                    pDosStruct->attackType = HTTP_FLOOD;
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+    }
+    if (pDosStruct->attackType == INVALID_FULL) {
+        printf("[x] Attack argument must by set !\n");
+        PrintMenuDos();
+        return FALSE;
+    }
+    if (pDosStruct->ipAddress == NULL || pDosStruct->port == 0) {
+        printf("[x] Invalid argument must by set !\n");
+        PrintMenuDos();
+        return FALSE;
+    }
+    return TRUE;
+}
 BOOL ParseEnumArg(int argc, char* argv[], pEnumStruct pEnumStruct){
     if (argc < 4 || 10 < argc){
         PrintMenuEnum();
@@ -809,7 +897,7 @@ BOOL ParseEnumArg(int argc, char* argv[], pEnumStruct pEnumStruct){
                 }
             }
         }
-    } else{
+    } else {
         PrintMenuEnum();
         return FALSE;
     }
@@ -838,6 +926,9 @@ BOOL GetArguments(int argc, char* argv[], pArguments pListAgrument) {
             return FALSE;
         } else if (strcmp(argv[1], "curl") == 0) {
             PrintMenuCurl();
+            return FALSE;        
+        } else if (strcmp(argv[1], "dos") == 0) {
+            PrintMenuDos();
             return FALSE;
         } else {
             PrintMenu();
@@ -859,6 +950,9 @@ BOOL GetArguments(int argc, char* argv[], pArguments pListAgrument) {
         } else if (strcmp(argv[1], "curl") == 0) {
             pListAgrument->programMode = ModeCurl;
             return ParseCurlArg(argc, argv, &(pListAgrument->curlStruct));
+        } else if (strcmp(argv[1], "dos") == 0) {
+            pListAgrument->programMode = ModeDos;
+            return ParseDosArg(argc, argv, &(pListAgrument->dosStruct));
         } else {
             PrintMenu();
             return FALSE;

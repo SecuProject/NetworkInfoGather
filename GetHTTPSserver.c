@@ -108,11 +108,11 @@ DWORD RequestHeader(HINTERNET hRequest, char** pServerResponce, FILE* pFile) {
                 free(lpOutBuffer);
                 return dwSize;
             } else
-                printOut(pFile, "\t[X] WinHttpQueryHeaders: Error %lu has occurred.\n", lastError);
+                PrintOut(pFile, "\t[X] WinHttpQueryHeaders: Error %lu has occurred.\n", lastError);
         } else
-            printOut(pFile, "\t[X] WinHttpOpen: Error %lu has occurred.\n", lastError);
+            PrintOut(pFile, "\t[X] WinHttpOpen: Error %lu has occurred.\n", lastError);
     } else
-        printOut(pFile, "\t[X] WinHttpQueryHeaders: Error %lu in WinHttpQueryDataAvailable.\n", GetLastError());
+        PrintOut(pFile, "\t[X] WinHttpQueryHeaders: Error %lu in WinHttpQueryDataAvailable.\n", GetLastError());
     return FALSE;
 }
 BOOL RequestBody(HINTERNET hRequest, char** serverResponce, FILE* pFile) {
@@ -132,12 +132,12 @@ BOOL RequestBody(HINTERNET hRequest, char** serverResponce, FILE* pFile) {
             if (*serverResponce == NULL)
                 return FALSE;
             if (!WinHttpReadData(hRequest, (LPVOID)((*serverResponce) + dwTmp), dwSize, &dwDownloaded)) {
-                printOut(pFile, "\t[X] Error %lu in WinHttpReadData.\n", GetLastError());
+                PrintOut(pFile, "\t[X] Error %lu in WinHttpReadData.\n", GetLastError());
                 return FALSE;
             }
             dwTmp += dwSize;
             if (!WinHttpQueryDataAvailable(hRequest, &dwSize)) {
-                printOut(pFile, "\t[X] Error %lu in WinHttpQueryDataAvailable.\n", GetLastError());
+                PrintOut(pFile, "\t[X] Error %lu in WinHttpQueryDataAvailable.\n", GetLastError());
                 return FALSE;
             }
         }
@@ -145,7 +145,7 @@ BOOL RequestBody(HINTERNET hRequest, char** serverResponce, FILE* pFile) {
         (*serverResponce)[srvResponseSize] = 0x00;
         return srvResponseSize;
     } else
-        printOut(pFile, "\t[X] Error %lu in WinHttpQueryDataAvailable.\n", GetLastError());
+        PrintOut(pFile, "\t[X] Error %lu in WinHttpQueryDataAvailable.\n", GetLastError());
     return FALSE;
 }
 
@@ -153,16 +153,16 @@ VOID PrintCertInfo(char* title, LPWSTR lpszSubjectInfo, FILE* pFile) {
     LPWSTR pwc = wcschr(lpszSubjectInfo, L'\n');
     if (pwc) {
         INT64 sizeSize = pwc - lpszSubjectInfo;
-        printOut(pFile, "\t\t[i] %s:\t%.*ws\n", title, (int)sizeSize, lpszSubjectInfo);
+        PrintOut(pFile, "\t\t[i] %s:\t%.*ws\n", title, (int)sizeSize, lpszSubjectInfo);
         while (pwc != NULL) {
             pwc++;
             LPWSTR pwcTemp = pwc;
             pwc = wcschr(pwc, L'\n');
             if (pwc != NULL) {
                 sizeSize = pwc - pwcTemp;
-                printOut(pFile, "\t\t\t\t%.*ws\n", (int)sizeSize, pwcTemp);
+                PrintOut(pFile, "\t\t\t\t%.*ws\n", (int)sizeSize, pwcTemp);
             } else
-                printOut(pFile, "\t\t\t\t%ws\n", pwcTemp);
+                PrintOut(pFile, "\t\t\t\t%ws\n", pwcTemp);
         }
     }
 }
@@ -187,12 +187,12 @@ BOOL GetServerCertInfo(HINTERNET hSession, FILE* pFile) {
                 if (pCertInfo->lpszIssuerInfo)
                     PrintCertInfo("Issuer", pCertInfo->lpszIssuerInfo,pFile);
                 if (pCertInfo->lpszProtocolName)
-                    printOut(pFile, "\t\t[i] Protocol:\t%ws\n", pCertInfo->lpszProtocolName);
+                    PrintOut(pFile, "\t\t[i] Protocol:\t%ws\n", pCertInfo->lpszProtocolName);
                 if (pCertInfo->lpszSignatureAlgName)
-                    printOut(pFile, "\t\t[i] Signature Algorithm: %ws\n", pCertInfo->lpszSignatureAlgName);
+                    PrintOut(pFile, "\t\t[i] Signature Algorithm: %ws\n", pCertInfo->lpszSignatureAlgName);
                 if (pCertInfo->lpszEncryptionAlgName)
-                    printOut(pFile, "\t\t[i] Encryption Algorithm: %ws\n", pCertInfo->lpszEncryptionAlgName);
-                printOut(pFile, "\t\t[i] Key Size:\t%d\n", pCertInfo->dwKeySize);
+                    PrintOut(pFile, "\t\t[i] Encryption Algorithm: %ws\n", pCertInfo->lpszEncryptionAlgName);
+                PrintOut(pFile, "\t\t[i] Key Size:\t%d\n", pCertInfo->dwKeySize);
                 LocalFree(pCertInfo->lpszSubjectInfo);
                 LocalFree(pCertInfo->lpszIssuerInfo);
                 bResult = TRUE;
@@ -251,22 +251,22 @@ UINT GetHttpsServer(char* ipAddress, int port, char* requestType, char* resource
                             WinHttpCloseHandle(hSession);
                             return srvResponseSize;
                         } else 
-                            printOut(pFile, "\t[X] WinHttpReceiveResponse:Error %lu has occurred.\n", GetLastError());
+                            PrintOut(pFile, "\t[X] WinHttpReceiveResponse:Error %lu has occurred.\n", GetLastError());
                     } else {
-                        printOut(pFile, "\t[X] WinHttpSendRequest:Error %lu has occurred.\n", GetLastError());
+                        PrintOut(pFile, "\t[X] WinHttpSendRequest:Error %lu has occurred.\n", GetLastError());
                     }
                         
                 }else
-                    printOut(pFile, "\t[X] WinHttpSetOption:Error %lu has occurred.\n", GetLastError());
+                    PrintOut(pFile, "\t[X] WinHttpSetOption:Error %lu has occurred.\n", GetLastError());
                 WinHttpCloseHandle(hRequest);
             } else
-                printOut(pFile, "\t[X] WinHttpOpenRequest:Error %lu has occurred.\n", GetLastError());
+                PrintOut(pFile, "\t[X] WinHttpOpenRequest:Error %lu has occurred.\n", GetLastError());
             WinHttpCloseHandle(hConnect);
         } else
-            printOut(pFile, "\t[X] WinHttpConnect:Error %lu has occurred.\n", GetLastError());
+            PrintOut(pFile, "\t[X] WinHttpConnect:Error %lu has occurred.\n", GetLastError());
         WinHttpCloseHandle(hSession);
     } else
-        printOut(pFile, "\t[X] WinHttpOpen:Error %lu has occurred.\n", GetLastError());
+        PrintOut(pFile, "\t[X] WinHttpOpen:Error %lu has occurred.\n", GetLastError());
     return FALSE;
 }
 

@@ -26,7 +26,7 @@ BOOL GetARPTable(NetworkPcInfo** ptrArpTable, int* arpTableSize, INT32 ipRangeIn
 	int status = GetIpNetTable2(AF_INET, &pipTable);
 	
 	if (status != NO_ERROR) {
-		printOut(pFile,"[x] GetIpNetTable for IPv4 table returned error: %i\n", status);
+		PrintOut(pFile,"[x] GetIpNetTable for IPv4 table returned error: %i\n", status);
 		return FALSE;
 	} else {
 		NetworkPcInfo* arpTable = (NetworkPcInfo*)calloc(sizeof(NetworkPcInfo), 1);
@@ -84,7 +84,7 @@ BOOL IsIpInArpTable(char* ipAddress,char* macAddress, FILE* pFile) {
 			}
 		}
 	} else 
-		printOut(pFile, "[x] GetIpNetTable for IPv4 table returned error: %i\n", status);
+		PrintOut(pFile, "[x] GetIpNetTable for IPv4 table returned error: %i\n", status);
 	FreeMibTable(pipTable);
 	return FALSE;
 }*/

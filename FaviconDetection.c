@@ -68,10 +68,10 @@ BOOL FaviconIdentification(RequestInfoStruct requestInfoStruct, FILE* pFile) {
 	if (faviconSize > 0) {
 		char* faviconHash = NULL;
 		if (MD5Hash(dataFavionBody, faviconSize, &faviconHash)) {
-			//printOut(NULL,"\t\t[D] MD5 Hash: %s\n", faviconHash);
+			//PrintOut(NULL,"\t\t[D] MD5 Hash: %s\n", faviconHash);
 			int iFavion = DatabaseSearch(faviconHash);
 			if (iFavion >= 0) {
-				printOut(NULL,"\t\t[Favicon id] %s\n", favionStruct[iFavion].cmsName);
+				PrintOut(NULL,"\t\t[Favicon id] %s\n", favionStruct[iFavion].cmsName);
 				free(faviconHash);
 				free(dataFavion);
 				return TRUE;

@@ -150,6 +150,8 @@
     <ClCompile Include="AdapterInformation.c" />
     <ClCompile Include="ARPQuery.c" />
     <ClCompile Include="ARPTable.c" />
+    <ClCompile Include="AttackDOS.c" />
+    <ClCompile Include="AttackFloodPing.c" />
     <ClCompile Include="Base64.c" />
     <ClCompile Include="ChainListUrlRedir.c" />
     <ClCompile Include="CheckCVE.c" />
@@ -180,6 +182,7 @@
     <ClCompile Include="ICMP.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="md5.c" />
+    <ClCompile Include="Message.c" />
     <ClCompile Include="MgArguments.c" />
     <ClCompile Include="MgCredentials.c" />
     <ClCompile Include="NetDiscovery.c" />
@@ -202,6 +205,8 @@
     <ClInclude Include="apacheWordList.h" />
     <ClInclude Include="ARPQuery.h" />
     <ClInclude Include="ARPTable.h" />
+    <ClInclude Include="AttackDOS.h" />
+    <ClInclude Include="AttackFloodPing.h" />
     <ClInclude Include="backupWordList.h" />
     <ClInclude Include="Base64.h" />
     <ClInclude Include="ChainListUrlRedir.h" />
@@ -236,6 +241,7 @@
     <ClInclude Include="ICMP.h" />
     <ClInclude Include="macDB.h" />
     <ClInclude Include="md5.h" />
+    <ClInclude Include="Message.h" />
     <ClInclude Include="MgArguments.h" />
     <ClInclude Include="MgCredentials.h" />
     <ClInclude Include="NetDiscovery.h" />

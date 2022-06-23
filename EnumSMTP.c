@@ -44,7 +44,7 @@ VOID FreeSmtpData(SMTP_DATA* smtpData) {
 BOOL ConnectToSmtp(NETSOCK_DATA* netSockData,FILE* pFile) {
 	SOCKET SocketFD = ConnectTcpServer(netSockData->ipAddress, netSockData->port);
 	if (SocketFD == INVALID_SOCKET){
-		printOut(pFile, "\t[SMTP] Fail to connect to server !\n");
+		PrintOut(pFile, "\t[SMTP] Fail to connect to server !\n");
 		return FALSE;
 	}
 	netSockData->SocketFD = SocketFD;
@@ -53,7 +53,7 @@ BOOL ConnectToSmtp(NETSOCK_DATA* netSockData,FILE* pFile) {
 int recvSmtp(NETSOCK_DATA* netSockData, char* recvBuffer, int bufferSize, FILE* pFile) {
 	int sizeRecv = recv(netSockData->SocketFD, recvBuffer, bufferSize, 0);
 	if (sizeRecv == SOCKET_ERROR) {
-		//printOut(pFile, "\t[SMTP] Fail to recv data !\n");
+		//PrintOut(pFile, "\t[SMTP] Fail to recv data !\n");
 		return SOCKET_ERROR;
 	}
 	if (strstr(recvBuffer, "Error: too many errors") != NULL) {
@@ -68,11 +68,11 @@ int sendSmtp(SOCKET socket,char* data, int dataLen, FILE* pFile){
 	const char endLine[] = "\r\n";
 	int sizeRecv = send(socket, data, dataLen, 0);
 	if (sizeRecv == SOCKET_ERROR){
-		printOut(pFile, "\t[SMTP] Fail to send data !\n");
+		PrintOut(pFile, "\t[SMTP] Fail to send data !\n");
 		return SOCKET_ERROR;
 	}
 	if (send(socket, endLine, sizeof(endLine)-1, 0) == SOCKET_ERROR){
-		printOut(pFile, "\t[SMTP] Fail to send data !\n");
+		PrintOut(pFile, "\t[SMTP] Fail to send data !\n");
 		return SOCKET_ERROR;
 	}
 	return sizeRecv;
@@ -209,7 +209,7 @@ BOOL NtlmAuth(NETSOCK_DATA netSockData, SMTP_DATA* smtpData, FILE* pFile) {
 	int sizeRecv = recvSmtp(&netSockData, recvBuffer, BUFFER_SIZE,pFile);
 	if (sizeRecv > 0) {
 		if (strstr(recvBuffer, "NTLM supported") != NULL) {
-			printOut(pFile, "\t\t[NTLM] AUTH NTLM 334");
+			PrintOut(pFile, "\t\t[NTLM] AUTH NTLM 334");
 
 			// send anonymous (null) credentials
 			const char ntlmAnonymous[] = "TlRMTVNTUAABAAAAB4IIAAAAAAAAAAAAAAAAAAAAAAA=";
@@ -221,7 +221,7 @@ BOOL NtlmAuth(NETSOCK_DATA netSockData, SMTP_DATA* smtpData, FILE* pFile) {
 					smtpData->ntlmData = (char*)xmalloc(sizeRecv + 1);
 					if (smtpData->ntlmData != NULL) {
 						strncpy_s(smtpData->ntlmData, sizeRecv + 1, recvBuffer, sizeRecv);
-						printOut(pFile, "\t[NTLM] %.*s\n", sizeRecv, recvBuffer);
+						PrintOut(pFile, "\t[NTLM] %.*s\n", sizeRecv, recvBuffer);
 						return TRUE;
 					}
 				}
@@ -244,12 +244,12 @@ BOOL SmtpUserEnum(NETSOCK_DATA netSockData, SMTP_DATA* smtpData, FILE* pFile) {
 		sizeRecv = recv(netSockData.SocketFD, recvBuffer, BUFFER_SIZE, 0);
 		if (sizeRecv > 0) {
 			if (strstr(recvBuffer, "250-VRFY") != NULL) {
-				printOut(pFile, "\t[SMTP] VRFY supported\n");
+				PrintOut(pFile, "\t[SMTP] VRFY supported\n");
 				bResult = UserEnumVRFY(netSockData, smtpData,pFile);
 			}
 			if (!bResult) {
 				if (strstr(recvBuffer, "250-ETRN") != NULL) {  //? OK ??? 
-					printOut(pFile, "\t[SMTP] RCPT supported\n");
+					PrintOut(pFile, "\t[SMTP] RCPT supported\n");
 					bResult = UserEnumRCPT(netSockData, smtpData,pFile);
 				}
 			}
@@ -277,16 +277,16 @@ BOOL SmtpEnum(NETSOCK_DATA netSockData, SMTP_DATA* smtpData, FILE* pFile) {
 			smtpData->banner[sizeRecv] = 0x00;
 			
 			if (CheckConnectionMsg(smtpData->banner)) {
-				printOut(pFile, "\t[SMTP] Banner %s", smtpData->banner);
+				PrintOut(pFile, "\t[SMTP] Banner %s", smtpData->banner);
 
 				if (!SmtpUserEnum(netSockData, smtpData,pFile))
-					printOut(pFile, "\t[SMTP] Fail to enumerate users !\n");
+					PrintOut(pFile, "\t[SMTP] Fail to enumerate users !\n");
 
 				NtlmAuth(netSockData, smtpData,pFile);
 
 				result = TRUE;
 			} else {
-				printOut(pFile, "\t[SMTP] Connection fail !\n");
+				PrintOut(pFile, "\t[SMTP] Connection fail !\n");
 				memset(smtpData->banner, 0x00, sizeRecv);
 			}
 			sendSmtp(netSockData.SocketFD, (char*)smtpQuit, sizeof(smtpQuit) - 1, pFile);
@@ -295,7 +295,7 @@ BOOL SmtpEnum(NETSOCK_DATA netSockData, SMTP_DATA* smtpData, FILE* pFile) {
 		}
 		closesocket(netSockData.SocketFD);
 	} else
-		printOut(pFile, "\t[SMTP] Fail to connect to server !\n");
+		PrintOut(pFile, "\t[SMTP] Fail to connect to server !\n");
 	return FALSE;
 
 }
@@ -313,9 +313,9 @@ BOOL EnumSMTP(NetworkPcInfo* networkPcInfo, int port, FILE* pFile) {
 		return FALSE;
 
 	if (SmtpEnum(netSockData, networkPcInfo->smtpData,pFile) && networkPcInfo->smtpData->numUser > 0) {
-		printOut(pFile, "\t[SMTP] User list:\n");
+		PrintOut(pFile, "\t[SMTP] User list:\n");
 		for (UINT i = 0; i < networkPcInfo->smtpData->numUser; i++)
-			printOut(pFile, "\t\t- %s\n", networkPcInfo->smtpData->listUser[i]);
+			PrintOut(pFile, "\t\t- %s\n", networkPcInfo->smtpData->listUser[i]);
 	}
 	
 	//FreeSmtpData(smtpData);

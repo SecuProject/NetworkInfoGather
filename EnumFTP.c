@@ -177,7 +177,7 @@ BOOL ListCurrentDirectory(char* IpAddress, char* username, char* password, INTER
 
 
 BOOL FtpBruteForce(char* serverIp, StructWordList structWordList, FILE* pFile, PStructCredentials credential){
-    printOut(pFile, "\t[FTP] Brute Forcing FTP server:\n");
+    PrintOut(pFile, "\t[FTP] Brute Forcing FTP server:\n");
     BOOL isFtpCreadValid = FTP_PASSWORD_INCORRECT;
     UINT i, j;
 

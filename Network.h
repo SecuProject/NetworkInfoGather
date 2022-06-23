@@ -2,6 +2,7 @@
 #pragma once
 #include "portList.h"
 #include "NetDiscovery.h"
+#include "Message.h"
 
 #ifndef NETWORK_HEADER_H
 #define NETWORK_HEADER_H
@@ -57,8 +58,6 @@ BOOL IsIpAddressValid(int a, int b, int c, int d);
 BOOL GetNetworkRange(char* ipAddress, INT32 ipRangeInt32);
 BOOL GetIpPortFromArg(char* argv, pBruteforceStruct pBruteforceStruct);
 
-BOOL printOut(FILE* pFile, const char* format, ...);
-BOOL printVerbose(BOOL isVerbose, const char* format, ...);
 DWORD SyncWaitForMultipleObjs(HANDLE* handles, DWORD count);
 
 

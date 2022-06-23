@@ -37,9 +37,9 @@ RequestInfoStruct GetInfoFromStruct(CurlStruct CurlStruct,char** pBaseAddress) {
 		return requestInfoStruct;
 
 	if (CurlStruct.isSsl) {
-		ptr += 8; // Remove "https://" str
+		ptr += 8; // Remove "https://" string
 	} else {
-		ptr += 7; // Remove "http://" str
+		ptr += 7; // Remove "http://" string
 	}
 
 
@@ -109,12 +109,12 @@ char* GetHostIpAddress(char* hostUrl, BOOL isVerboseMode) {
 		} else
 			return NULL;
 	}
-	printVerbose(isVerboseMode, "\t[i] Checking IP address validity: ", ipAddress);
+	PrintVerbose(isVerboseMode, "\t[i] Checking IP address validity: ", ipAddress);
 	if (IsIpAddressValid(a, b, c, d)) {
-		printVerbose(isVerboseMode, "VALID\n");
-		printVerbose(isVerboseMode, "\t[i] Target host: %s\n", ipAddress);
+		PrintVerbose(isVerboseMode, "VALID\n");
+		PrintVerbose(isVerboseMode, "\t[i] Target host: %s\n", ipAddress);
 	} else
-		printVerbose(isVerboseMode, "INVALID\n");
+		PrintVerbose(isVerboseMode, "INVALID\n");
 	return ipAddress;
 }
 
@@ -128,16 +128,16 @@ BOOL Curl(CurlStruct CurlStruct) {
 	} else if (CurlStruct.method != NULL)
 		httpMethon = CurlStruct.method;
 
-	printVerbose(CurlStruct.isVerbose, "\t[i] Target url: %s\n", CurlStruct.hostUrl);
+	PrintVerbose(CurlStruct.isVerbose, "\t[i] Target url: %s\n", CurlStruct.hostUrl);
 
 	requestInfoStruct = GetInfoFromStruct(CurlStruct, &urlBaseAddress);
 	if (requestInfoStruct.ipAddress == NULL)
 		return FALSE;
 
 
-	printVerbose(CurlStruct.isVerbose, "\t[i] Target Port: %i\n", requestInfoStruct.port);
-	printVerbose(CurlStruct.isVerbose, "\t[i] TLS status: %s\n", requestInfoStruct.isSSL? "Enable":"Disable");
-	printVerbose(CurlStruct.isVerbose, "\t[i] Target resource: %s\n", urlBaseAddress);
+	PrintVerbose(CurlStruct.isVerbose, "\t[i] Target Port: %i\n", requestInfoStruct.port);
+	PrintVerbose(CurlStruct.isVerbose, "\t[i] TLS status: %s\n", requestInfoStruct.isSSL? "Enable":"Disable");
+	PrintVerbose(CurlStruct.isVerbose, "\t[i] Target resource: %s\n", urlBaseAddress);
 
 
 	char* ipAddress = GetHostIpAddress(requestInfoStruct.ipAddress, CurlStruct.isVerbose);

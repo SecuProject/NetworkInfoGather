@@ -48,7 +48,7 @@ BOOL GrabBanner(char* protocalName, char* ipAddress, unsigned int port, char* bu
 	if (SocketFD != INVALID_SOCKET){
 		int sizeRecv = recv(SocketFD, buffer, bufferSize, 0);
 		if (sizeRecv > 0){
-			printOut(pFile, "\t[%s] Banner %.*s", protocalName, sizeRecv, buffer + offset); // Add sizeRecv to be tested !!!
+			PrintOut(pFile, "\t[%s] Banner %.*s", protocalName, sizeRecv, buffer + offset); // Add sizeRecv to be tested !!!
 			AddEndLine(buffer + offset, sizeRecv);
 			closesocket(SocketFD);
 			return TRUE;
@@ -78,7 +78,7 @@ BOOL PortFingerPrint(NetworkPcInfo* networkPcInfo, int nbDetected, BOOL isBrutef
 		int nbFPInfo = networkPcInfo[i].nbOpenPort;
 
 		if(nbFPInfo > 0)
-			printOut(pFile,"[%s] FingerPrint\n", ipAddress);
+			PrintOut(pFile,"[%s] FingerPrint\n", ipAddress);
 		for (int j = 0; j < nbFPInfo; j++) {
 			int portNb = networkPcInfo[i].port[j].portNumber;
 			if(networkPcInfo[i].port[j].isTcp){

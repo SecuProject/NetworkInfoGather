@@ -38,18 +38,18 @@ BOOL SendRequest(SOCKET Socket, char* ipAddress, char* requestType, char* resour
         if (requestSize > 0) {
             int sendSize = send(Socket, getRequest, requestSize, 0);
             if (sendSize <= 0) {
-                printOut(pFile, "\t\t[X] Send request failed.\n");
+                PrintOut(pFile, "\t\t[X] Send request failed.\n");
                 free(getRequest);
                 return FALSE;
             }
             if (sendSize != requestSize)
-                printOut(pFile, "\t\t[!] Send request size not match !\n");
+                PrintOut(pFile, "\t\t[!] Send request size not match !\n");
 
             free(getRequest);
             return TRUE;
 
         } else
-            printOut(pFile, "\t\t[X] Generate Get request failed.\n");
+            PrintOut(pFile, "\t\t[X] Generate Get request failed.\n");
         free(getRequest);
         return TRUE;
     }
@@ -77,7 +77,7 @@ UINT RecvResponce(SOCKET Socket, char** pServerResponce, FILE* pFile) {
         nDataLength += nDataLengthTmp;
     }
     if (nDataLengthTmp == SOCKET_ERROR) {
-        //printOut(pFile, "\t\t[x] Error receiving data.\n");
+        //PrintOut(pFile, "\t\t[x] Error receiving data.\n");
         closesocket(Socket);
         return FALSE;
     }

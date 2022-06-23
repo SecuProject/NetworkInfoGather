@@ -60,20 +60,20 @@ PHTTP_STRUC GetHttpRequest2(char* ipAddress, int port, char* path, char* request
     else
         httpStruct->responseLen = GetHttpServer(ipAddress, port, requestType, path, NULL, &(httpStruct->rawData), httpAuthHeader, pFile); // GET
     if (httpStruct->responseLen == 0) {
-        //printOut(pFile, "\t\t[x] Page not available !\n");
+        //PrintOut(pFile, "\t\t[x] Page not available !\n");
         if (httpStruct->rawData != NULL)
             free(httpStruct->rawData);
         free(httpStruct);
         return NULL;
     }
     if (httpStruct->rawData == NULL) {
-        printOut(pFile, "\t\t[x] Response data error !\n");
+        PrintOut(pFile, "\t\t[x] Response data error !\n");
         free(httpStruct);
         return NULL;
     }
 
     if (!GetHttpRequestInfo(httpStruct)) {
-        printOut(pFile, "\t\t[x] Fail to retrieve information form the request !\n");
+        PrintOut(pFile, "\t\t[x] Fail to retrieve information form the request !\n");
         free(httpStruct->rawData);
         free(httpStruct);
         return NULL;
@@ -121,7 +121,7 @@ BOOL ExtractStrInt(char* str, int matchStr, char* buffer, int bufferLen){
     httpStruct->responseLen = GetHttpServer(ipAddress, port, "HEAD", path, NULL, httpStruct->rawData, pFile);
 
     if (httpStruct->responseLen == 0) {
-        printOut(pFile, "\t[-] Page not available !\n");
+        PrintOut(pFile, "\t[-] Page not available !\n");
         free(httpStruct->rawData);
         free(httpStruct);
         return NULL;
@@ -133,7 +133,7 @@ BOOL ExtractStrInt(char* str, int matchStr, char* buffer, int bufferLen){
     }
 
     if (!GetHttpRequestInfo(httpStruct)) {
-        printOut(pFile, "\t[-] Fail to retrieve information form the request !\n");
+        PrintOut(pFile, "\t[-] Fail to retrieve information form the request !\n");
         free(httpStruct->rawData);
         free(httpStruct);
         return NULL;
@@ -224,7 +224,7 @@ BOOL GetHttpServerInfo(RequestInfoStruct requestInfoStruct, ServerType* serverTy
             GetHTTPFingerprint(pHttpStructPage->pContent, &portInfo);
 
             //if (GetHTTPFingerprint(pHttpStructPage->pContent, &portInfo))
-                //printOut(pFile, "\t[HTTP%s] Port %i Fingerprint %i - %i\n", isSSL ? "S" : "", portInfo.portNumber, portInfo.deviceType, portInfo.version); // portInfo.deviceType todo
+                //PrintOut(pFile, "\t[HTTP%s] Port %i Fingerprint %i - %i\n", isSSL ? "S" : "", portInfo.portNumber, portInfo.deviceType, portInfo.version); // portInfo.deviceType todo
         }
     } else {
         if (IS_HTTP_AUTH(pHttpStructPage->returnCode)) {

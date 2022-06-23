@@ -19,6 +19,7 @@
 #include "DetectHttpBasicAuth.h"
 #include "EnumPort.h"
 #include "Curl.h"
+#include "AttackDOS.h"
 
 #pragma comment(lib, "Advapi32.lib")
 #pragma comment(lib, "iphlpapi.lib")
@@ -57,21 +58,21 @@ BOOL Scan(ScanStruct scanStruct) {
 		return FALSE;
 	nbAdapter = getAdapterkInfo(adapterInfo, scanStruct.ouputFile);
 	if (nbAdapter == 0) {
-		printOut(scanStruct.ouputFile, "[x] No network interface detected !\n");
+		PrintOut(scanStruct.ouputFile, "[x] No network interface detected !\n");
 		free(adapterInfo);
 		return FALSE;
 	}
 	
 	if (scanStruct.isListInterface || scanStruct.interfaceNb == 0 || scanStruct.interfaceNb > nbAdapter) {
 		if (scanStruct.interfaceNb > nbAdapter)
-			printOut(scanStruct.ouputFile, "[x] Invalid number for the adapter !\n\n");
+			PrintOut(scanStruct.ouputFile, "[x] Invalid number for the adapter !\n\n");
 		else if (scanStruct.interfaceNb == 0 && !scanStruct.isListInterface)
-			printOut(scanStruct.ouputFile, "[x] Adapter not set (-i [Adapter Number]) !\n\n");
+			PrintOut(scanStruct.ouputFile, "[x] Adapter not set (-i [Adapter Number]) !\n\n");
 		for (UINT i = 0; i < nbAdapter; i++) {
 			int maskSizeInt = 0;
 
 			ipCalucation(adapterInfo[i].localIP, adapterInfo[i].networkMask, &maskSizeInt);
-			printOut(scanStruct.ouputFile, "[ Adapter %i ] GW %s - MASK %s - Local IP %s\n", i + 1, adapterInfo[i].GateWayIp, adapterInfo[i].networkMask, adapterInfo[i].localIP);
+			PrintOut(scanStruct.ouputFile, "[ Adapter %i ] GW %s - MASK %s - Local IP %s\n", i + 1, adapterInfo[i].GateWayIp, adapterInfo[i].networkMask, adapterInfo[i].localIP);
 		}
 	} else if (scanStruct.interfaceNb < nbAdapter + 1) {
 		INT32 ipRangeInt32 = 0;
@@ -85,10 +86,10 @@ BOOL Scan(ScanStruct scanStruct) {
 		else
 			ipRangeInt32 = ipCalucation(adapterInfoSelected.localIP, adapterInfoSelected.networkMask, &maskSizeInt) + 1;
 
-		printOut(scanStruct.ouputFile, "[ Adapter %i ] GW %s - MASK %s - Local IP %s\n\n", scanStruct.interfaceNb, adapterInfoSelected.GateWayIp, adapterInfoSelected.networkMask, adapterInfoSelected.localIP);
+		PrintOut(scanStruct.ouputFile, "[ Adapter %i ] GW %s - MASK %s - Local IP %s\n\n", scanStruct.interfaceNb, adapterInfoSelected.GateWayIp, adapterInfoSelected.networkMask, adapterInfoSelected.localIP);
 
 		if (scanStruct.typeOfScan == Disable_Scan && scanStruct.ipAddress == NULL) {
-			printOut(scanStruct.ouputFile, "[!] The target(s) IP address must be define with '-t' if the host discovery is disable !\n\n");
+			PrintOut(scanStruct.ouputFile, "[!] The target(s) IP address must be define with '-t' if the host discovery is disable !\n\n");
 		} else if (NetDiscovery(scanStruct, ipRangeInt32, maskSizeInt, adapterInfoSelected.localIP, &networkPcInfo, &nbDetected, scanStruct.ouputFile)) {
 			if (scanStruct.portScan) {
 				//scanPort(networkPcInfo, nbDetected, scanStruct);
@@ -111,7 +112,7 @@ BOOL Scan(ScanStruct scanStruct) {
 VOID PrintInfoBf(char* protocol, char* ipAddress,int port,UINT nbCreadTry) {
 	printf("[-] %s basic authentication brute force:\n", protocol);
 	printf("\t[+] Target: %s:%i\n", ipAddress, port);
-	printf("\t[+] Number of cread to try: %u\n", nbCreadTry);
+	printf("\t[+] Number of credential to try: %u\n", nbCreadTry);
 }
 BOOL BrutForceSmbFunc(BruteforceStruct bruteforceStruct) {
 	BOOL result = FALSE;
@@ -181,7 +182,7 @@ BOOL BruteForce(BruteforceStruct bruteforceStruct) {
 }
 
 /*
-Arg manage output file !!!
+Argument manage output file !!!
 
 */
 int main(int argc, char* argv[]) {
@@ -208,6 +209,9 @@ int main(int argc, char* argv[]) {
 			break;
 		case ModeCurl:
 			Curl(listAgrument.curlStruct);
+			break;
+		case ModeDos:
+			AttackDos(listAgrument.dosStruct);
 			break;
 		}
 		WSACleanup();

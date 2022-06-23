@@ -48,7 +48,7 @@ BOOL DnsRequest(char* pOwnerName, char* DnsServIp, WORD wType, char** hostname, 
 		//printf("The host name is %s\n", (char*)(pDnsRecord->Data.PTR.pNameHost));
 		if (pDnsRecord != NULL) {
 			size_t bufferSize = strlen((char*)(pDnsRecord->Data.PTR.pNameHost)) + 1;
-			*hostname = (char*)malloc(bufferSize);
+			*hostname = (char*)xmalloc(bufferSize);
 			if (*hostname != NULL) {
 				strcpy_s(*hostname, bufferSize, (char*)(pDnsRecord->Data.PTR.pNameHost));
 				result = TRUE;
@@ -68,18 +68,16 @@ BOOL GetDnsServer(char* serverDnsIp, UINT bufferSize) {
 	//IP_ADDR_STRING* pIPAddr;
 	BOOL result = FALSE;
 
-	pFixedInfo = (FIXED_INFO*)malloc(sizeof(FIXED_INFO));
+	pFixedInfo = (FIXED_INFO*)xmalloc(sizeof(FIXED_INFO));
 	if (pFixedInfo == NULL) {
-		printf("Error allocating memory needed to call GetNetworkParams\n");
 		return FALSE;
 	}
 	ulOutBufLen = sizeof(FIXED_INFO);
 
 	if (GetNetworkParams(pFixedInfo, &ulOutBufLen) == ERROR_BUFFER_OVERFLOW) {
 		free(pFixedInfo);
-		pFixedInfo = (FIXED_INFO*)malloc(ulOutBufLen);
+		pFixedInfo = (FIXED_INFO*)xmalloc(ulOutBufLen);
 		if (pFixedInfo == NULL) {
-			printf("Error allocating memory needed to call GetNetworkParams\n");
 			return FALSE;
 		}
 	}
@@ -195,7 +193,7 @@ BOOL DNSdiscoveryMultiThread(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo, 
 				printf("\t[x] Server DNS IP address is public !\n");
 			free(serverDnsIp);
 		} else
-			printOut(pFile, "\t[x] Unable to allocate memory\n");
+			PrintOut(pFile, "\t[x] Unable to allocate memory\n");
 		
 
 		FreeNetworkPcInfo(dnsStructData, dwThreadIdArray, hThreadArray);

@@ -2,29 +2,34 @@
 #include <iphlpapi.h>   // IPAddr
 #include <stdio.h>
 #include <ws2tcpip.h>   // inet_pton
+#include "Message.h"
 
 #include "Network.h"
 #include "AdapterInformation.h"
 
 void* xrealloc(void* ptr, size_t size) {
 	void* newptr;
-	if (size == 0 || ptr == NULL)
+	if (size == 0 || ptr == NULL) {
+		PrintMsgError2("Memory allocation failed data is size 0");
 		return FALSE;
+	}
 
-	newptr = realloc(ptr, size);
+	newptr = xrealloc(ptr, size);
 	if (newptr == NULL) {
-		printf("[x] Memory allocation failed. (%lu)\n", GetLastError());
+		PrintMsgError2("Memory allocation failed");
 		free(ptr);
 		return NULL;
 	}
 	return newptr;
 }
 void* xcalloc(size_t _Count, size_t _Size){
-	if (_Count == 0 || _Size == 0)
+	if (_Count == 0 || _Size == 0) {
+		PrintMsgError2("Memory allocation failed data is size 0");
 		return FALSE;
-	char* newptr = calloc(_Count, _Size);
+	}
+	char* newptr = xcalloc(_Count, _Size);
 	if (newptr == NULL){
-		printf("[x] Memory allocation failed. (%lu)\n", GetLastError());
+		PrintMsgError2("Memory allocation failed");
 		return NULL;
 	}
 	return newptr;
@@ -34,7 +39,7 @@ void* xmalloc(size_t _Size){
 		return FALSE;
 	char* newptr = malloc(_Size);
 	if (newptr == NULL){
-		printf("[x] Memory allocation failed. (%lu)\n", GetLastError());
+		PrintMsgError2("Memory allocation failed");
 		return NULL;
 	}
 	return newptr;
@@ -119,26 +124,6 @@ char* StrToLower(char* s) {
 	return s;
 }
 
-
-BOOL printOut(FILE* pFile, const char* format, ...) {
-	va_list args;
-	va_start(args, format);
-	vprintf(format, args);
-	if (pFile != NULL)
-		vfprintf(pFile, format, args);
-	va_end(args);
-	return TRUE;
-}
-BOOL printVerbose(BOOL isVerbose, const char* format, ...) {
-	if (isVerbose) {
-		va_list args;
-		va_start(args, format);
-		vprintf(format, args);
-		va_end(args);
-	}
-	return TRUE;
-}
-
 DWORD SyncWaitForMultipleObjs(HANDLE* handles, DWORD count) {
 	DWORD waitingThreadsCount = count;
 	int index = 0;
@@ -197,20 +182,20 @@ SOCKET ConnectTcpServer(char* ipAddress, int port){
 BOOL initWSA(FILE* pFile) {
 	WSADATA wsa;
 
-	//printOut(pFile,"[i] Initialising Winsock...");
+	//PrintOut(pFile,"[i] Initializing Winsock...");
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
-		printOut(pFile,"[x] Failed. Error Code : %d", WSAGetLastError());
+		PrintOut(pFile,"[x] Failed. Error Code : %d", WSAGetLastError());
 		return FALSE;
 	}
-	//printOut(pFile,"Initialised.\n");
+	//PrintOut(pFile,"Initialized.\n");
 	return TRUE;
 }
 
-// Set socket time out 2 sec
+// Set socket time out 3 sec
 int SetOptions(SOCKET fd){
 	struct timeval timeout;
 
-	timeout.tv_sec = 2;
+	timeout.tv_sec = 3;
 	timeout.tv_usec = 0;
 	return setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(timeout)) != SOCKET_ERROR;
 }

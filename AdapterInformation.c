@@ -19,7 +19,7 @@ int getAdapterkInfo(ADAPTER_INFO* adapterInfo, FILE* pFile) {
 
 	pAdapterInfo = (IP_ADAPTER_INFO *)malloc(sizeof(IP_ADAPTER_INFO));
 	if (pAdapterInfo == NULL) {
-		printOut(pFile,"Error allocating memory needed to call GetAdaptersinfo\n");
+		PrintOut(pFile,"Error allocating memory needed to call GetAdaptersinfo\n");
 		return FALSE;
 	}
 
@@ -27,7 +27,7 @@ int getAdapterkInfo(ADAPTER_INFO* adapterInfo, FILE* pFile) {
 		free(pAdapterInfo);
 		pAdapterInfo = (IP_ADAPTER_INFO *)malloc(ulOutBufLen);
 		if (pAdapterInfo == NULL) {
-			printOut(pFile,"Error allocating memory needed to call GetAdaptersinfo\n");
+			PrintOut(pFile,"Error allocating memory needed to call GetAdaptersinfo\n");
 			return FALSE;
 		}
 	}
@@ -45,7 +45,7 @@ int getAdapterkInfo(ADAPTER_INFO* adapterInfo, FILE* pFile) {
 			pAdapter = pAdapter->Next;
 		}
 	}else {
-		printOut(pFile,"GetAdaptersInfo failed with error: %d\n", dwRetVal);
+		PrintOut(pFile,"GetAdaptersInfo failed with error: %d\n", dwRetVal);
 		free(pAdapterInfo);
 		return FALSE;
 	}

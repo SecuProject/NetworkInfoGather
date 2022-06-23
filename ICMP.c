@@ -54,8 +54,8 @@ BOOL startPinging(char* ipAddress, int* computerTTL, FILE* pFile) {
 	HANDLE hIcmpFile = IcmpCreateFile();
 
 	if (hIcmpFile == INVALID_HANDLE_VALUE) {
-		printOut(pFile, "\t[x] Unable to open handle.\n");
-		printOut(pFile, "\t[x] IcmpCreatefile returned error: %lu\n", GetLastError());
+		PrintOut(pFile, "\t[x] Unable to open handle.\n");
+		PrintOut(pFile, "\t[x] IcmpCreatefile returned error: %lu\n", GetLastError());
 		return FALSE;
 	} else {
 		LPVOID ReplyBuffer = NULL;
@@ -63,14 +63,14 @@ BOOL startPinging(char* ipAddress, int* computerTTL, FILE* pFile) {
 		IPAddr ipaddr = inet_addr(ipAddress);
 
 		if (ipaddr == INADDR_NONE) {
-			printOut(pFile, "\t[X] Error with inet_addr (ip address) !!!\n");
+			PrintOut(pFile, "\t[X] Error with inet_addr (ip address) !!!\n");
 			return FALSE;
 		}
 
 
 		ReplyBuffer = (VOID*)calloc(ReplySize, 1);
 		if (ReplyBuffer == NULL) {
-			printOut(pFile, "\t[x] Unable to allocate memory\n");
+			PrintOut(pFile, "\t[x] Unable to allocate memory\n");
 			return FALSE;
 		} else {
 			//char SendData[SEND_DATA_SIZE] = "Data Buffer";

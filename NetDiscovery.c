@@ -28,13 +28,13 @@ EnumOS DetectOSBaseTTL(UINT computerTTL) {
 VOID PrintHostOS(EnumOS hostOs, FILE* pFile) {
 	switch (hostOs) {
 	case OsLinux:
-		printOut(pFile, " - [Linux base]");
+		PrintOut(pFile, " - [Linux base]");
 		break;
 	case OsWindows:
-		printOut(pFile, " - [Windows base]");
+		PrintOut(pFile, " - [Windows base]");
 break;
 	case OsCisco:
-		printOut(pFile, " - [Cisco base]");
+		PrintOut(pFile, " - [Cisco base]");
 		break;
 	default:
 		//printf(" - [Unknown OS]");
@@ -45,22 +45,22 @@ break;
 VOID ScanBanner(TypeOfScan typeOfScan, FILE* pFile) {
 	switch (typeOfScan) {
 	case Passif_Scan:
-		printOut(pFile, "[i] ARP Table discovery:\n");
+		PrintOut(pFile, "[i] ARP Table discovery:\n");
 		break;
 	case Passif_Packet_Sniffing:
-		printOut(pFile, "[i] Passive packet sniffing:\n");
+		PrintOut(pFile, "[i] Passive packet sniffing:\n");
 		break;
 	case ICMP_Scan:
-		printOut(pFile, "[i] ICMP discovery:\n");
+		PrintOut(pFile, "[i] ICMP discovery:\n");
 		break;
 	case ARP_Scan:
-		printOut(pFile, "[i] ARP discovery:\n");
+		PrintOut(pFile, "[i] ARP discovery:\n");
 		break;
 	case DNS_Scan:
-		printOut(pFile, "[i] DNS request discovery:\n");
+		PrintOut(pFile, "[i] DNS request discovery:\n");
 		break;
 	case Disable_Scan:
-		printOut(pFile, "[i] Host(s) to scan:\n");
+		PrintOut(pFile, "[i] Host(s) to scan:\n");
 	default:
 		break;
 	}
@@ -119,7 +119,7 @@ INT32 AddIPRange(ScanStruct scanStruct, int* maskSizeInt) {
 BOOL AddHostNotScan(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo, INT32 ipAddressBc, int* nbDetected, FILE* pFile) {
 	NetworkPcInfo* networkPcInfo = (NetworkPcInfo*)calloc(maskSizeInt, sizeof(NetworkPcInfo));
 	if (networkPcInfo == NULL) {
-		printOut(pFile, "\t[x] Unable to allocate memory\n");
+		PrintOut(pFile, "\t[x] Unable to allocate memory\n");
 		return FALSE;
 	}
 
@@ -142,18 +142,18 @@ BOOL AddHostNotScan(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo, INT32 ipA
 VOID PrintDiscoveredHost(ScanStruct scanStruct, NetworkPcInfo** networkPcInfo, int nbDetected, FILE* pFile) {
 	for (int i = 0; i < nbDetected; i++) {
 		if ((*networkPcInfo)[i].macAddress == NULL)
-			printOut(scanStruct.ouputFile, "\t%3i - %15s", i + 1, (*networkPcInfo)[i].ipAddress);
+			PrintOut(scanStruct.ouputFile, "\t%3i - %15s", i + 1, (*networkPcInfo)[i].ipAddress);
 		else
-			printOut(scanStruct.ouputFile, "\t%3i - %15s:%s", i + 1, (*networkPcInfo)[i].ipAddress, (*networkPcInfo)[i].macAddress);
+			PrintOut(scanStruct.ouputFile, "\t%3i - %15s:%s", i + 1, (*networkPcInfo)[i].ipAddress, (*networkPcInfo)[i].macAddress);
 		
 		if((*networkPcInfo)[i].vendorName != NULL)
-			printOut(scanStruct.ouputFile, " - [%s]",(*networkPcInfo)[i].vendorName);
+			PrintOut(scanStruct.ouputFile, " - [%s]",(*networkPcInfo)[i].vendorName);
 		if((*networkPcInfo)[i].hostname != NULL)
-			printOut(scanStruct.ouputFile, " - [%s]",(*networkPcInfo)[i].hostname);
+			PrintOut(scanStruct.ouputFile, " - [%s]",(*networkPcInfo)[i].hostname);
 
 		PrintHostOS((*networkPcInfo)[i].osName, pFile);
 
-		printOut(scanStruct.ouputFile, "\n");
+		PrintOut(scanStruct.ouputFile, "\n");
 	}
 	return;
 }

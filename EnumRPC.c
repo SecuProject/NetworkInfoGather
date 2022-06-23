@@ -74,7 +74,7 @@ BOOL __RpcAuthBruteForce(char* DomainControllerName, char* domain, StructWordLis
 				}
 				DsUnBindA(phDS);
 			}
-			printOut(NULL, "\t\t[i] %i/%i\r", i * structWordList.nbPassword + j + 1,structWordList.nbPassword * structWordList.nbUsername);
+			PrintOut(NULL, "\t\t[i] %i/%i\r", i * structWordList.nbPassword + j + 1,structWordList.nbPassword * structWordList.nbUsername);
 				
 		}
 	}

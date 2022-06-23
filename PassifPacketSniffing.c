@@ -44,8 +44,8 @@ BOOL ProcessPacket(char* Buffer, int Size, NetworkPcInfo** ppNetworkPcInfo, int*
 			strcpy_s(pNetworkPcInfo[*nbPcInfo].ipAddress, IP_ADDRESS_LEN, ipAddressSrc);
 			
 			pNetworkPcInfo[*nbPcInfo].macAddress[0] = 0x00;
-			//printOut(pFile,"\tSource IP:\t %s\t", ipAddressSrc);
-			//printOut(pFile,"\t[%i] - [%s]\t", (*nbPcInfo) +1, ipAddressSrc);
+			//PrintOut(pFile,"\tSource IP:\t %s\t", ipAddressSrc);
+			//PrintOut(pFile,"\t[%i] - [%s]\t", (*nbPcInfo) +1, ipAddressSrc);
 			pNetworkPcInfo[*nbPcInfo].osName = DetectOSBaseTTL(iphdr->ip_ttl);
 			(*nbPcInfo)++;
 			pNetworkPcInfo = (NetworkPcInfo*)xrealloc(pNetworkPcInfo, ((*nbPcInfo) + 1) * sizeof(NetworkPcInfo));
@@ -61,8 +61,8 @@ BOOL ProcessPacket(char* Buffer, int Size, NetworkPcInfo** ppNetworkPcInfo, int*
 			//pNetworkPcInfo[*nbPcInfo].osName = DetectOSBaseTTL(iphdr->ip_ttl);
 			pNetworkPcInfo[*nbPcInfo].osName = OsUnknown;
 			pNetworkPcInfo[*nbPcInfo].macAddress[0] = 0x00;
-			//printOut(pFile,"\tDestination IP:\t %s\n", ipAddressDst);
-			//printOut(pFile, "\t[%i] - [%s]\n", (*nbPcInfo) + 1, ipAddressDst);
+			//PrintOut(pFile,"\tDestination IP:\t %s\n", ipAddressDst);
+			//PrintOut(pFile, "\t[%i] - [%s]\n", (*nbPcInfo) + 1, ipAddressDst);
 			pNetworkPcInfo[*nbPcInfo].osName = DetectOSBaseTTL(iphdr->ip_ttl);
 			(*nbPcInfo)++;
 			pNetworkPcInfo = (NetworkPcInfo*)xrealloc(pNetworkPcInfo, ((*nbPcInfo) + 1) * sizeof(NetworkPcInfo));
@@ -106,10 +106,10 @@ BOOL StartSniffing(SOCKET sniffer, int timeSniffing, NetworkPcInfo** ppNetworkPc
 	}
 	*nbDetected = nbPcInfo;
 	if (mangobyte <= 0)
-		printOut(pFile,"[x] recvfrom() failed.\n");
+		PrintOut(pFile,"[x] recvfrom() failed.\n");
 
 	if (!HeapFree(GetProcessHeap(), 0, Buffer)) {
-		printOut(pFile,"[x] Call to HeapFree has failed (%u)\n", GetLastError());
+		PrintOut(pFile,"[x] Call to HeapFree has failed (%u)\n", GetLastError());
 		return FALSE;
 	}
 
@@ -126,24 +126,24 @@ BOOL initSniffer(char* interfaceIp, SOCKET* sniffer, FILE* pFile) {
 	struct hostent* local;
 	*sniffer = socket(AF_INET, SOCK_RAW, IPPROTO_IP);
 	if (*sniffer == INVALID_SOCKET) {
-		printOut(pFile,"[x] Failed to create raw socket.\n");
+		PrintOut(pFile,"[x] Failed to create raw socket.\n");
 		return FALSE;
 	}
 	//Retrive the local hostname
 	if (gethostname(hostname, sizeof(hostname)) == SOCKET_ERROR) {
-		printOut(pFile,"[x] Gethostname failed : %d\n", WSAGetLastError());
+		PrintOut(pFile,"[x] Gethostname failed : %d\n", WSAGetLastError());
 		return FALSE;
 	}
 
 	//Retrive the available IPs of the local host
 	local = gethostbyname(hostname);
 	if (local == NULL) {
-		printOut(pFile,"[x] Gethostbyname failed: %d.\n", WSAGetLastError());
+		PrintOut(pFile,"[x] Gethostbyname failed: %d.\n", WSAGetLastError());
 		return FALSE;
 	}
 	int i;
 	if (local->h_addr_list[0] == 0){ 
-		printOut(pFile,"[x] Interface not found !\n");
+		PrintOut(pFile,"[x] Interface not found !\n");
 		return FALSE;
 	}
 
@@ -153,7 +153,7 @@ BOOL initSniffer(char* interfaceIp, SOCKET* sniffer, FILE* pFile) {
 			break;
 	}
 	if (strcmp(inet_ntoa(addr), interfaceIp) != 0) {
-		printOut(pFile,"[x] The interface was not found !\n");
+		PrintOut(pFile,"[x] The interface was not found !\n");
 		return FALSE;
 	}
 
@@ -164,12 +164,12 @@ BOOL initSniffer(char* interfaceIp, SOCKET* sniffer, FILE* pFile) {
 	dest.sin_port = 0;
 
 	if (bind(*sniffer, (const SOCKADDR_IN*) &dest, sizeof(SOCKADDR_IN)) == SOCKET_ERROR) {
-		printOut(pFile,"[x] bind(%s) failed.\n", inet_ntoa(addr));
+		PrintOut(pFile,"[x] bind(%s) failed.\n", inet_ntoa(addr));
 		return FALSE;
 	}
 	int j = 1;
 	if (WSAIoctl(*sniffer, SIO_RCVALL, &j, sizeof(int), 0, 0, (LPDWORD)&in, 0, 0) == SOCKET_ERROR) {
-		printOut(pFile,"[x] WSAIoctl() failed.\n");
+		PrintOut(pFile,"[x] WSAIoctl() failed.\n");
 		return FALSE;
 	}
 	return TRUE;

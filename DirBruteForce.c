@@ -89,8 +89,6 @@ ENUM_PAGE_NOT_FOUND SetNotFound(PHTTP_STRUC pHttpStruct, RequestInfoStruct reque
     if (pHttpStructInvalide == NULL)
         return BASE_CODE_ERROR_CODE;
 
-
-
     pHttpStruct->returnCode = pHttpStructInvalide[0]->returnCode;
     pHttpStruct->contentLen = pHttpStructInvalide[0]->contentLen;
 
@@ -170,7 +168,7 @@ VOID PrintAllDir(FILE* pFile, char* printBuffer, int printBufferLen) {
         if (printBuffer[i] == 0x09)
             strLenNew += 5;
     }
-    printOut(pFile, "%s", printBuffer);
+    PrintOut(pFile, "%s", printBuffer);
     for (int i = 0; i < defaultWidth - strLenNew; i++)
         printf(" ");
     printf("\n");
@@ -196,7 +194,7 @@ VOID PrintDirFind(PHTTP_STRUC pHttpStructPage, char* ipAddress, FILE* pFile, BOO
         (pHttpStructPage->contentLen > 0) ? pHttpStructPage->contentLen : 0);
     PrintAllDir(pFile, printBuffer, strLen);
 
-    /* printOut(pFile, "\t\thttp%s://%s%-23s %i -  %-5i                                                   \n",
+    /* PrintOut(pFile, "\t\thttp%s://%s%-23s %i -  %-5i                                                   \n",
          isSSL ? "s" : "", ipAddress,
          pHttpStructPage->requestPath, pHttpStructPage->returnCode,
          (pHttpStructPage->contentLen > 0) ? pHttpStructPage->contentLen : 0);*/
@@ -430,6 +428,8 @@ BOOL HttpDirEnum(RequestInfoStruct requestInfoStruct, ServerType serverType, FIL
         FreePHTTP_STRUC(pHttpStructInvalide);
         return FALSE;
     }
+
+    printf("[d] Enum Dir Not Found: %i\n", enumDirNotFound);
 
     printf("\t\tURL\t\t\t\t   %s      Code - Length\tRedirection\n", requestInfoStruct.isSSL ? " " : "");
 

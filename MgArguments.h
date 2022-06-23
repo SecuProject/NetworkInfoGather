@@ -37,8 +37,6 @@ typedef struct ScanStruct {
 //
 ////////////////////// SCAN ///////////////////////////
 
-
-
 /////////////////// Brute Force ///////////////////////
 //
 typedef struct {
@@ -137,8 +135,6 @@ typedef struct pEnumStruct{
 //
 ///////////////////// Enumeration /////////////////////////
 
-
-
 ///////////////////// Curl /////////////////////////
 // 
 typedef struct pCurlStruct {
@@ -157,13 +153,38 @@ typedef struct pCurlStruct {
 // 
 ///////////////////// Curl /////////////////////////
 
+///////////////////// DOS /////////////////////////
+//
+
+
+
+typedef enum {
+    INVALID_FULL,
+    TCP_FLOOD_SYN,
+    TCP_FLOOD_FULL,
+    UDP_FLOOD,
+    PING_FLOOD,
+    HTTP_FLOOD,
+}AttackType;
+typedef struct pDosStruct {
+    char* ipAddress;
+    INT port;
+    AttackType attackType;
+
+    UINT dataSize;
+    UINT time;
+}DosStruct, * pDosStruct;
+// 
+///////////////////// DOS /////////////////////////
+
 
 typedef enum {
     ModeScan,
     ModeBruteforce,
     ModeExploit,
     ModeEnum,
-    ModeCurl
+    ModeCurl,
+    ModeDos
 }ProgramMode;
 
 typedef struct Argument {
@@ -174,6 +195,7 @@ typedef struct Argument {
         ScanStruct scanStruct;
         EnumStruct enumStruct;
         CurlStruct curlStruct;
+        DosStruct dosStruct;
     };
 }Arguments, * pArguments;
 
