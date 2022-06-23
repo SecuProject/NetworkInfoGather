@@ -784,10 +784,10 @@ BOOL ParseDosArg(int argc, char* argv[], pDosStruct pDosStruct) {
                     pDosStruct->port = atoi(argv[i + 1]);
                     break;
                 case 'd':
-                    pDosStruct->dataSize = atoi(argv[i + 1]);
+                    pDosStruct->dataSize = atoi(argv[i + 1]) * 1000;
                     break;
                 case 'T':
-                    pDosStruct->time = atoi(argv[i + 1]);
+                    pDosStruct->time = atoi(argv[i + 1]) * 1000;
                     break;
                 default:
                     break;
@@ -821,8 +821,13 @@ BOOL ParseDosArg(int argc, char* argv[], pDosStruct pDosStruct) {
         PrintMenuDos();
         return FALSE;
     }
-    if (pDosStruct->ipAddress == NULL || pDosStruct->port == 0) {
-        printf("[x] Invalid argument must by set !\n");
+    if (pDosStruct->ipAddress == NULL) {
+        printf("[x] IP Address argument must by set !\n");
+        PrintMenuDos();
+        return FALSE;
+    }
+    if (pDosStruct->attackType != PING_FLOOD && pDosStruct->port == 0) {
+        printf("[x] Port argument must by set !\n");
         PrintMenuDos();
         return FALSE;
     }

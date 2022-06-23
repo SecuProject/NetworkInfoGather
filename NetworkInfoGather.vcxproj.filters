@@ -157,6 +157,9 @@
     <Filter Include="Source Files\AttackDOS\AttackFloodPing">
       <UniqueIdentifier>{bab08f0b-9b82-4d5f-ac03-4f4a98c02e2b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\AttackDOS\AttackFloodFullTCP">
+      <UniqueIdentifier>{c7860373-f24a-4d00-a63f-00afaa7483f0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -311,6 +314,9 @@
     </ClCompile>
     <ClCompile Include="AttackFloodPing.c">
       <Filter>Source Files\AttackDOS\AttackFloodPing</Filter>
+    </ClCompile>
+    <ClCompile Include="AttackFloodFullTCP.c">
+      <Filter>Source Files\AttackDOS\AttackFloodFullTCP</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -490,6 +496,9 @@
     </ClInclude>
     <ClInclude Include="AttackFloodPing.h">
       <Filter>Source Files\AttackDOS\AttackFloodPing</Filter>
+    </ClInclude>
+    <ClInclude Include="AttackFloodFullTCP.h">
+      <Filter>Source Files\AttackDOS\AttackFloodFullTCP</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

