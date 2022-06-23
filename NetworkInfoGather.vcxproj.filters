@@ -160,6 +160,12 @@
     <Filter Include="Source Files\AttackDOS\AttackFloodFullTCP">
       <UniqueIdentifier>{c7860373-f24a-4d00-a63f-00afaa7483f0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\AttackDOS\AttackFloodUDP">
+      <UniqueIdentifier>{39b0dfe2-a97b-4798-b6d5-4c05d9fda1d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\AttackDOS\AttackFloodTcpSyn">
+      <UniqueIdentifier>{2ba8271e-dc21-4b8e-98e9-6416ec78c28b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -317,6 +323,12 @@
     </ClCompile>
     <ClCompile Include="AttackFloodFullTCP.c">
       <Filter>Source Files\AttackDOS\AttackFloodFullTCP</Filter>
+    </ClCompile>
+    <ClCompile Include="AttackFloodUDP.c">
+      <Filter>Source Files\AttackDOS\AttackFloodUDP</Filter>
+    </ClCompile>
+    <ClCompile Include="AttackFloodTcpSyn.c">
+      <Filter>Source Files\AttackDOS\AttackFloodTcpSyn</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -499,6 +511,12 @@
     </ClInclude>
     <ClInclude Include="AttackFloodFullTCP.h">
       <Filter>Source Files\AttackDOS\AttackFloodFullTCP</Filter>
+    </ClInclude>
+    <ClInclude Include="AttackFloodUDP.h">
+      <Filter>Source Files\AttackDOS\AttackFloodUDP</Filter>
+    </ClInclude>
+    <ClInclude Include="AttackFloodTcpSyn.h">
+      <Filter>Source Files\AttackDOS\AttackFloodTcpSyn</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

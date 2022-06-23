@@ -8,7 +8,7 @@
 
 //void scanPort(NetworkPcInfo* networkPcInfo, int nbDetected, ScanStruct scanStruct);
 
-//BOOL scanPortOpenUDP(char* dest_ip, int port, FILE* pFile);
+BOOL scanPortOpenUDP(char* dest_ip, int port, FILE* pFile);
 BOOL scanPortOpenTCP(char* dest_ip, int port, FILE* pFile);
 
 

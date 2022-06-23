@@ -153,6 +153,8 @@
     <ClCompile Include="AttackDOS.c" />
     <ClCompile Include="AttackFloodFullTCP.c" />
     <ClCompile Include="AttackFloodPing.c" />
+    <ClCompile Include="AttackFloodTcpSyn.c" />
+    <ClCompile Include="AttackFloodUDP.c" />
     <ClCompile Include="Base64.c" />
     <ClCompile Include="ChainListUrlRedir.c" />
     <ClCompile Include="CheckCVE.c" />
@@ -209,6 +211,8 @@
     <ClInclude Include="AttackDOS.h" />
     <ClInclude Include="AttackFloodFullTCP.h" />
     <ClInclude Include="AttackFloodPing.h" />
+    <ClInclude Include="AttackFloodTcpSyn.h" />
+    <ClInclude Include="AttackFloodUDP.h" />
     <ClInclude Include="backupWordList.h" />
     <ClInclude Include="Base64.h" />
     <ClInclude Include="ChainListUrlRedir.h" />
