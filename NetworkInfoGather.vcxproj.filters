@@ -166,6 +166,12 @@
     <Filter Include="Source Files\AttackDOS\AttackFloodTcpSyn">
       <UniqueIdentifier>{2ba8271e-dc21-4b8e-98e9-6416ec78c28b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\AttackDOS\AttackFloodHttp">
+      <UniqueIdentifier>{100d0c1c-885f-4063-af1e-dc2cbe0d1cca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\4. FingerPrintInfo\EnumHTTP\ExternalIp">
+      <UniqueIdentifier>{0825890b-21b8-4649-b698-739ec5285453}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -329,6 +335,12 @@
     </ClCompile>
     <ClCompile Include="AttackFloodTcpSyn.c">
       <Filter>Source Files\AttackDOS\AttackFloodTcpSyn</Filter>
+    </ClCompile>
+    <ClCompile Include="AttackFloodHttp.c">
+      <Filter>Source Files\AttackDOS\AttackFloodHttp</Filter>
+    </ClCompile>
+    <ClCompile Include="ExternalIp.c">
+      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\ExternalIp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -517,6 +529,12 @@
     </ClInclude>
     <ClInclude Include="AttackFloodTcpSyn.h">
       <Filter>Source Files\AttackDOS\AttackFloodTcpSyn</Filter>
+    </ClInclude>
+    <ClInclude Include="AttackFloodHttp.h">
+      <Filter>Source Files\AttackDOS\AttackFloodHttp</Filter>
+    </ClInclude>
+    <ClInclude Include="ExternalIp.h">
+      <Filter>Source Files\4. FingerPrintInfo\EnumHTTP\ExternalIp</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

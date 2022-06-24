@@ -184,6 +184,7 @@ typedef enum {
     ModeExploit,
     ModeEnum,
     ModeCurl,
+    ModeExternalIp,
     ModeDos
 }ProgramMode;
 

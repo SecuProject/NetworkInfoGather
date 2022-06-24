@@ -240,13 +240,14 @@ VOID PrintMenuDos() {
     printf("-aH\t\tHTTP flood (KeepAlive -> slowloris)\n\n");
 }
 VOID PrintMenu() {
-    printf("\n\nNetworkInfoGather.exe {scan,bf,exploit,enum} [-h]\n\n");
+    printf("\n\nNetworkInfoGather.exe {scan,bf,exploit,enum,dos,WAN,curl}\n\n");
     printf("OPTION:\n");
     printf("\tscan\tWill scan the network\n");
     printf("\tbf\tbrute force protocol\n");
     printf("\texploit\tExploit vulnerability\n");
     printf("\tenum\tPerform enumeration\n");
     printf("\tdos\tDenial of service attack\n");
+    printf("\tWAN\tPrint external IP address of the system\n");
     printf("\tcurl\tWeb request\n");
     return;
 }
@@ -461,7 +462,7 @@ BOOL HostnameToIp(char* hostname, char** ppIpAddress){
 
     he = gethostbyname(hostname);
     if (he == NULL){
-        printf("[x] Fail to resovle the hostname (%i)!\n", WSAGetLastError());
+        printf("[x] Fail to resolve the hostname (%i)!\n", WSAGetLastError());
         free(*ppIpAddress);
         return FALSE;
     }
@@ -762,7 +763,7 @@ BOOL ParseCurlArg(int argc, char* argv[], pCurlStruct pCurlStruct) {
 }
 
 BOOL ParseDosArg(int argc, char* argv[], pDosStruct pDosStruct) {
-    // default: porgram dos ip port => 4
+    // default: program dos IP port => 4
     if (argc < 4 || 10 < argc) {
         PrintMenuEnum();
         return FALSE;
@@ -931,7 +932,10 @@ BOOL GetArguments(int argc, char* argv[], pArguments pListAgrument) {
             return FALSE;
         } else if (strcmp(argv[1], "curl") == 0) {
             PrintMenuCurl();
-            return FALSE;        
+            return FALSE;  
+        } else if (strcmp(argv[1], "WAN") == 0 || strcmp(argv[1], "wan") == 0) {
+            pListAgrument->programMode = ModeExternalIp;
+            return TRUE;  
         } else if (strcmp(argv[1], "dos") == 0) {
             PrintMenuDos();
             return FALSE;
@@ -963,6 +967,5 @@ BOOL GetArguments(int argc, char* argv[], pArguments pListAgrument) {
             return FALSE;
         }
     }
-
     return TRUE;
 }

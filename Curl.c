@@ -152,21 +152,8 @@ BOOL Curl(CurlStruct CurlStruct) {
 	if (CurlStruct.userAgent)
 		httpUserAgent = CurlStruct.userAgent;
 	else if (CurlStruct.agentRand) {
-		char* httpUserAgentTab[] = {
-			"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36 Edg/102.0.1245.44",
-			"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36",
-			"Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36",
-			"Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36",
-			"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:101.0) Gecko/20100101 Firefox/101.0",
-			"Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36 Vivaldi/4.3",
-			"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36 Vivaldi/4.3",
-		};
-		httpUserAgent = httpUserAgentTab[rand() % (sizeof(httpUserAgentTab)-1)]; // to check
+		httpUserAgent = userAgentList[rand() % (10 - 1)]; // to check
 	}
-
-	/*
-	"Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/81.0" https://example.com/"
-	*/
 	char* serverResponce = NULL;
 	UINT responseSize;
 

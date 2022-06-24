@@ -29,7 +29,7 @@
 
 #define NO_BODY_DATA		0
 
-extern const char* userAgentList[];
+extern const char* userAgentList[10];
 
 typedef struct {
 	const char* pStart;

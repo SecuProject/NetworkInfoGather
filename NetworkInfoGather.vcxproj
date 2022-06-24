@@ -152,6 +152,7 @@
     <ClCompile Include="ARPTable.c" />
     <ClCompile Include="AttackDOS.c" />
     <ClCompile Include="AttackFloodFullTCP.c" />
+    <ClCompile Include="AttackFloodHttp.c" />
     <ClCompile Include="AttackFloodPing.c" />
     <ClCompile Include="AttackFloodTcpSyn.c" />
     <ClCompile Include="AttackFloodUDP.c" />
@@ -178,6 +179,7 @@
     <ClCompile Include="EnumSmbUser.c" />
     <ClCompile Include="EnumSMTP.c" />
     <ClCompile Include="Exploit.c" />
+    <ClCompile Include="ExternalIp.c" />
     <ClCompile Include="FaviconDetection.c" />
     <ClCompile Include="GetHTTPserver.c" />
     <ClCompile Include="GetHTTPSserver.c" />
@@ -210,6 +212,7 @@
     <ClInclude Include="ARPTable.h" />
     <ClInclude Include="AttackDOS.h" />
     <ClInclude Include="AttackFloodFullTCP.h" />
+    <ClInclude Include="AttackFloodHttp.h" />
     <ClInclude Include="AttackFloodPing.h" />
     <ClInclude Include="AttackFloodTcpSyn.h" />
     <ClInclude Include="AttackFloodUDP.h" />
@@ -238,6 +241,7 @@
     <ClInclude Include="EnumSmbUser.h" />
     <ClInclude Include="EnumSMTP.h" />
     <ClInclude Include="Exploit.h" />
+    <ClInclude Include="ExternalIp.h" />
     <ClInclude Include="FaviconDatabase.h" />
     <ClInclude Include="FaviconDetection.h" />
     <ClInclude Include="GetHTTPserver.h" />

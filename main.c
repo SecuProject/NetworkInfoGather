@@ -20,6 +20,7 @@
 #include "EnumPort.h"
 #include "Curl.h"
 #include "AttackDOS.h"
+#include "ExternalIp.h"
 
 #pragma comment(lib, "Advapi32.lib")
 #pragma comment(lib, "iphlpapi.lib")
@@ -210,6 +211,9 @@ int main(int argc, char* argv[]) {
 		case ModeCurl:
 			Curl(listAgrument.curlStruct);
 			break;
+		case ModeExternalIp:
+			ExternalIp();
+			return TRUE;
 		case ModeDos:
 			AttackDos(listAgrument.dosStruct);
 			break;
