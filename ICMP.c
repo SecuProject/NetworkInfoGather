@@ -68,7 +68,7 @@ BOOL startPinging(char* ipAddress, int* computerTTL, FILE* pFile) {
 		}
 
 
-		ReplyBuffer = (VOID*)calloc(ReplySize, 1);
+		ReplyBuffer = (VOID*)xcalloc(ReplySize, 1);
 		if (ReplyBuffer == NULL) {
 			PrintOut(pFile, "\t[x] Unable to allocate memory\n");
 			return FALSE;

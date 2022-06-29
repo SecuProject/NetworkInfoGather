@@ -87,7 +87,7 @@ BOOL UserEnumRcptFrom(NETSOCK_DATA netSockData, char* recvBuffer, FILE* pFile) {
 }
 
 BOOL UserEnumRCPT(NETSOCK_DATA netSockData, SMTP_DATA* smtpData, FILE* pFile) {
-	smtpData->listUser = (char**)calloc(sizeof(smtpUser) / sizeof(char*), sizeof(char*));
+	smtpData->listUser = (char**)xcalloc(sizeof(smtpUser) / sizeof(char*), sizeof(char*));
 	if (smtpData->listUser == NULL)
 		return FALSE;
 
@@ -143,7 +143,7 @@ BOOL UserEnumRCPT(NETSOCK_DATA netSockData, SMTP_DATA* smtpData, FILE* pFile) {
 }
 BOOL UserEnumVRFY(NETSOCK_DATA netSockData, SMTP_DATA* smtpData, FILE* pFile) {
 	smtpData->numUser = 0;
-	smtpData->listUser = (char**)calloc(sizeof(smtpUser) / sizeof(char*), sizeof(char*));
+	smtpData->listUser = (char**)xcalloc(sizeof(smtpUser) / sizeof(char*), sizeof(char*));
 	if (smtpData->listUser == NULL)
 		return FALSE;
 

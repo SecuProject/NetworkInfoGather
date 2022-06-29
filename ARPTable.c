@@ -29,8 +29,7 @@ BOOL GetARPTable(NetworkPcInfo** ptrArpTable, int* arpTableSize, INT32 ipRangeIn
 		PrintOut(pFile,"[x] GetIpNetTable for IPv4 table returned error: %i\n", status);
 		return FALSE;
 	} else {
-		NetworkPcInfo* arpTable = (NetworkPcInfo*)calloc(sizeof(NetworkPcInfo), 1);
-
+		NetworkPcInfo* arpTable = (NetworkPcInfo*)xcalloc(sizeof(NetworkPcInfo), 1);
 		if (arpTable == NULL)
 			return FALSE;
 

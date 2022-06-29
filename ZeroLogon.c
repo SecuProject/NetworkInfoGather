@@ -4,6 +4,7 @@
 #include "MgArguments.h"
 #include "NetLogon.h"
 #include "ZeroLogon.h"
+#include "Network.h"
 
 
 
@@ -99,7 +100,7 @@ BOOL RunZeroLogon(WCHAR* dc_fqdn, WCHAR* dc_netbios, WCHAR* dc_account, BOOL isO
 
 BOOL GetComputerNameFQDL(WCHAR* dc_netbios, WCHAR** ppDcAccount) {
 	size_t dcAccountSize = wcslen(dc_netbios) + 2;
-	*ppDcAccount = (WCHAR*)calloc(dcAccountSize, sizeof(WCHAR));
+	*ppDcAccount = (WCHAR*)xcalloc(dcAccountSize, sizeof(WCHAR));
 	if (*ppDcAccount == NULL) {
 		printf("\t[x] Fail to allocate memory !\n");
 		return FALSE;

@@ -76,9 +76,8 @@ BOOL EnumNetBios(NetworkPcInfo* networkPcInfo) {
         return FALSE;
     }
 
-    recv = (UCHAR*)calloc(RECV_BUFFER_SIZE, 1);
+    recv = (UCHAR*)xcalloc(RECV_BUFFER_SIZE, 1);
     if (recv == NULL) {
-        printf("\t\t[-] Memory error !\n");
         closesocket(pSocket);
         return FALSE;
     }
@@ -104,9 +103,8 @@ BOOL EnumNetBios(NetworkPcInfo* networkPcInfo) {
             return FALSE;
         }
 
-        networkPcInfo->NetbiosInfo = (NETBIOS_Info*)calloc(1, sizeof(NETBIOS_Info));
+        networkPcInfo->NetbiosInfo = (NETBIOS_Info*)xcalloc(1, sizeof(NETBIOS_Info));
         if (networkPcInfo->NetbiosInfo == NULL) {
-            printf("\t\t[-] Memory error !\n");
             free(recv);
             closesocket(pSocket);
             return FALSE;

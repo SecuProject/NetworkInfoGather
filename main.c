@@ -54,7 +54,7 @@ BOOL Scan(ScanStruct scanStruct) {
 	// Disable SMB brute-force for the test !!! 
 	//scanStruct.bruteforce = FALSE;
 
-	adapterInfo = (ADAPTER_INFO*)calloc(sizeof(ADAPTER_INFO), MAX_NB_ADAPTER);
+	adapterInfo = (ADAPTER_INFO*)xcalloc(sizeof(ADAPTER_INFO), MAX_NB_ADAPTER);
 	if (adapterInfo == NULL)
 		return FALSE;
 	nbAdapter = getAdapterkInfo(adapterInfo, scanStruct.ouputFile);
@@ -71,6 +71,7 @@ BOOL Scan(ScanStruct scanStruct) {
 			PrintOut(scanStruct.ouputFile, "[x] Adapter not set (-i [Adapter Number]) !\n\n");
 		for (UINT i = 0; i < nbAdapter; i++) {
 			int maskSizeInt = 0;
+
 
 			ipCalucation(adapterInfo[i].localIP, adapterInfo[i].networkMask, &maskSizeInt);
 			PrintOut(scanStruct.ouputFile, "[ Adapter %i ] GW %s - MASK %s - Local IP %s\n", i + 1, adapterInfo[i].GateWayIp, adapterInfo[i].networkMask, adapterInfo[i].localIP);

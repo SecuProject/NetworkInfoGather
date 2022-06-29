@@ -85,7 +85,7 @@ BOOL StartSniffing(SOCKET sniffer, int timeSniffing, NetworkPcInfo** ppNetworkPc
 	int mangobyte;
 	//char Buffer[PACKET_BUFFER_SIZE]; // heap alloc
 
-	*ppNetworkPcInfo = (NetworkPcInfo*)calloc(sizeof(NetworkPcInfo), 1);
+	*ppNetworkPcInfo = (NetworkPcInfo*)xcalloc(sizeof(NetworkPcInfo), 1);
 	if (*ppNetworkPcInfo == NULL)
 		return FALSE;
 

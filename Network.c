@@ -14,7 +14,7 @@ void* xrealloc(void* ptr, size_t size) {
 		return FALSE;
 	}
 
-	newptr = xrealloc(ptr, size);
+	newptr = realloc(ptr, size);
 	if (newptr == NULL) {
 		PrintMsgError2("Memory allocation failed");
 		free(ptr);
@@ -27,7 +27,7 @@ void* xcalloc(size_t _Count, size_t _Size){
 		PrintMsgError2("Memory allocation failed data is size 0");
 		return FALSE;
 	}
-	char* newptr = xcalloc(_Count, _Size);
+	char* newptr = calloc(_Count, _Size);
 	if (newptr == NULL){
 		PrintMsgError2("Memory allocation failed");
 		return NULL;

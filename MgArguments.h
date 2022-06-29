@@ -8,6 +8,9 @@
 #include <stdio.h>
 #include "MgCredentials.h"
 
+#define MATCH(strA,strB)            (strcmp(strA, strB) == 0)
+#define MATCHN(strA,strB,strLen)    (strncmp(strA, strB,strLen) == 0)
+
 #define MAX_BUFFER	128
 
 ////////////////////// SCAN ///////////////////////////

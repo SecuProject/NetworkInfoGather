@@ -179,16 +179,16 @@ DWORD WINAPI ThreadNetworkPortScan(LPVOID lpParam) {
 		portList = pscanStruct->portList;
 	}
 
-	DWORD* dwThreadIdArray = (DWORD*)calloc(nbPort, sizeof(DWORD));
+	DWORD* dwThreadIdArray = (DWORD*)xcalloc(nbPort, sizeof(DWORD));
 	if (dwThreadIdArray == NULL) {
 		return FALSE;
 	}
-	HANDLE* hThreadArray = (HANDLE*)calloc(nbPort, sizeof(HANDLE));
+	HANDLE* hThreadArray = (HANDLE*)xcalloc(nbPort, sizeof(HANDLE));
 	if (hThreadArray == NULL) {
 		free(dwThreadIdArray);
 		return FALSE;
 	}
-	PTHREAD_STRUCT_PORT_SCAN pThreadDataPort = (PTHREAD_STRUCT_PORT_SCAN)calloc(nbPort, sizeof(THREAD_STRUCT_PORT_SCAN));
+	PTHREAD_STRUCT_PORT_SCAN pThreadDataPort = (PTHREAD_STRUCT_PORT_SCAN)xcalloc(nbPort, sizeof(THREAD_STRUCT_PORT_SCAN));
 	if (pThreadDataPort == NULL) {
 		free(hThreadArray);
 		free(dwThreadIdArray);
@@ -235,17 +235,17 @@ DWORD WINAPI ThreadNetworkPortScan(LPVOID lpParam) {
 
 
 BOOL MultiScanPort(NetworkPcInfo* networkPcInfo, int nbDetected, ScanStruct scanStruct, BOOL isTcp) {
-	DWORD* dwThreadIdArray = (DWORD*)calloc(nbDetected, sizeof(DWORD));
+	DWORD* dwThreadIdArray = (DWORD*)xcalloc(nbDetected, sizeof(DWORD));
 	if (dwThreadIdArray == NULL) {
 		return FALSE;
 	}
-	HANDLE* hThreadArray = (HANDLE*)calloc(nbDetected, sizeof(HANDLE));
+	HANDLE* hThreadArray = (HANDLE*)xcalloc(nbDetected, sizeof(HANDLE));
 	if (hThreadArray == NULL) {
 		free(dwThreadIdArray);
 		return FALSE;
 	}
 
-	PTHREAD_STRUCT_PC_PORT_SCAN pThreadData = (PTHREAD_STRUCT_PC_PORT_SCAN)calloc(nbDetected, sizeof(THREAD_STRUCT_PC_PORT_SCAN));
+	PTHREAD_STRUCT_PC_PORT_SCAN pThreadData = (PTHREAD_STRUCT_PC_PORT_SCAN)xcalloc(nbDetected, sizeof(THREAD_STRUCT_PC_PORT_SCAN));
 	if (pThreadData == NULL) {
 		free(hThreadArray);
 		free(dwThreadIdArray);

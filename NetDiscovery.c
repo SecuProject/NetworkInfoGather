@@ -117,7 +117,7 @@ INT32 AddIPRange(ScanStruct scanStruct, int* maskSizeInt) {
 }
 
 BOOL AddHostNotScan(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo, INT32 ipAddressBc, int* nbDetected, FILE* pFile) {
-	NetworkPcInfo* networkPcInfo = (NetworkPcInfo*)calloc(maskSizeInt, sizeof(NetworkPcInfo));
+	NetworkPcInfo* networkPcInfo = (NetworkPcInfo*)xcalloc(maskSizeInt, sizeof(NetworkPcInfo));
 	if (networkPcInfo == NULL) {
 		PrintOut(pFile, "\t[x] Unable to allocate memory\n");
 		return FALSE;

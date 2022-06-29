@@ -152,7 +152,7 @@ BOOL Curl(CurlStruct CurlStruct) {
 	if (CurlStruct.userAgent)
 		httpUserAgent = CurlStruct.userAgent;
 	else if (CurlStruct.agentRand) {
-		httpUserAgent = userAgentList[rand() % (10 - 1)]; // to check
+		httpUserAgent = (char*)userAgentList[rand() % (10 - 1)]; // to check
 	}
 	char* serverResponce = NULL;
 	UINT responseSize;
@@ -181,8 +181,6 @@ BOOL Curl(CurlStruct CurlStruct) {
 // pCurlStruct.agentRand
 
 // agentRand -> output !!!
-
-
 
 
 /*

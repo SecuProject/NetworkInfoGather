@@ -62,7 +62,7 @@ ENUM_PAGE_NOT_FOUND SetNotFound(PHTTP_STRUC pHttpStruct, RequestInfoStruct reque
     BOOL isContentLenSame = TRUE;
     BOOL isRedirectionSame = TRUE;
     UINT isMatch = 0;
-    PHTTP_STRUC pHttpStructInvalide[3]; // calloc
+    PHTTP_STRUC pHttpStructInvalide[3]; // xcalloc
 
 
     /*pHttpStruct->redirectionPath = (char*)malloc(REDIRECTION_PATH_SIZE);
@@ -132,7 +132,6 @@ ENUM_PAGE_NOT_FOUND SetNotFound(PHTTP_STRUC pHttpStruct, RequestInfoStruct reque
     for (int i = invalideUrlPathSize - 1; i > 0; i--)
         free(pHttpStructInvalide[i]);
 
-
     if (isReturnCodeSame)
         return BASE_CODE_ERROR_CODE;
     else if (isContentLenSame)
@@ -140,7 +139,6 @@ ENUM_PAGE_NOT_FOUND SetNotFound(PHTTP_STRUC pHttpStruct, RequestInfoStruct reque
     else if (isRedirectionSame)
         return BASE_DATA_SIZE_CODE;
     return BASE_NOT_FOUND;
-
 }
 
 ENUM_PAGE_NOT_FOUND SetFileNotFound(PHTTP_STRUC pHttpStruct, RequestInfoStruct requestInfoStruct, FILE* pFile) {
@@ -174,10 +172,10 @@ VOID PrintAllDir(FILE* pFile, char* printBuffer, int printBufferLen) {
     printf("\n");
 }
 VOID PrintDirFindRedirect(PHTTP_STRUC pHttpStructPage, char* ipAddress, FILE* pFile, BOOL isSSL) {
-    char* printBuffer = (char*)malloc(1024);
+    char* printBuffer = (char*)malloc(BUFFER_SIZE);
     if (printBuffer == NULL)
         return;
-    int strLen = sprintf_s(printBuffer, 1024, "\t\thttp%s://%s%-24s %i  -  %-5i -> %s",
+    int strLen = sprintf_s(printBuffer, BUFFER_SIZE, "\t\thttp%s://%s%-24s %i  -  %-5i -> %s",
         isSSL ? "s" : "", ipAddress,
         pHttpStructPage->requestPath,
         pHttpStructPage->returnCode,
@@ -186,10 +184,10 @@ VOID PrintDirFindRedirect(PHTTP_STRUC pHttpStructPage, char* ipAddress, FILE* pF
     PrintAllDir(pFile, printBuffer, strLen);
 }
 VOID PrintDirFind(PHTTP_STRUC pHttpStructPage, char* ipAddress, FILE* pFile, BOOL isSSL) {
-    char* printBuffer = (char*)malloc(1024);
+    char* printBuffer = (char*)malloc(BUFFER_SIZE);
     if (printBuffer == NULL)
         return;
-    int strLen = sprintf_s(printBuffer, 1024, "\t\thttp%s://%s%-24s %i  -  %-5i", isSSL ? "s" : "", ipAddress,
+    int strLen = sprintf_s(printBuffer, BUFFER_SIZE, "\t\thttp%s://%s%-24s %i  -  %-5i", isSSL ? "s" : "", ipAddress,
         pHttpStructPage->requestPath, pHttpStructPage->returnCode,
         (pHttpStructPage->contentLen > 0) ? pHttpStructPage->contentLen : 0);
     PrintAllDir(pFile, printBuffer, strLen);
@@ -386,7 +384,7 @@ int StartHttpDirEnum(RequestInfoStruct requestInfoStruct, FILE* pFile, ENUM_PAGE
 
 
 char** CreateTableBackup(UINT numIndexFile, UINT* nbLineListBackup) {
-    char** wordListBackupFile = (char**)calloc(ARRAY_SIZE_CHAR(wordListBackupAppendFile), sizeof(char*));
+    char** wordListBackupFile = (char**)xcalloc(ARRAY_SIZE_CHAR(wordListBackupAppendFile), sizeof(char*));
     if (wordListBackupFile == NULL)
         return NULL;
 
@@ -411,7 +409,6 @@ VOID ClearTableBackup(char** wordListBackupFile, UINT nbLineListBackup) {
 #define DEBUG_TEST 1
 
 BOOL HttpDirEnum(RequestInfoStruct requestInfoStruct, ServerType serverType, FILE* pFile) {
-
     printf("\t[HTTP%s] %s:%i - HTTP%s Directory Enumeration\n", requestInfoStruct.isSSL ? "S" : "", requestInfoStruct.ipAddress, requestInfoStruct.port, requestInfoStruct.isSSL ? "S" : "");
 
     ENUM_PAGE_NOT_FOUND enumPageNotFound;
@@ -450,11 +447,7 @@ BOOL HttpDirEnum(RequestInfoStruct requestInfoStruct, ServerType serverType, FIL
     }
 
 
-
     StartHttpDirEnum(requestInfoStruct, pFile, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListCommonFile, ARRAY_SIZE_CHAR(wordListCommonFile), &headRedirUrl, &tailRedirUrl);
-
-
-
 
 #if !DEBUG_TEST
     //StartHttpDirEnum(ipAddress, port, httpAuthHeader, pFile, isSSL, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListCommonDir, ARRAY_SIZE_CHAR(wordListCommonDir), &headRedirUrl, &tailRedirUrl);
@@ -487,7 +480,7 @@ BOOL HttpDirEnum(RequestInfoStruct requestInfoStruct, ServerType serverType, FIL
 
     /*PrintRedirectionNode(headRedirUrl);
 
-
+   
     printf("\t[HTTP%s] %s:%i - HTTP%s Backup Enumeration\n", requestInfoStruct.isSSL ? "S" : "", requestInfoStruct.ipAddress, requestInfoStruct.port, requestInfoStruct.isSSL ? "S" : "");
     StartHttpDirEnum(requestInfoStruct, pFile, enumPageNotFound, enumDirNotFound, pHttpStructInvalide, (char**)wordListBackupFile, ARRAY_SIZE_CHAR(wordListBackupFile), &headRedirUrl, &tailRedirUrl);
     ClearRedirectionNode(headRedirUrl);*/

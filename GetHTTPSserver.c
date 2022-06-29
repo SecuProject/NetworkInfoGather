@@ -11,7 +11,7 @@
 
 
 HINTERNET WinHttpOpenF(char* userAgent) {
-    WCHAR* userAgentW = (WCHAR*)calloc(USER_AGENT_SIZE, sizeof(WCHAR));
+    WCHAR* userAgentW = (WCHAR*)xcalloc(USER_AGENT_SIZE, sizeof(WCHAR));
     if (userAgentW != NULL) {
         HINTERNET hSession;
 
@@ -27,7 +27,7 @@ HINTERNET WinHttpOpenF(char* userAgent) {
     return NULL;
 }
 HINTERNET WinHttpConnectF(HINTERNET hSession,char* ipAddress, int port) {
-    WCHAR* ipAddressW = (WCHAR*)calloc(IP_ADDRESS_LEN, sizeof(WCHAR));
+    WCHAR* ipAddressW = (WCHAR*)xcalloc(IP_ADDRESS_LEN, sizeof(WCHAR));
     if (ipAddressW != NULL) {
         HINTERNET hConnect;
 
@@ -39,9 +39,9 @@ HINTERNET WinHttpConnectF(HINTERNET hSession,char* ipAddress, int port) {
     return NULL;
 }
 HINTERNET WinHttpOpenRequestF(HINTERNET hConnect, char* requestType, char* resourcePath) {
-    WCHAR* resourcePathW = (WCHAR*)calloc(RESOURCE_PATH_SIZE, sizeof(WCHAR));
+    WCHAR* resourcePathW = (WCHAR*)xcalloc(RESOURCE_PATH_SIZE, sizeof(WCHAR));
     if (resourcePathW != NULL) {
-        WCHAR* requestTypeW = (WCHAR*)calloc(REQUEST_TYPE_SIZE, sizeof(WCHAR));
+        WCHAR* requestTypeW = (WCHAR*)xcalloc(REQUEST_TYPE_SIZE, sizeof(WCHAR));
         if (requestTypeW != NULL) {
             HINTERNET hRequest;
 
@@ -97,7 +97,7 @@ DWORD RequestHeader(HINTERNET hRequest, char** pServerResponce, FILE* pFile) {
             if (*pServerResponce == NULL)
                 return FALSE;
 
-            lpOutBuffer = (WCHAR*)calloc(dwSize, sizeof(WCHAR));
+            lpOutBuffer = (WCHAR*)xcalloc(dwSize, sizeof(WCHAR));
             if (lpOutBuffer == NULL)
                 return FALSE;
 
@@ -206,7 +206,7 @@ BOOL GetServerCertInfo(HINTERNET hSession, FILE* pFile) {
 
 BOOL WinHttpSetCustomHeader(HINTERNET hRequest, char* customHeader, FILE* pFile) {
     if (customHeader != NULL && customHeader[0] != 0x00) {
-        WCHAR* wCustomHeader = (WCHAR*)calloc(1042, sizeof(WCHAR));
+        WCHAR* wCustomHeader = (WCHAR*)xcalloc(1042, sizeof(WCHAR));
         if (wCustomHeader == NULL)
             return FALSE;
         int CustHeadSize = swprintf(wCustomHeader, 1042, L"%hs", customHeader);

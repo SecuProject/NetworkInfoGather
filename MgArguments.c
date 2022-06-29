@@ -11,9 +11,6 @@
 #include "wordlist.h"
 #include "Network.h"
 
-#define MATCH(strA,strB)            (strcmp(strA, strB) == 0)
-#define MATCHN(strA,strB,strLen)    (strncmp(strA, strB,strLen) == 0)
-
 
 // InetPton(AF_INET, _T("192.168.1.1"), &RecvAddr.sin_addr.s_addr);
 #pragma warning(disable:4996) 
@@ -33,7 +30,7 @@ BOOL GetPortList(char* portListRaw, pScanStruct pScanStruct) {
 
     // Check if only one port
     if (portList == NULL) {
-        int* portListInt = (int*)calloc(1, sizeof(int));
+        int* portListInt = (int*)xcalloc(1, sizeof(int));
         if (portListInt == NULL)
             return FALSE;
         portListInt[0] = atoi(portListRaw);
@@ -45,7 +42,7 @@ BOOL GetPortList(char* portListRaw, pScanStruct pScanStruct) {
         pScanStruct->portList = portListInt;
         pScanStruct->nbPort = 1;
     } else {
-        int* portListInt = (int*)calloc(maxNbPort, sizeof(int));
+        int* portListInt = (int*)xcalloc(maxNbPort, sizeof(int));
         if (portListInt == NULL)
             return FALSE;
         int countPort = 0;
@@ -409,7 +406,7 @@ UINT LoadWordList(char* filePath, char*** pOutputTab) {
     FILE* pFile = OpenFileF(filePath);
     if (pFile != NULL) {
         nbUsername = CountFileLineF(pFile);
-        userTab = (char**)calloc(nbUsername, sizeof(char*));
+        userTab = (char**)xcalloc(nbUsername, sizeof(char*));
         if (userTab == NULL) {
             printf("[!] Fail to allocate memory !\n");
             return FALSE;

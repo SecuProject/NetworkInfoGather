@@ -306,10 +306,10 @@ BOOL SmbEnum(char* serverIp, BOOL isBruteForce, FILE* pFile) {
 BOOL SmbEnum(char* serverIp, BOOL isBruteForce, FILE* pFile) {
     int serverIpSize = (int)strlen(serverIp);
 
-    LPTSTR lpszServer = (LPTSTR)calloc(serverIpSize + 1, sizeof(LPTSTR));
+    LPTSTR lpszServer = (LPTSTR)xcalloc(serverIpSize + 1, sizeof(LPTSTR));
     if (lpszServer == NULL)
         return FALSE;
-    char* sharePath = (char*)calloc(serverIpSize + 4 + 1, sizeof(char*));
+    char* sharePath = (char*)xcalloc(serverIpSize + 4 + 1, sizeof(char*));
     if (sharePath == NULL)
         return FALSE;
 

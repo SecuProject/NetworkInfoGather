@@ -193,7 +193,7 @@ BOOL GetHttpRequestInfo(PHTTP_STRUC httpStruct) {
 
 
 PHTTP_STRUC InitPHTTP_STRUC(UINT nbElement) {
-    PHTTP_STRUC httpStruct = (PHTTP_STRUC)calloc(nbElement, sizeof(HTTP_STRUC));
+    PHTTP_STRUC httpStruct = (PHTTP_STRUC)xcalloc(nbElement, sizeof(HTTP_STRUC));
     if (httpStruct == NULL)
         return NULL;
 
