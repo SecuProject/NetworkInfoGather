@@ -16,6 +16,16 @@
 #define IS_PERMANENT_NEGATIVE_REPLY(ftpCode)    (ftpCode > 399 && ftpCode < 500)
 #define IS_PROTECTED_REPLY(ftpCode)             (ftpCode > 499 && ftpCode < 600)
 
+BOOL DetectVersionVuln(char* versionInfo) {
+    if (strstr(versionInfo, "vsftpd 3.0.3")) {
+        printf("\t\t[!] Remote Denial of Service - CVE:N/A\n");
+        return TRUE;
+    }else if (strstr(versionInfo, "vsftpd 2.3.4")) {
+        printf("\t\t[!] Backdoor Command Execution - CVE:2011-2523\n");
+        return TRUE;
+    }
+    return FALSE;
+}
 BOOL HandleFtpCode(int ftpCode){
     BOOL isPositive = TRUE;
     printf("\t\t[");
@@ -61,12 +71,13 @@ INT HandleFtpMsg(BOOL isVerbose){
                 return FALSE;
             }
             if (sscanf_s(token, "%i %[^\t\n\r]", &ftpCode, tempRespInfo, RESPONSE_INFO_SIZE) == 2){
-                if (isVerbose){
+                DetectVersionVuln(tempRespInfo);
+                /*if (isVerbose) {
                     if (HandleFtpCode(ftpCode))
                         printf("%s\n", tempRespInfo);
                     else
                         printf("%s (%i)\n", tempRespInfo, ftpCode);
-                }
+                }*/
             } else
                 printf("[!] %s\n", token);
             token = strtok_s(NULL, delim, &next_token);
