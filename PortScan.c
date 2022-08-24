@@ -106,7 +106,7 @@ typedef struct {
 	ScanStruct *scanStruct;
 	NetworkPcInfo *networkPcInfo;
 	int nbPort;
-	int portList;
+	int portNumber;
 } THREAD_STRUCT_PORT_SCAN, * PTHREAD_STRUCT_PORT_SCAN;
 
 typedef struct {
@@ -122,12 +122,12 @@ DWORD WINAPI ThreadPcPortScanTcp(LPVOID lpParam) {
 	NetworkPcInfo* pNetworkPcInfo = pThreadData->networkPcInfo;
 	ScanStruct* pscanStruct = pThreadData->scanStruct;
 
-	
-	if (scanPortOpenTCP(pNetworkPcInfo->ipAddress, pThreadData->portList, pscanStruct->ouputFile)) {
+	//printf("- 3 '%i'\n", pThreadData->portNumber);
+	if (scanPortOpenTCP(pNetworkPcInfo->ipAddress, pThreadData->portNumber, pscanStruct->ouputFile)) {
 		
 		EnterCriticalSection(&CriticalSection);
 		// Access the shared resource.
-		pNetworkPcInfo->port[pNetworkPcInfo->nbOpenPort].portNumber = pThreadData->portList;
+		pNetworkPcInfo->port[pNetworkPcInfo->nbOpenPort].portNumber = pThreadData->portNumber;
 		pNetworkPcInfo->port[pNetworkPcInfo->nbOpenPort].isTcp = TRUE;
 		pNetworkPcInfo->nbOpenPort++;
 
@@ -142,11 +142,11 @@ DWORD WINAPI ThreadPcPortScanUdp(LPVOID lpParam) {
 	ScanStruct* pscanStruct = pThreadData->scanStruct;
 
 	
-	if (scanPortOpenUDP(pNetworkPcInfo->ipAddress, pThreadData->portList, pscanStruct->ouputFile)) {
+	if (scanPortOpenUDP(pNetworkPcInfo->ipAddress, pThreadData->portNumber, pscanStruct->ouputFile)) {
 		
 		EnterCriticalSection(&CriticalSection);
 		// Access the shared resource.
-		pNetworkPcInfo->port[pNetworkPcInfo->nbOpenPort].portNumber = pThreadData->portList;
+		pNetworkPcInfo->port[pNetworkPcInfo->nbOpenPort].portNumber = pThreadData->portNumber;
 		pNetworkPcInfo->port[pNetworkPcInfo->nbOpenPort].isTcp = FALSE;
 		pNetworkPcInfo->nbOpenPort++;
 
@@ -156,27 +156,78 @@ DWORD WINAPI ThreadPcPortScanUdp(LPVOID lpParam) {
 	return TRUE;
 }
 
-// portTcp ???
+BOOL CreatePcPortScanTH(DWORD* dwThreadIdArray, HANDLE* hThreadArray, PTHREAD_STRUCT_PORT_SCAN pThreadDataPort, PTHREAD_STRUCT_PC_PORT_SCAN pThreadData, NetworkPcInfo* pNetworkPcInfo, ScanStruct* pscanStruct, int nbPort, int nbThread, int* portList){
+	//pNetworkPcInfo->nbOpenPort = 0;
+	
+	for (int iPort = 0; iPort < nbPort; iPort++) {
+		pThreadDataPort[iPort].scanStruct = pscanStruct;
+		pThreadDataPort[iPort].networkPcInfo = pNetworkPcInfo;
+		pThreadDataPort[iPort].nbPort = nbPort;
+		pThreadDataPort[iPort].portNumber = portList[iPort];
+
+		if (pThreadData->isTcp)
+			hThreadArray[iPort] = CreateThread(NULL, 0, ThreadPcPortScanTcp, &pThreadDataPort[iPort], 0, &dwThreadIdArray[iPort]);
+		else
+			hThreadArray[iPort] = CreateThread(NULL, 0, ThreadPcPortScanUdp, &pThreadDataPort[iPort], 0, &dwThreadIdArray[iPort]);
+
+		if (hThreadArray[iPort] == NULL) {
+			printf("\t[x] Unable to Create Thread\n");
+			free(pThreadDataPort);
+			free(hThreadArray);
+			free(dwThreadIdArray);
+			return FALSE;
+		}
+		//Sleep(1); // 5   20
+	}
+
+	SyncWaitForMultipleObjs(hThreadArray, nbPort);
+
+	for (int iPort = 0; iPort < nbPort; iPort++) {
+		if (hThreadArray[iPort] != NULL)
+			CloseHandle(hThreadArray[iPort]);
+	}
+	return TRUE;
+}
+
+#define NB_MAX_THREAD 1000
+
+
 DWORD WINAPI ThreadNetworkPortScan(LPVOID lpParam) {
 	PTHREAD_STRUCT_PC_PORT_SCAN pThreadData = (PTHREAD_STRUCT_PC_PORT_SCAN)lpParam;
 	NetworkPcInfo* pNetworkPcInfo = pThreadData->networkPcInfo;
 	ScanStruct* pscanStruct = pThreadData->scanStruct;
 
+	BOOL isScanFullPort = FALSE;
 	int nbPort;
+	int nbThread;
 	int* portList;
-	if (pThreadData->isTcp) {
-		portList = (int*)portTcp;
-		nbPort = NB_TAB_PORT_TCP;
-	} else {
-		portList = (int*)portUdp;
-		nbPort = NB_TAB_PORT_UDP;
-	}
-	
 
-	// If user set custom port
 	if (pscanStruct->nbPort > 0) {
-		nbPort = pscanStruct->nbPort;
-		portList = pscanStruct->portList;
+		if (pscanStruct->nbPort > NB_MAX_THREAD) {
+			// If user set scann all port
+			nbPort = pscanStruct->nbPort;
+			nbThread = NB_MAX_THREAD;
+
+			portList = xcalloc(NB_MAX_THREAD+1,sizeof(int*));
+			if (portList == NULL)
+				return FALSE;
+			isScanFullPort = TRUE;
+		} else {
+			// If user set custom port
+			nbPort = pscanStruct->nbPort;
+			portList = pscanStruct->portList;
+			nbThread = nbPort;
+		}
+	} else {
+		//Use default port list
+		if (pThreadData->isTcp) {
+			portList = (int*)portTcp;
+			nbPort = NB_TAB_PORT_TCP;
+		} else {
+			portList = (int*)portUdp;
+			nbPort = NB_TAB_PORT_UDP;
+		}
+		nbThread = nbPort;
 	}
 
 	DWORD* dwThreadIdArray = (DWORD*)xcalloc(nbPort, sizeof(DWORD));
@@ -194,43 +245,33 @@ DWORD WINAPI ThreadNetworkPortScan(LPVOID lpParam) {
 		free(dwThreadIdArray);
 		return FALSE;
 	}
-
-	//pNetworkPcInfo->nbOpenPort = 0;
-	for (int iPort= 0; iPort < nbPort; iPort++) {
-		pThreadDataPort[iPort].scanStruct = pscanStruct;
-		pThreadDataPort[iPort].networkPcInfo = pNetworkPcInfo;
-		pThreadDataPort[iPort].nbPort = nbPort;
-		pThreadDataPort[iPort].portList = portList[iPort];
-
-
-		if(pThreadData->isTcp)
-			hThreadArray[iPort] = CreateThread(NULL, 0, ThreadPcPortScanTcp, &pThreadDataPort[iPort], 0, &dwThreadIdArray[iPort]);
-		else
-			hThreadArray[iPort] = CreateThread(NULL, 0, ThreadPcPortScanUdp, &pThreadDataPort[iPort], 0, &dwThreadIdArray[iPort]);
-
-		if (hThreadArray[iPort] == NULL) {
-			printf("\t[x] Unable to Create Thread\n");
-			free(pThreadDataPort);
-			free(hThreadArray);
-			free(dwThreadIdArray);
-			return FALSE;
+	
+	if (isScanFullPort) {
+		for (int i = 1; i < nbPort; i += NB_MAX_THREAD) {
+			double result = ((double)i / (double)nbPort) * 100;
+			printf("\t[i] Port scan: %.2f/100%%\r", result);
+			int j = i;
+			if (j < NB_MAX_THREAD) {
+				for (; j < NB_MAX_THREAD * i; j++)
+					portList[j - 1] = j;
+			}else {
+				for (; j < i + NB_MAX_THREAD; j++)
+					portList[j% NB_MAX_THREAD] = j;
+			}
+				
+			if (i < NB_MAX_THREAD) {
+				CreatePcPortScanTH(dwThreadIdArray, hThreadArray, pThreadDataPort, pThreadData, pNetworkPcInfo, pscanStruct, NB_MAX_THREAD-1, nbThread, portList);
+				i--;
+			}else
+				CreatePcPortScanTH(dwThreadIdArray, hThreadArray, pThreadDataPort, pThreadData, pNetworkPcInfo, pscanStruct, NB_MAX_THREAD, nbThread, portList);
 		}
-		Sleep(20);
-	}
-
-	SyncWaitForMultipleObjs(hThreadArray, nbPort);
-
-	for (int iPort = 0; iPort < nbPort; iPort++) {
-		if(hThreadArray[iPort] != NULL)
-			CloseHandle(hThreadArray[iPort]);
-	}
+	}else
+		CreatePcPortScanTH(dwThreadIdArray, hThreadArray, pThreadDataPort, pThreadData, pNetworkPcInfo, pscanStruct, NB_MAX_THREAD, nbThread, portList);
 	free(pThreadDataPort);
 	free(hThreadArray);
 	free(dwThreadIdArray);
 	return TRUE;
 }
-
-
 
 
 

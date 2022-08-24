@@ -167,7 +167,7 @@ VOID PrintMenuScan() {
     printf("\t\t\t\te.g. '192.168.1.1' or '192.168.1.1-5' or '192.168.1.0/24'\n");
     printf("\t-ps\t\tEnable port scan\n");
     printf("\t-p [PORT_NB]\tUse custom port list port scan (If not set will use default list)\n");
-    printf("\t\t\t\te.g. -p 80,443,8080\n");
+    printf("\t\t\t\te.g. -p 80,443,8080 or -p- for all ports\n");
     printf("\t-sV\t\tScan for service version\n");
     printf("\t-b\t\tEnable brute force enable\n");
     printf("\t-A\t\tAggressive scan (grab banner and brute force enable)\n");
@@ -360,6 +360,9 @@ BOOL ParseScanArg(int argc, char* argv[], pScanStruct pScanStruct) {
                         }
                     } else if (argv[count][1] == 'p' && argv[count][2] == 's') {
                         pScanStruct->portScan = TRUE;
+                    } else if (argv[count][1] == 'p' && argv[count][2] == '-') {
+                        pScanStruct->portScan = TRUE;
+                        pScanStruct->nbPort = 65535;
                     } else if (argv[count][1] == 't' && argv[count][2] == 't' && argc > count + 1) {
                         pScanStruct->psTimeout = atoi(argv[count+1]);
                         count++;
@@ -371,7 +374,7 @@ BOOL ParseScanArg(int argc, char* argv[], pScanStruct pScanStruct) {
                 } else
                     printf("[!] Unknown argument %s\n", argv[count]);
             } else {
-                printf("[!] Unknown 2 argument %s\n", argv[count]);
+                printf("[!] Unknown argument %s\n", argv[count]);
             }
         }
     }
