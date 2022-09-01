@@ -48,5 +48,7 @@
   - [x] Certificate
   - [ ] Find email address
   - [ ] DOMAIN NAME
-
+ - [ ] Curl
+   - [ ] Follow redirection
+   - [ ] Bug with hostname
 

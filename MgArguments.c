@@ -199,7 +199,7 @@ VOID PrintMenuEnum(){
     return;
 }
 VOID PrintMenuCurl() {
-    printf("NetworkInfoGather.exe curl [http|https]://IP_ADDRESS/resource [-v] [-o FILE] [-X GET] []\n\n");
+    printf("NetworkInfoGather.exe curl [http|https]://IP_ADDRESS/resource [-v] [-a] [-A USER_AGENT] [-o PATH] [-I|-X METHOD]\n\n");
     printf("URL:\n");
     printf("\tProtocol\n");
     printf("\tTarget IP Address\n");
@@ -752,9 +752,11 @@ BOOL ParseCurlArg(int argc, char* argv[], pCurlStruct pCurlStruct) {
     // Check incompatible arguments
     if (pCurlStruct->agentRand && pCurlStruct->agentInfo) {
         printf("[x] Arg error (-A and -a)!\n");
+        return FALSE;
     }
     if (pCurlStruct->method != NULL && pCurlStruct->agentInfo) {
         printf("[x] Arg error (-I and -X)!\n");
+        return FALSE;
     }
     // Check requirements 
     if (pCurlStruct->hostUrl == NULL)
