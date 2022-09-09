@@ -21,6 +21,7 @@ typedef enum {
     ICMP_Scan,
     ARP_Scan,
     DNS_Scan,
+    MULTI_Scan,
     Disable_Scan
 }TypeOfScan;
 

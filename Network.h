@@ -33,7 +33,7 @@
 										||strncmp(IP_ADDRESS, "172.16.", 7) == 0 \
 										|| strncmp(IP_ADDRESS, "10.", 3) == 0)
 
-
+                                                                                                                                                                                                                                                                                                                                                                           
 typedef struct {
 	char ipAddress[IP_ADDRESS_LEN + 1];
 	char macAddress[MAC_ADDRESS_LEN + 1];

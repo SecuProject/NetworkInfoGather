@@ -185,6 +185,17 @@ BOOL NetDiscovery(ScanStruct scanStruct, INT32 ipRangeInt32, int maskSizeInt,cha
 		if (DNSdiscoveryMultiThread(maskSizeInt, networkPcInfo, ipRangeInt32, nbDetected, pFile))
 			getMacVendor(*networkPcInfo, *nbDetected);
 		break;
+	case MULTI_Scan:
+		if (ARPdiscoveryThread(maskSizeInt, networkPcInfo, ipRangeInt32, nbDetected, pFile) ||
+			DNSdiscoveryMultiThread(maskSizeInt, networkPcInfo, ipRangeInt32, nbDetected, pFile)) {
+			getMacVendor(*networkPcInfo, *nbDetected);
+			//PrintDiscoveredHost(scanStruct, networkPcInfo, *nbDetected, pFile);
+		}
+			
+
+		// Over write ARP Information !!! 
+		ICMPdiscoveryMultiThread(maskSizeInt, networkPcInfo, ipRangeInt32, nbDetected, pFile);
+		break;
 	case Disable_Scan:
 		if(AddHostNotScan(maskSizeInt, networkPcInfo, ipRangeInt32, nbDetected, pFile))
 			getMacVendor(*networkPcInfo, *nbDetected);

@@ -11,7 +11,6 @@
 #define NB_TIME_PING	(rand() % 2) + 3
 
 
-
 #define SEND_DATA_SIZE	32
 
 // 0.5s => 5 * 100
@@ -93,16 +92,55 @@ DWORD WINAPI ThreadPingHost(LPVOID lpParam) {
 	return icmpStructData->isHostUp;
 }
 
+
+BOOL UpdateData(int pNbDetected, int nbDetected, NetworkPcInfo* ptrNetworkPcInfo, NetworkPcInfo* networkPcInfo){
+	for (int i = 0; i < pNbDetected; i++) {
+		for (int j = 0; j < nbDetected; j++) {
+			printf("\t[%i/%i] Match ? '%s' == '%s'\n", i, j, networkPcInfo[i].ipAddress, (ptrNetworkPcInfo)[j].ipAddress);
+
+
+
+			printf("\t[+] DIFF %i\n", strcmp(networkPcInfo[i].ipAddress, (ptrNetworkPcInfo)[j].ipAddress));
+			if (strcmp(networkPcInfo[i].ipAddress, (ptrNetworkPcInfo)[j].ipAddress) == 0) {
+				ptrNetworkPcInfo[i].osName = networkPcInfo[j].osName;
+				printf("\t\t[+] Match %i\n", (ptrNetworkPcInfo[i]).osName);
+				printf("\t\t[+] Match %s == %s\n", networkPcInfo[i].ipAddress, (ptrNetworkPcInfo)[j].ipAddress);
+			}
+		}
+	}
+	return TRUE;
+}
+
+
+void print_ip(unsigned int ip) {
+	unsigned char bytes[4];
+	bytes[0] = ip & 0xFF;
+	bytes[1] = (ip >> 8) & 0xFF;
+	bytes[2] = (ip >> 16) & 0xFF;
+	bytes[3] = (ip >> 24) & 0xFF;
+	printf("%d.%d.%d.%d\n", bytes[3], bytes[2], bytes[1], bytes[0]);
+}
+
 BOOL ICMPdiscoveryMultiThread(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo, INT32 ipAddressBc, int* pNbDetected, FILE* pFile) {
 	NetworkPcInfo* networkPcInfo;
 	PTHREAD_STRUCT_DATA icmpStructData;
 	DWORD* dwThreadIdArray;
 	HANDLE* hThreadArray;
-	if (InitNetworkPcInfo(&networkPcInfo, &icmpStructData, &dwThreadIdArray, &hThreadArray, maskSizeInt)){
+	if (*pNbDetected > 0) {
+		for (int i = 0;i<*pNbDetected; i++) {
+			int computerTTL = 0;
+			if(startPinging((*ptrNetworkPcInfo)[i].ipAddress, &computerTTL, pFile))
+				(*ptrNetworkPcInfo)[i].osName = DetectOSBaseTTL(computerTTL);
+
+			//PrintOut(pFile, "\t%3i - %15s -> %i", i + 1, (*ptrNetworkPcInfo)[i].ipAddress, computerTTL);
+		}
+		// (*ptrNetworkPcInfo)[i].osName += computerTTL;
+		return TRUE;
+	}else if (InitNetworkPcInfo(&networkPcInfo, &icmpStructData, &dwThreadIdArray, &hThreadArray, maskSizeInt)){
 		int nbDetected = 0;
 
 		for (int i = 0; i < maskSizeInt; i++){
-			INT32 ipAddress = ipAddressBc + i;
+			UINT ipAddress = ipAddressBc + i + 127;
 
 			sprintf_s(icmpStructData[i].ipAddress, IP_ADDRESS_LEN, "%i.%i.%i.%i",
 				(ipAddress >> 24) & OCTE_MAX, //  << 24; // (OCTE_SIZE * 4)
@@ -135,7 +173,6 @@ BOOL ICMPdiscoveryMultiThread(int maskSizeInt, NetworkPcInfo** ptrNetworkPcInfo,
 		networkPcInfo = (NetworkPcInfo*)xrealloc(networkPcInfo, (nbDetected + 1) * sizeof(NetworkPcInfo));
 		if (networkPcInfo == NULL)
 			return FALSE;
-
 		*pNbDetected = nbDetected;
 		*ptrNetworkPcInfo = networkPcInfo;
 		return TRUE;

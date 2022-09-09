@@ -157,6 +157,7 @@ VOID PrintMenuScan() {
     printf("\t-sI\t\tSelect ICMP scan.\n");
     printf("\t-sA\t\tSelect ARP scan [DEFAULT].\n");
     printf("\t-sN\t\tSelect DNS scan.\n");
+    printf("\t-sM\t\tSelect Multiple scan (ICMP + ARP + DNS).\n");
     printf("\t-sP\t\tSelect passif mode (Require Administrator privilege).\n");
     printf("\t\t\t\t-tt TIME   Define the time to sniff packets (default: 5s).\n");
     printf("\t-sT\t\tSelect passif mode (Will grab the list of host from the ARP table of the system).\n\n");
@@ -264,7 +265,6 @@ BOOL SetArgSolo(pScanStruct* pScanStruct, char* charArg) {
     case '?':
         PrintMenu();
         return FALSE;
-        break;
     default:
         printf("[!] Unknown argument %s\n", charArg);
         break;
@@ -348,6 +348,9 @@ BOOL ParseScanArg(int argc, char* argv[], pScanStruct pScanStruct) {
                         case 'N':
                             pScanStruct->typeOfScan = DNS_Scan;
                             break;
+                        case 'M':
+                            pScanStruct->typeOfScan = MULTI_Scan;
+                            break;
                         case 'T':
                             pScanStruct->typeOfScan = Passif_Scan;
                             break;
@@ -364,14 +367,14 @@ BOOL ParseScanArg(int argc, char* argv[], pScanStruct pScanStruct) {
                         pScanStruct->psTimeout = atoi(argv[count+1]);
                         count++;
                     } else
-                        printf("[!] Unknown argument %s\n", argv[count]);
+                        printf("[!] Unknown 3 argument %s\n", argv[count]);
                 } else if (strcmp(argv[count], "--help") == 0) {
                     PrintMenu();
                     return FALSE;
                 } else
-                    printf("[!] Unknown argument %s\n", argv[count]);
+                    printf("[!] Unknown 2 argument %s\n", argv[count]);
             } else {
-                printf("[!] Unknown 2 argument %s\n", argv[count]);
+                printf("[!] Unknown 1 argument %s\n", argv[count]);
             }
         }
     }
