@@ -133,6 +133,18 @@ const char* wordListBackupAppendFile[] = {
 };
 
 const char* wordListCommonFile[] = {
+/*
+List of potentially vulnerable URI's
+Source:
+- https://github.com/rvrsh3ll/SharpFruit/blob/master/SharpFruit/Program.cs
+*/
+"/web-console/ServerInfo.jsp",
+"/workorder/FileDownload.jsp",
+"/ibm/console/logon.jsp?action=OK",
+"/admin/index.php",
+
+
+
 "/.bash_history",
 "/.bashrc",
 "/.cache",
@@ -286,6 +298,30 @@ const char* wordListCommonFile[] = {
 "/xmlrpc.php"
 };
 const char* wordListCommonDir[] = {
+/*
+List of potentially vulnerable URI's
+Source:
+- https://github.com/rvrsh3ll/SharpFruit/blob/master/SharpFruit/Program.cs
+*/
+"/manager/html",
+"/jmx-console/",
+"/invoker/JMXInvokerServlet",
+"/system/console",
+"/axis2/axis2-admin/",
+"/data/login",
+"/script/",
+"/opennms/",
+"/vsphere-client/",
+"/vsphere-client/?csp",
+"/exchange/servlet/ADSHACluster",
+"/securityRealm/user/admin/",
+
+"/internal/",
+"/admin",
+"/#",
+"/#/Login",
+
+
 "/0",
 "/00",
 "/01",

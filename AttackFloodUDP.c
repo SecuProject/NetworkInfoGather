@@ -71,7 +71,7 @@ BOOL AttackFloodUDP(char* ipAddress, int port, int waitTime, UINT bufferSize, BO
         printf("[X] Unable to perform the DOS attack !\n\n");
         return FALSE;
     }else
-        printf("[X] Port %i is OPEN !\n", port);
+        printf("[+] Port %i is OPEN !\n", port);
 
 
     for (int i = 0; startTime + waitTime > currentTime; i++) {

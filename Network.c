@@ -154,12 +154,13 @@ SOCKADDR_IN InitSockAddr(char* ipAddress, int port) {
 	SOCKADDR_IN ssin;
 	IPAddr ipAddressF;
 
-	inet_pton(AF_INET, ipAddress, &ipAddressF);
 	memset(&ssin, 0, sizeof(SOCKADDR_IN));
-	ssin.sin_family = AF_INET;
-	ssin.sin_addr.s_addr = ipAddressF;
-	ssin.sin_port = htons(port);
-
+	if (inet_pton(AF_INET, ipAddress, &ipAddressF)) {
+		ssin.sin_family = AF_INET;
+		ssin.sin_addr.s_addr = ipAddressF;
+		ssin.sin_port = htons(port);
+	}else
+		printf("\t[x] Fail to convert IP address (%ld)!\n", GetLastError());
 	return ssin;
 }
 SOCKET ConnectTcpServer(char* ipAddress, int port){

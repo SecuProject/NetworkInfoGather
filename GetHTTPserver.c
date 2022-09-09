@@ -95,6 +95,7 @@ UINT RecvResponce(SOCKET Socket, char** pServerResponce, FILE* pFile) {
 UINT GetHttpServer(char* ipAddress, int port, char* requestType, char* resourcePath, char* userAgent, char** pServerResponce, char* customHeader, FILE* pFile) {
     SOCKET Socket = ConnectTcpServer(ipAddress, port);
     if (Socket != INVALID_SOCKET){
+        // The ipAddress should be the hostname !!!
         if (SendRequest(Socket, ipAddress, requestType, resourcePath, userAgent, customHeader, pFile)){
             UINT nDataLength = RecvResponce(Socket, pServerResponce, pFile);
             closesocket(Socket);

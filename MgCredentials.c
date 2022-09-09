@@ -5,7 +5,7 @@
 #include "MgCredentials.h"
 
 PStructCredentials InitCredStruct(char* username, char* password, char* domain){
-    PStructCredentials pStructCredentials = (PStructCredentials)malloc(sizeof(StructCredentials));
+    PStructCredentials pStructCredentials = (PStructCredentials)xmalloc(sizeof(StructCredentials));
     if (pStructCredentials == NULL){
         printf("[-] Error: malloc failed\n");
         return NULL;

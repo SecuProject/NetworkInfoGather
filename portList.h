@@ -12,6 +12,8 @@
 #define PORT_DNS				53
 #define PORT_HTTP				80
 #define PORT_KERBEROS			88
+//#define PORT_POP				110
+//#define PORT_NFS				111
 #define PORT_RPC				135
 #define PORT_NETBIOS_SSN		139
 #define PORT_LDAP				389
@@ -19,6 +21,7 @@
 #define PORT_SMB				445
 #define PORT_MSSQL				1433
 #define PORT_ORACLEDB			1521
+//#define PORT_NFS_ALT			2049
 #define PORT_FTP_ALT			2121
 #define PORT_SSH_ALT			2222
 #define PORT_HTTP_GRAFANA		3000
@@ -26,16 +29,20 @@
 #define PORT_RDP				3389
 #define PORT_POSTGRESQL			5432
 #define PORT_DNS_ALT			5353
-#define PORT_VNC				5900
+//#define PORT_VNC				5800
+//#define PORT_VNC_ALT			5900
 #define PORT_WINRM				5985
 #define PORT_X11				6000
+//#define PORT_REDIS			6379
 #define PORT_HTTP_TOMCAT		8009
 #define PORT_HTTP_PROXY			8080
 #define PORT_HTTP_OTHER			8180
 #define PORT_HTTP_DELUGE		8112
 #define PORT_HTTP_PORTAINER		9000
 #define PORT_HTTPS_PORTAINER	9443
+//#define PORT_HTTP_IBM_TIVOLI	9495
 #define PORT_HTTP_PROMETHEUS	9090
+#define PORT_HTTP_MONGODB		27017
 //
 ////////////////// TCP //////////////////
 
@@ -52,7 +59,7 @@
 //
 ////////////////// UDP //////////////////
 
-#define NB_TAB_PORT_TCP		29
+#define NB_TAB_PORT_TCP		30
 #define NB_TAB_PORT_UDP		6
 
 
