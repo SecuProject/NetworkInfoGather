@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>NIG&lpar;NetworkInfoGather&rpar;</title>
+        <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+        
+    </head>
+    <body class="vscode-body vscode-light">
+        <h1 id="nignetworkinfogather">NIG(NetworkInfoGather)</h1>
+<p><img src="file:////Users/juliandotreppe/Documents/git/NetworkInfoGather/nig.png" alt="NetworkInfoGather logo"></p>
+<h2 id="overview">Overview</h2>
+<p>Welcome to my cutting-edge project! The primary goal is to create a state-of-the-art tool that adeptly gathers essential information from the local network and all connected machines.</p>
+<p>This tool has been meticulously crafted with extensibility in mind, allowing seamless integration of new and exciting features to keep it at the forefront of innovation.</p>
+<h2 id="features">Features</h2>
+<p><strong>Scan</strong>: Scan the network and gather information about connected machines.</p>
+<ul>
+<li>
+<p>List interfaces available for scan:</p>
+<pre><code>NIG.exe scan -l
+</code></pre>
+</li>
+<li>
+<p>Perform a TCP SYN scan on a specific IP address:</p>
+<pre><code>NIG.exe scan -t 192.168.1.1
+</code></pre>
+</li>
+<li>
+<p>Enable port scan during the scan:</p>
+<pre><code>NIG.exe scan -t 192.168.1.1 -ps
+</code></pre>
+</li>
+</ul>
+<p><strong>Brute Force Protocol (bf)</strong>: Perform a brute force attack on various protocols such as FTP, HTTP, HTTPS, SMB, or RPC.</p>
+<ul>
+<li>
+<p>Brute force [protocol] with a specific username and password:</p>
+<pre><code>NIG.exe bf [protocol] 192.168.1.1 -u username -p password
+</code></pre>
+</li>
+<li>
+<p>Brute force [protocol] with a username list and password list:</p>
+<pre><code>NIG.exe bf [protocol] 192.168.1.1 -U usernameFile.lst -P passwordFile.lst
+</code></pre>
+</li>
+</ul>
+<p><strong>Exploit</strong>: Exploit vulnerabilities, such as Zerologon, MS17-010 (EternalBlue), Double Pulsar, or PrintNightmare, on target servers.</p>
+<ul>
+<li>
+<p>Exploit Zerologon vulnerability on a domain controller:</p>
+<pre><code>NIG.exe exploit zerologon -d dc1.domain.local -e
+</code></pre>
+</li>
+<li>
+<p>Exploit MS17-010 (EternalBlue) vulnerability on a target IP address:</p>
+<pre><code>NIG.exe exploit ms17 192.168.1.1
+</code></pre>
+</li>
+</ul>
+<p><strong>Enumeration (enum)</strong>: Perform enumeration on SMB shares or FTP access.</p>
+<ul>
+<li>
+<p>Enumerate SMB shares on a target IP address with a specific username and password:</p>
+<pre><code>NIG.exe enum smb 192.168.1.1 -u username -p password -U
+</code></pre>
+</li>
+<li>
+<p>Enumerate FTP servers on a target IP address with a specific username and password:</p>
+<pre><code>NIG.exe enum ftp 192.168.1.1 -u username -p password -P 21
+</code></pre>
+</li>
+</ul>
+<p><strong>Denial of Service Attack (dos)</strong>: Conduct a Denial of Service (DoS) attack on a target IP and port.</p>
+<ul>
+<li>
+<p>Perform a TCP SYN flood attack on a target IP address and port:</p>
+<pre><code>NIG.exe dos -t 192.168.1.1 -p 80 -aS
+</code></pre>
+</li>
+<li>
+<p>Perform a UDP flood attack on a target IP address and port:</p>
+<pre><code>NIG.exe dos -t 192.168.1.1 -p 53 -aU
+</code></pre>
+</li>
+</ul>
+<p><strong>WAN</strong>: Print the external IP address of the system</p>
+<ul>
+<li>Retrieve the external IP of the currently connect network:<pre><code>NIG.exe WAN
+</code></pre>
+</li>
+</ul>
+<p><strong>curl</strong>: Perform web requests on a target IP address or resource.</p>
+<ul>
+<li>
+<p>Perform an HTTP GET request on a specific IP address and resource:</p>
+<pre><code>NIG.exe curl http://192.168.1.1/resource
+</code></pre>
+</li>
+<li>
+<p>Perform an HTTPS GET request on a specific IP address and resource:</p>
+<pre><code>NIG.exe curl https://192.168.1.1/resource
+</code></pre>
+</li>
+</ul>
+<p>Note: Some features may require additional setup, options, or further development as indicated in the provided shell output.</p>
+<h2 id="building">Building</h2>
+<p>Provide instructions on how to install the project or how to obtain the executable. Include any prerequisites or dependencies that need to be installed beforehand.</p>
+<h2 id="contributing">Contributing</h2>
+<p>We welcome contributions to improve the project! To contribute, follow these steps:</p>
+<ol>
+<li>Fork the repository.</li>
+<li>Create a new branch.</li>
+<li>Make your changes and commit them.</li>
+<li>Push your changes to your fork.</li>
+<li>Submit a pull request.</li>
+</ol>
+<p>Please follow our Contribution Guidelines for more details.</p>
+<h2 id="license">License</h2>
+<p>Include the project's license information, indicating how others can use, modify, and distribute the code. Mention any third-party libraries and their licenses if applicable.</p>
+<p>This project is licensed under the GPLv3</p>
+<h2 id="contact">Contact</h2>
+<p>For any inquiries or feedback, you can contact the project maintainers at:</p>
+<p>Email: <a href="mailto:maintainer@example.com">maintainer@example.com</a></p>
+
+        
+        
+    </body>
+    </html>
