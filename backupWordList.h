@@ -23,7 +23,7 @@
 #ifndef BACKUP_WORD_LIST_HEADER_H
 #define BACKUP_WORD_LIST_HEADER_H
 
-const char* ��wordListBackupFile[] = {
+const char* wordListBackupFile[] = {
     "",
     "a"};
 
