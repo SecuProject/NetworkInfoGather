@@ -266,4 +266,4 @@ This project is licensed under the [GNU General Public License v3.0](LICENSE). Y
 ## Contact
 For any inquiries or feedback, you can contact the project maintainer at:
 
-Email: TO BE ADDED@smthg.io
+Email: TO BE ADDED
